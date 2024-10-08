@@ -201,6 +201,7 @@ Data/magazine
 experiments/
 !*.json
 *.nohup
+*.npy
 Data/preprocessed
 Data/
 data/

@@ -12,7 +12,7 @@ if __name__ == '__main__':
         # 逐帧捕获
         ret, frame = cap.read()
 
-        # 如果读取帧失败，则退出循环
+        # 如果读取帧失败，则退出循环qq
         if not ret:
             print("无法接收帧（流结束？）")
             break
