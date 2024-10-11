@@ -1,13 +1,11 @@
 from torchvision import datasets
-from torchvision.transforms import ToTensor,transforms
+from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
 import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader
-import torch.optim as optim
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 DEVICE = torch.device("mps") if torch.backends.mps.is_available() else DEVICE
 import cv2
+
 '''
 在Matplotlib中，颜色映射（Colormap）用于将数据值映射到颜色空间，以便在可视化中表示不同的数值或类别。除了`'gray'`之外，Matplotlib提供了许多预定义的颜色映射选项。以下是一些常用的颜色映射：
 
@@ -51,8 +49,6 @@ plt.show()
 '''
 
 
-
-
 def showImg():
     training_data = datasets.FashionMNIST(
         root="data",
@@ -94,9 +90,10 @@ def showImg():
         plt.imshow(img.squeeze(), cmap="coolwarm")
     plt.show()
 
+
 def resize_show():
-    im = cv2.imread("/Users/deipss/workspace/ai/torch_learning/data/img_align_celeba/000001.jpg",cv2.IMREAD_GRAYSCALE)
-    im = cv2.resize(im,(24,24))
+    im = cv2.imread("/Users/deipss/workspace/ai/torch_learning/data/img_align_celeba/000001.jpg", cv2.IMREAD_GRAYSCALE)
+    im = cv2.resize(im, (24, 24))
     cv2.namedWindow('Display Window', cv2.WINDOW_NORMAL)
     # 显示图像
     cv2.imshow('Display Window', im)
@@ -107,5 +104,4 @@ def resize_show():
 
 
 if __name__ == '__main__':
-    resize_show();
-
+    resize_show()
