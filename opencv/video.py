@@ -157,7 +157,7 @@ def track_bar():
     # YUV主要用于视频
     paint = np.zeros((480, 640, 3), np.uint8)
 
-    # todo RGB translate to HSV by bar
+    #
 
 
 def mat():
@@ -204,6 +204,22 @@ def channel():
     # merge 通道的合并
 
 
+def toHSV():
+    # 加载图像
+    image = cv2.imread('../data/img_align_celeba/000001.jpg')
+
+    # 将图像从 BGR 转换为 HSV
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    # 显示原始图像和 HSV 图像
+    cv2.imshow('Original Image', image)
+    cv2.imshow('HSV Image', hsv_image)
+
+    # 等待按键按下以关闭窗口
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
 def paint_shape():
     # 创建一个黑色背景的图像
     image = np.zeros((512, 512, 3), dtype=np.uint8)
@@ -232,15 +248,13 @@ def paint_shape():
 
 
 def image_operate():
-
     # sub add addWeighted
 
     # bit opr bitwise_not bitwise_and bitwise_or bitwise_xor
 
-
     image = cv2.imread('../data/img_align_celeba/000001.jpg')
     image2 = cv2.imread('../data/img_align_celeba/000002.jpg')
-    img_add = cv2.add(image2,image)
+    img_add = cv2.add(image2, image)
     img_weight = cv2.addWeighted(image2, 0.7, image, 0.3, 0)
 
     center = (100, 100)  # 裁剪区域的中心点
@@ -257,8 +271,8 @@ def image_operate():
 
     # 读取图像
 
-def img_opr():
 
+def img_opr():
     # resize 缩放算法
     # flip
     # rotate
@@ -273,8 +287,8 @@ def img_opr():
 
     # 或者按比例缩放
     resized_image_by_factor = cv2.resize(image, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
-    cv2.imshow("resize img",resized_image)
-    cv2.imshow("resize dimg",resized_image_by_factor)
+    cv2.imshow("resize img", resized_image)
+    cv2.imshow("resize dimg", resized_image_by_factor)
 
     # 水平翻转
     horizontal_flip = cv2.flip(image, 1)
@@ -309,8 +323,8 @@ def img_opr():
 
     cv2.destroyAllWindows()
 
-def filter():
 
+def filter():
     # 低通滤波可以去除噪音或平滑图像
     # 高通滤波可以帮助查找图像的边缘
     # filter2D
@@ -325,7 +339,7 @@ def filter():
 
     # 显示原始图像和滤波后的图像
     cv2.imshow('Filtered Image', filtered_image)
-    print(image.shape,filtered_image.shape)
+    print(image.shape, filtered_image.shape)
 
     # 定义一个3x3的高斯模糊滤波器
     gaussian_kernel = np.array([[1, 2, 1],
@@ -351,42 +365,227 @@ def filter():
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-def fileter_2():
-    pass
-    # boxFilter
-    # blur
-    # medianFilter
-    # GaussianFilter
-    # 双边滤波
-    # 高通滤波 应用Sobel边缘检测滤波器 同时检测 X Y 效果不好，先分开各自检测X或Y，再合并
-    # scharr 沙尔滤波，X Y，只能检测一个
-    # laplacian 滤波
-    # canny 边缘检测
-    # adaptiveMethod
-    # erode
-    # dilate
-    # getStructuringElement
-    # 开运算=腐蚀+膨胀 morphologyEx = erode + dilate
-    # 闭运算=膨胀+腐蚀 morphologyEx = dilate + erode
-    # 形态学梯度：morphologyEx  原图-腐蚀
-    # 顶帽=原图-开运算
-    # 黑帽=原图-闭运算
+
+
+def filter_one_dim():
+    import cv2
+    import numpy as np
+
+    # 加载图像并转换为灰度图像
+    image = cv2.imread('../data/img_align_celeba/000001.jpg')
+
+    # 计算水平方向的梯度
+    G_x = cv2.filter2D(image, cv2.CV_64F, np.array([[-1, 1]]))
+
+    # 计算垂直方向的梯度
+    G_y = cv2.filter2D(image, cv2.CV_64F, np.array([[-1], [1]]))
+
+    # 计算梯度的幅度
+    magnitude = np.sqrt(G_x ** 2 + G_y ** 2)
+
+    # 显示结果
+    cv2.imshow('Original Image', image)
+    cv2.imshow('Gradient Magnitude', magnitude / magnitude.max())
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
+def boxFilter():
+    # 加载图像
+    image = cv2.imread('../data/img_align_celeba/000001.jpg', cv2.IMREAD_GRAYSCALE)
+
+    # 应用盒状滤波
+    filtered_image = cv2.boxFilter(image, -1, (3, 3))
+    blur_image = cv2.blur(image, (5, 5))
+    medianBlur = cv2.medianBlur(image, 5)
+
+    GaussianBlur = cv2.GaussianBlur(image, (5, 5), 0)
+
+    # 应用双边滤波
+    bilateralFilter = cv2.bilateralFilter(image, d=9, sigmaColor=75, sigmaSpace=75)
+    # 使用拉普拉斯滤波器
+    laplacian = cv2.Laplacian(image, cv2.CV_64F)
+
+    # 使用Sobel算子
+    sobelx = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)
+    sobely = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
+    sobel = np.sqrt(sobelx ** 2 + sobely ** 2)
+    # 使用Scharr滤波器计算水平方向的梯度
+    scharr_x = cv2.Scharr(image, cv2.CV_64F, 1, 0)
+
+    # 使用Scharr滤波器计算垂直方向的梯度
+    scharr_y = cv2.Scharr(image, cv2.CV_64F, 0, 1)
+
+    # 计算梯度的幅度
+    magnitude = np.sqrt(scharr_x ** 2 + scharr_y ** 2)
+
+    # 应用Canny边缘检测
+    Canny = cv2.Canny(image, threshold1=50, threshold2=150)
+
+    # 使用Mean-C方法进行自适应阈值处理
+    mean_c = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
+
+    # 使用Gaussian-C方法进行自适应阈值处理
+    gaussian_c = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+
+    # 显示结果
+    cv2.imshow('Mean-C Adaptive Threshold', mean_c)
+    cv2.imshow('Gaussian-C Adaptive Threshold', gaussian_c)
+
+    # 显示结果
+    cv2.imshow('Canny', Canny)
+
+    # 显示结果
+    cv2.imshow('Scharr X Gradient', np.abs(scharr_x).astype(np.uint8))
+    cv2.imshow('blur_image', blur_image)
+    cv2.imshow('Scharr Y Gradient', np.abs(scharr_y).astype(np.uint8))
+    cv2.imshow('Gradient Magnitude', np.abs(magnitude).astype(np.uint8))
+    # 显示结果
+    cv2.imshow('Laplacian Filtered Image', np.abs(laplacian).astype(np.uint8))
+    cv2.imshow('Sobel Filtered Image', np.abs(sobel).astype(np.uint8))
+
+    # 显示结果
+    cv2.imshow('Original Image', image)
+    cv2.imshow('Filtered Image', filtered_image)
+    cv2.imshow('medianBlur', medianBlur)
+    cv2.imshow('GaussianBlur', GaussianBlur)
+    cv2.imshow('bilateralFilter', bilateralFilter)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
+def morphology():
+    image = cv2.imread('../data/img_align_celeba/000001.jpg', cv2.IMREAD_GRAYSCALE)
+
+    # 定义结构元素
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+
+    # 进行腐蚀操作
+    eroded_image = cv2.erode(image, kernel, iterations=1)
+    dilated_image = cv2.dilate(image, kernel, iterations=1)
+
+    # 开运算：先腐蚀再膨胀
+    opened_image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+
+    # 闭运算：先膨胀再腐蚀
+    closed_image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
+
+    # 进行顶帽操作
+    tophat_image = cv2.morphologyEx(image, cv2.MORPH_TOPHAT, kernel)
+
+    # 进行黑帽操作
+    blackhat_image = cv2.morphologyEx(image, cv2.MORPH_BLACKHAT, kernel)
+    # 显示原始图像和腐蚀后的图像
+    cv2.imshow('Original Image', image)
+    cv2.imshow('Eroded Image', eroded_image)
+    cv2.imshow('Dilated Image', dilated_image)
+
+    cv2.imshow('Opened Image', opened_image)
+    cv2.imshow('Closed Image', closed_image)
+    cv2.imshow('Top-Hat Image', tophat_image)
+    cv2.imshow('Black-Hat Image', blackhat_image)
+
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 def contours():
-    pass
-    # 二值化
-    # findContours
-    # dramContours
-    # contoursArea
-    # arcLength
+    import cv2
+    import numpy as np
 
-    # 多边形逼近 approx approxPolyDP
-    # 凸包 hull convexHull
-    #
-    # minAreaRect
-    # boundingRect
+    # 加载图像并转换为灰度图像
+    image = cv2.imread('../data/img_align_celeba/000001.jpg')
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
+    # 进行二值化处理
+    _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+
+    # 查找轮廓
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # 绘制所有轮廓
+    cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
+
+    # 处理每个轮廓
+    for contour in contours:
+        # 计算轮廓面积
+        area = cv2.contourArea(contour)
+        print(f'Contour Area: {area}')
+
+        # 近似轮廓
+        epsilon = 0.02 * cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, epsilon, True)
+        cv2.drawContours(image, [approx], -1, (0, 0, 255), 2)
+
+        # 计算凸包
+        hull = cv2.convexHull(contour)
+        cv2.drawContours(image, [hull], -1, (255, 0, 0), 2)
+
+        # 计算最小外接矩形
+        rect = cv2.minAreaRect(contour)
+        box = cv2.boxPoints(rect)
+        box = np.int0(box)
+        cv2.drawContours(image, [box], 0, (255, 255, 0), 2)
+
+        # 计算外接矩形
+        x, y, w, h = cv2.boundingRect(contour)
+        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 255), 2)
+
+    # 显示结果
+    cv2.imshow('Result', image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
+
+def feature_detect():
+    # 读取图像并转换为灰度图像
+    image = cv2.imread('../data/img_align_celeba/000001.jpg')
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = np.float32(gray)
+
+    # 使用 Harris 角点检测
+    dst = cv2.cornerHarris(gray, 2, 3, 0.04)
+
+    # 归一化结果
+    dst = cv2.dilate(dst, None)
+
+    # 阈值处理，标记角点
+    image[dst > 0.01 * dst.max()] = [0, 0, 255]
+
+    # 显示结果
+    cv2.imshow('Harris Corner Detection', image)
+
+    # 使用 Shi-Tomasi 角点检测
+    corners = cv2.goodFeaturesToTrack(gray, maxCorners=100, qualityLevel=0.01, minDistance=10)
+
+    # 将角点坐标转换为整数
+    corners = np.int0(corners)
+
+    # 绘制检测到的角点
+    for corner in corners:
+        x, y = corner.ravel()
+        cv2.circle(image, (x, y), 3, (0, 0, 255), -1)
+
+    # 显示结果
+    cv2.imshow('Shi-Tomasi Corner Detection', image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    # 以图搜图:特征匹配+单应性矩阵 findHomography(srcPts )
+    # 图像拼接 角点、
+    # 拼图游戏
+
+    # harris角点 connerHarris
+    #  goodFeaturesToTrack
+    # SIFT 图片放大后，harrris不一定能检测出来，可以用SIFT
+    # SURF 描述子
+    # OBR
+
+    # FLANN 特征匹配
+    # drawMatchesKnn
+
+
+# hstack
 
 if __name__ == '__main__':
-    filter()
+    feature_detect()
