@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 
-
-
 import os
 import torch
 import torchvision
@@ -13,8 +11,8 @@ from torchvision.transforms.v2 import functional as F
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
-
 DEVICE = torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
+
 
 class PennFudanDataset(torch.utils.data.Dataset):
     def __init__(self, root, transforms):
