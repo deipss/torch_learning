@@ -7,7 +7,9 @@ def windows_show():
     cv2.imshow('new', 0)
     cv2.waitKey(0)
 
-
+'''
+打开个人的摄像头
+'''
 def capture_face():
     # 加载 Haar 级联分类器
     face_cascade = cv2.CascadeClassifier('../data/haarcascade_frontalface_default.xml')
@@ -45,7 +47,7 @@ def capture_face():
     cv2.destroyAllWindows()
 
 
-def print_vedio():
+def print_video():
     # 打开摄像头。参数0表示第一个摄像头设备，如果有多个摄像头，可以使用1, 2等
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
@@ -587,5 +589,33 @@ def feature_detect():
 
 # hstack
 
+def gaussian_pyramid():
+    import matplotlib.pyplot as plt
+
+    # 读取图像
+    image = cv2.imread('../data/img_align_celeba/000001.jpg')
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转换为 RGB 格式
+
+    # 初始化高斯金字塔
+    gaussian_pyramid = [image]
+
+    # 构建高斯金字塔
+    num_levels = 4  # 指定金字塔的层数
+    for i in range(num_levels - 1):
+        # 使用高斯滤波器进行平滑处理
+        blurred = cv2.GaussianBlur(gaussian_pyramid[i], (5, 5), 0)
+        # 下采样
+        downsampled = cv2.pyrDown(blurred)
+        gaussian_pyramid.append(downsampled)
+
+    # 显示金字塔各层图像
+    fig, axes = plt.subplots(1, num_levels, figsize=(15, 5))
+    for i in range(num_levels):
+        axes[i].imshow(gaussian_pyramid[i])
+        axes[i].set_title(f'Level {i}')
+        axes[i].axis('off')
+    plt.show()
+
+
 if __name__ == '__main__':
-    feature_detect()
+    gaussian_pyramid()

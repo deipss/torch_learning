@@ -142,7 +142,6 @@ if __name__ == '__main__':
     weak_classifiers = train_weak_classifiers(X_features, y, num_classifiers)
 
     strong_classifier = build_strong_classifier(weak_classifiers)
-    strong_classifier = build_strong_classifier(weak_classifiers)
 
     # 测试分类器
     test_image = cv2.imread('/Users/deipss/workspace/ai/torch_learning/data/img_align_celeba/000001.jpg', cv2.IMREAD_GRAYSCALE)
