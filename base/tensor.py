@@ -2,25 +2,34 @@ import torch
 import numpy as np
 from torch import nn
 
+def cnn_multiple_channel():
+    input = torch.rand(3,5,5)
+    print(input)
+    model = nn.Conv2d(in_channels=3,out_channels=8,kernel_size=(2,2))
+    output = model(input)
+    nn.Max
+    print(output)
+
 def cnn_kernel_learning():
-    img = torch.ones(6,8)
-    img[:,2:4] = 0
-    Y = torch.rand(6,7)
+    img = torch.ones(6, 8)
+    img[:, 2:4] = 0
+    Y = torch.rand(6, 7)
     print(img)
     print(Y)
     K = torch.tensor([[1.0, -1.0]])
     conv2d = nn.Conv2d(1, 1, kernel_size=(1, 2), bias=False)
-    img = img.reshape((1,1,6,8))
-    Y = Y.reshape((1,1,6,7))
+    img = img.reshape((1, 1, 6, 8))
+    Y = Y.reshape((1, 1, 6, 7))
     lr = 3e-2
     for i in range(10):
         Y_hat = conv2d(img)
-        l =  (Y_hat-Y)**2
+        l = (Y_hat - Y) ** 2
         conv2d.zero_grad()
         l.sum().backward()
-        conv2d.weight.data[:] -=lr*conv2d.weight.grad
-        if(i%2==0):
+        conv2d.weight.data[:] -= lr * conv2d.weight.grad
+        if (i % 2 == 0):
             print(f'epoch {i} ,loss = {l.sum():.3f}')
+
 
 class Conv2D(nn.Module):
     def __init__(self, kernel, *args, **kwargs):
@@ -145,4 +154,4 @@ def torch_tensor():
 
 
 if __name__ == '__main__':
-    cnn_kernel_learning()
+    cnn_multiple_channel()

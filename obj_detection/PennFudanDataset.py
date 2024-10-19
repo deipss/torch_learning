@@ -71,8 +71,8 @@ class PennFudanDataset(torch.utils.data.Dataset):
 
 
 def show_img():
-    image = read_image("'../data/PennFudanPed/PNGImages/FudanPed00064.png'")
-    mask = read_image("'../data/PennFudanPed/PNGImages/FudanPed00064_mask.png'")
+    image = read_image("/Users/deipss/workspace/ai/torch_learning/data/PennFudanPed/PNGImages/FudanPed00064.png")
+    mask = read_image("/Users/deipss/workspace/ai/torch_learning/data/PennFudanPed/PedMasks/FudanPed00064_mask.png")
     # image.size()  torch.Size([3, 438, 567])
     # mask.size()  torch.Size([1, 438, 567])
     plt.figure(figsize=(16, 8))

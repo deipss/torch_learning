@@ -2,6 +2,37 @@ import cv2
 import numpy as np
 
 
+def selective_anchor():
+
+    # 读取图像
+    image = cv2.imread('../data/img_align_celeba/000001.jpg')
+
+    # 初始化选择性搜索对象
+    ss = cv2.ximgproc.segmentation.createSelectiveSearchSegmentation()
+    ss.setBaseImage(image)
+
+    # 使用不同的策略生成候选区域
+    ss.switchToSingleStrategy()
+    # ss.switchToSelectiveSearchFast()
+    # ss.switchToSelectiveSearchQuality()
+
+    # 执行选择性搜索
+    rects = ss.process()
+
+    # 打印生成的候选区域数量
+    print(f'生成的候选区域数量: {len(rects)}')
+
+    # 在图像上绘制候选区域
+    for i, rect in enumerate(rects):
+        if i >= 50:  # 只绘制前 50 个候选区域
+            break
+        x, y, w, h = rect
+        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    # 显示图像
+    cv2.imshow('Selective Search Output', image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 def windows_show():
     cv2.namedWindow("new", cv2.WINDOW_AUTOSIZE)
     cv2.imshow('new', 0)
@@ -618,4 +649,4 @@ def gaussian_pyramid():
 
 
 if __name__ == '__main__':
-    gaussian_pyramid()
+    selective_anchor()
