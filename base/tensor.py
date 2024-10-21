@@ -1,13 +1,22 @@
 import torch
 import numpy as np
 from torch import nn
+import os
+
+def metric_logger_show():
+    data = torch.stack([torch.arange(1,19),torch.arange(20,38)],dim=0)
+    print(data.shape)
+    data_z = zip(data[0],data[1])
+    print(next(data_z))
+
+    for key, value in os.environ.items():
+        print(f'{key}: {value}')
 
 def cnn_multiple_channel():
     input = torch.rand(3,5,5)
     print(input)
     model = nn.Conv2d(in_channels=3,out_channels=8,kernel_size=(2,2))
     output = model(input)
-    nn.Max
     print(output)
 
 def cnn_kernel_learning():
@@ -57,7 +66,7 @@ def zip_show():
     print(d2)
 
 
-def corr2d():
+def conv2d():
     X = torch.arange(1, 13).reshape(3, 4)
     K = torch.tensor([[1, 2], [3, 4]])
     h, w = K.shape
@@ -69,7 +78,7 @@ def corr2d():
     print(Y)
 
 
-def param():
+def param_torch():
     net = nn.Sequential(nn.Linear(4, 8), nn.ReLU(), nn.Linear(8, 1))
     X = torch.rand(size=(2, 4))
     net(X)
@@ -154,4 +163,4 @@ def torch_tensor():
 
 
 if __name__ == '__main__':
-    cnn_multiple_channel()
+    metric_logger_show()
