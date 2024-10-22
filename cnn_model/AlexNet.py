@@ -6,7 +6,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch.optim as optim
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-DEVICE = torch.device("mps") if torch.backends.mps.is_available() else DEVICE
+
 
 
 class AlexNet(nn.Module):
@@ -148,7 +148,7 @@ def train():
     print(f"Accuracy of the model on the test images: {100 * correct / total}%")
 
     # 保存模型
-    torch.save(model.state_dict(), "data/alexnet_fashionmnist.pth")
+    torch.save(model.state_dict(), "../data/alexnet_fashionmnist.pth")
 
 
 if __name__ == '__main__':

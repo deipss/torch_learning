@@ -182,4 +182,4 @@ def torch_tensor():
 
 
 if __name__ == '__main__':
-    torch_tensor()
+    param_torch()

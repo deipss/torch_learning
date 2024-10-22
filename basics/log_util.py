@@ -1,10 +1,12 @@
 from datetime import datetime
 import json
 import torch
-
 import os
-
+from torchsummary import summary
 root_path = '../data'
+
+def print_model(model,input_size):
+    summary(model, input_size)
 
 
 def print_loss(epoch=0, idx=0, **param):
@@ -28,10 +30,17 @@ def save_json(filename='', modelname='', json_data=None, **param):
     print(fname + " area saved")
 
 
-def save_model(filename='', model=None, **model_param):
-    pass
+def save_model(filename='', model=None, replace=True, **model_param):
+    formatted_time = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+    dict_format = '_'.join(["{0}={1}_".format(k, v) for k, v in model_param.items()])
+    fname = '_'.join([filename, dict_format, formatted_time])
+    fname += '.pkl'
+    fpath = os.path.join(root_path, 'pkl', fname)
+    torch.save(model.state_dict(), fpath)
+
 
 
 if __name__ == '__main__':
     print_loss(1, 1, **{'a': 'b', 'c': 'd'})
     save_json(filename='aaa', modelname='cnn_model', json_data={1: 2}, **{'a': 'b', 'c': 'd'})
+    save_model(filename='aaa', model=torch.nn.Linear(3,4), **{'a': 'b', 'c': 'd'})
