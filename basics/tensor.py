@@ -3,21 +3,30 @@ import numpy as np
 from torch import nn
 import os
 
-def metric_logger_show():
-    data = torch.stack([torch.arange(1,19),torch.arange(20,38)],dim=0)
-    print(data.shape)
-    data_z = zip(data[0],data[1])
-    print(next(data_z))
+from torchviz import make_dot
+from torchsummary import summary
 
+
+def zip_stack():
+    # stack函数 将2个一维数组，堆叠为一个2x18的二维数组
+    data = torch.stack([torch.arange(1, 19), torch.arange(20, 38)], dim=0)
+    print(data.shape)
+    # zip函数将两个一维数组，进行
+    data_z = zip(data[0], data[1])
+    print(next(data_z))
+    # 打印操作系统中的环境变量
     for key, value in os.environ.items():
         print(f'{key}: {value}')
 
+
 def cnn_multiple_channel():
-    input = torch.rand(3,5,5)
+    # CNN多通道
+    input = torch.rand(3, 5, 5)
     print(input)
-    model = nn.Conv2d(in_channels=3,out_channels=8,kernel_size=(2,2))
+    model = nn.Conv2d(in_channels=3, out_channels=8, kernel_size=(2, 2))
     output = model(input)
     print(output)
+
 
 def cnn_kernel_learning():
     img = torch.ones(6, 8)
@@ -35,6 +44,7 @@ def cnn_kernel_learning():
         l = (Y_hat - Y) ** 2
         conv2d.zero_grad()
         l.sum().backward()
+        # 更新这个模型，各个权重（即隐藏层）的数据值
         conv2d.weight.data[:] -= lr * conv2d.weight.grad
         if (i % 2 == 0):
             print(f'epoch {i} ,loss = {l.sum():.3f}')
@@ -59,7 +69,7 @@ def zip_show():
     for a, b in t3:
         print(a, b)
         print(*a)
-
+    # 累加和
     d1 = torch.cumsum(t1, dim=0)
     print(d1)
     d2 = torch.cumsum(d1, dim=1)
@@ -74,14 +84,14 @@ def conv2d():
     for i in range(Y.shape[0]):
         for j in range(Y.shape[1]):
             Y[i, j] = torch.sum(X[i:i + h, j:j + w] * K)
-
     print(Y)
 
 
 def param_torch():
+    # 线性模型
     net = nn.Sequential(nn.Linear(4, 8), nn.ReLU(), nn.Linear(8, 1))
     X = torch.rand(size=(2, 4))
-    net(X)
+    y = net(X)
     print(net)
     print(net.state_dict())
     print(net.named_parameters())
@@ -89,9 +99,16 @@ def param_torch():
     print(net[2].bias.data)
     print(net[2].weight)
 
+    summary(net, (3, 4))
+
+    # # 使用 torchviz 可视化模型结构
+    # dot = make_dot(y, params=dict(list(net.named_parameters()) + [('x', X)]))
+    # dot.render("model_structure", format="png")
+
 
 def param_share():
     share = nn.Linear(8, 8)
+    # net的第1层和share是共享内存的
     net = nn.Sequential(share, nn.ReLU(), share, nn.ReLU(), nn.Linear(8, 1))
     x = torch.randn((2, 8))
     a = net(x)
@@ -108,6 +125,8 @@ def torch_tensor():
     y_c = y.clone().view(-1, 2)
     print("y_c")
     print(y_c)
+    print(id(y_c) == id(y))
+    print(id(y.reshape(-1,2)) == id(y))
     z = y.new_zeros(4, 3, dtype=torch.float32)
     print(z)
     k = torch.randn(4, 3, dtype=torch.float32)
@@ -163,4 +182,4 @@ def torch_tensor():
 
 
 if __name__ == '__main__':
-    metric_logger_show()
+    torch_tensor()

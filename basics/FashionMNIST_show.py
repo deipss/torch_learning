@@ -2,12 +2,15 @@ from torchvision import datasets
 from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
 import torch
+
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 DEVICE = torch.device("mps") if torch.backends.mps.is_available() else DEVICE
 import cv2
 
 '''
-在Matplotlib中，颜色映射（Colormap）用于将数据值映射到颜色空间，以便在可视化中表示不同的数值或类别。除了`'gray'`之外，Matplotlib提供了许多预定义的颜色映射选项。以下是一些常用的颜色映射：
+在Matplotlib中，颜色映射（Colormap）用于将数据值映射到颜色空间，
+以便在可视化中表示不同的数值或类别。
+除了`'gray'`之外，Matplotlib提供了许多预定义的颜色映射选项。以下是一些常用的颜色映射：
 
 1. **'viridis'**：一种对颜色盲友好的颜色映射，从蓝色到黄色渐变。
 2. **'plasma'**：从蓝色到红色的鲜艳颜色映射。
@@ -33,7 +36,8 @@ import cv2
 22. **'bwr'**：蓝-白-红色映射，常用于表示正负差异。
 23. **'seismic'**：从绿色到红色的地震色彩映射。
 
-此外，Matplotlib还允许用户创建自定义颜色映射，以满足特定的可视化需求。可以使用`matplotlib.cm`模块中的`LinearSegmentedColormap`类来定义自己的颜色映射。
+此外，Matplotlib还允许用户创建自定义颜色映射，以满足特定的可视化需求。
+可以使用`matplotlib.cm`模块中的`LinearSegmentedColormap`类来定义自己的颜色映射。
 
 例如，要使用Jet颜色映射，你可以这样做：
 
@@ -51,14 +55,14 @@ plt.show()
 
 def showImg():
     training_data = datasets.FashionMNIST(
-        root="data",
+        root="../data",
         train=True,
         download=True,
         transform=ToTensor()
     )
 
     test_data = datasets.FashionMNIST(
-        root="data",
+        root="../data",
         train=False,
         download=True,
         transform=ToTensor()
@@ -92,7 +96,7 @@ def showImg():
 
 
 def resize_show():
-    im = cv2.imread("/Users/deipss/workspace/ai/torch_learning/data/img_align_celeba/000001.jpg", cv2.IMREAD_GRAYSCALE)
+    im = cv2.imread("../data/img_align_celeba/000001.jpg", cv2.IMREAD_GRAYSCALE)
     im = cv2.resize(im, (24, 24))
     cv2.namedWindow('Display Window', cv2.WINDOW_NORMAL)
     # 显示图像

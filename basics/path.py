@@ -26,7 +26,7 @@ def math():
 if __name__ == '__main__':
     pairs = [(1, 'a'), (2, 'b'), (3, 'c')]
 
-    # 解压
+    # *解压 zip进行元组压缩
     numbers, letters = zip(*pairs)
     print(numbers)  # 输出: (1, 2, 3)
     print(letters)  # 输出: ('a', 'b', 'c')

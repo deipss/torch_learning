@@ -122,7 +122,7 @@ def train():
     #     for images, labels in train_loader:
     #         images=images.to(DEVICE)
     #         labels=labels.to(DEVICE)
-    #         outputs = model(images)
+    #         outputs = cnn_model(images)
     #         loss = criterion(outputs, labels)
     #
     #         # 反向传播和优化

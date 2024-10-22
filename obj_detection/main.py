@@ -44,7 +44,7 @@ def demo_run():
 
 
 def get_model_instance_segmentation(num_classes):
-    # load an instance segmentation model pre-trained on COCO
+    # load an instance segmentation cnn_model pre-trained on COCO
     model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights="DEFAULT")
 
     # get number of input features for the classifier
@@ -95,10 +95,10 @@ def train():
         collate_fn=utils.collate_fn
     )
 
-    # get the model using our helper function
+    # get the cnn_model using our helper function
     model = get_model_instance_segmentation(num_classes)
 
-    # move model to the right device
+    # move cnn_model to the right device
     model.to(device)
 
     # construct an optimizer
