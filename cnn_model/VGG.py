@@ -62,9 +62,3 @@ class VGG16(nn.Module):
         x = x.view(x.size(0), -1)  # 展平
         x = self.classifier(x)
         return x
-
-# 创建 VGG16 模型实例
-model = VGG16(num_classes=1000)
-
-# 打印模型结构
-print(model)

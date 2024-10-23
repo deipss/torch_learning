@@ -82,18 +82,3 @@ class UNet(nn.Module):
 
         # Output layer
         return self.outconv(u4)
-
-# 实例化模型
-n_channels = 3  # 图像通道数，对于彩色图像是3
-n_classes = 1    # 根据分割任务的类别数
-
-model = UNet(n_channels, n_classes)
-
-# 创建一个随机初始化的输入张量，模拟一个批量大小为1的图像批次
-# 假设输入图像大小为256x256，通道数为3（RGB）
-input_tensor = torch.randn(1, n_channels, 256, 256)
-
-# 前向传播以获取模型输出
-output = model(input_tensor)
-
-print(output.shape)  # 应该输出: torch.Size([1, n_classes, 256, 256])

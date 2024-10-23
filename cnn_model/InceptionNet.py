@@ -101,14 +101,3 @@ class InceptionNet(nn.Module):
         out = self.dropout(out)
         out = torch.flatten(out, 1)
         return out
-
-# 实例化模型
-model = InceptionNet(num_classes=1000)
-
-# 创建一个随机初始化的输入张量，模拟一个批量大小为64的图像批次
-# 假设输入图像大小为224x224，通道数为3（RGB）
-input_tensor = torch.randn(64, 3, 224, 224)
-
-# 前向传播以获取模型输出
-output = model(input_tensor)
-print(output.size())  # 应该输出: torch.Size([64, 1000])
