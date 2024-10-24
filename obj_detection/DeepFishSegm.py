@@ -16,13 +16,13 @@ class DeepFishSegm(torch.utils.data.Dataset):
         self.transforms = transforms
         # load all image files, sorting them to
         # ensure that they are aligned
-        self.imgs = list(sorted(os.listdir(os.path.join(root, "/images/valid"))))
-        self.masks = list(sorted(os.listdir(os.path.join(root, "/masks/valid"))))
+        self.imgs = list(sorted(os.listdir(os.path.join(root, "images/valid"))))
+        self.masks = list(sorted(os.listdir(os.path.join(root, "masks/valid"))))
 
     def __getitem__(self, idx):
         # load images and masks
         img_path = os.path.join(self.root, "images/valid", self.imgs[idx])
-        mask_path = os.path.join(self.root, "/mask/valid", self.masks[idx])
+        mask_path = os.path.join(self.root, "masks/valid", self.masks[idx])
         img = read_image(img_path)
         mask = read_image(mask_path)
         # instances are encoded as different colors

@@ -1,5 +1,6 @@
 import utils
 from PennFudanDataset import  PennFudanDataset
+from DeepFishSegm import DeepFishSegm
 from torchvision.transforms import v2 as T
 import torch
 import torchvision
@@ -142,8 +143,8 @@ def trainDeepFishSegm():
     # our dataset has two classes only - background and person
     num_classes = 2
     # use our dataset and defined transformations
-    dataset = PennFudanDataset('/data/ai_data/DeepFish/Segmentation', get_transform(train=True))
-    dataset_test = PennFudanDataset('/data/ai_data/DeepFish/Segmentation', get_transform(train=False))
+    dataset = DeepFishSegm('/data/ai_data/DeepFish/Segmentation', get_transform(train=True))
+    dataset_test = DeepFishSegm('/data/ai_data/DeepFish/Segmentation', get_transform(train=False))
 
     # split the dataset in train and test set
     indices = torch.randperm(len(dataset)).tolist()
@@ -239,4 +240,4 @@ def show():
 
 
 if __name__ == '__main__':
-    trainPennFudanDataset()
+    trainDeepFishSegm()
