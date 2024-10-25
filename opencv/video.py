@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def selective_anchor():
-
     # 读取图像
     image = cv2.imread('../data/img_align_celeba/000001.jpg')
 
@@ -33,14 +33,19 @@ def selective_anchor():
     cv2.imshow('Selective Search Output', image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+
 def windows_show():
     cv2.namedWindow("new", cv2.WINDOW_AUTOSIZE)
     cv2.imshow('new', 0)
     cv2.waitKey(0)
 
+
 '''
 打开个人的摄像头
 '''
+
+
 def capture_face():
     # 加载 Haar 级联分类器
     face_cascade = cv2.CascadeClassifier('../data/haarcascade_frontalface_default.xml')
@@ -425,66 +430,73 @@ def filter_one_dim():
 
 def boxFilter():
     # 加载图像
-    image = cv2.imread('../data/img_align_celeba/000001.jpg', cv2.IMREAD_GRAYSCALE)
-
+    image = cv2.imread('/Users/deipss/workspace/ai/torch_learning/data/PennFudanPed/PNGImages/FudanPed00066.png',
+                       cv2.IMREAD_GRAYSCALE)
+    img_map = {}
+    img_map['origin'] = image
     # 应用盒状滤波
     filtered_image = cv2.boxFilter(image, -1, (3, 3))
+    img_map['boxFilter'] = filtered_image
     blur_image = cv2.blur(image, (5, 5))
+    img_map['blur'] = blur_image
     medianBlur = cv2.medianBlur(image, 5)
-
+    img_map['medianBlur'] = medianBlur
     GaussianBlur = cv2.GaussianBlur(image, (5, 5), 0)
+    img_map['GaussianBlur'] = GaussianBlur
 
     # 应用双边滤波
     bilateralFilter = cv2.bilateralFilter(image, d=9, sigmaColor=75, sigmaSpace=75)
+    img_map['bilateralFilter'] = bilateralFilter
     # 使用拉普拉斯滤波器
     laplacian = cv2.Laplacian(image, cv2.CV_64F)
+    img_map['laplacian'] = laplacian
 
     # 使用Sobel算子
     sobelx = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)
     sobely = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
     sobel = np.sqrt(sobelx ** 2 + sobely ** 2)
+    img_map['sobel'] = sobel
     # 使用Scharr滤波器计算水平方向的梯度
     scharr_x = cv2.Scharr(image, cv2.CV_64F, 1, 0)
-
     # 使用Scharr滤波器计算垂直方向的梯度
     scharr_y = cv2.Scharr(image, cv2.CV_64F, 0, 1)
-
     # 计算梯度的幅度
     magnitude = np.sqrt(scharr_x ** 2 + scharr_y ** 2)
+    img_map['magnitude'] = magnitude
 
     # 应用Canny边缘检测
     Canny = cv2.Canny(image, threshold1=50, threshold2=150)
-
+    img_map['Canny'] = Canny
     # 使用Mean-C方法进行自适应阈值处理
     mean_c = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
-
+    img_map['mean_c'] = mean_c
     # 使用Gaussian-C方法进行自适应阈值处理
     gaussian_c = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    img_map['gaussian_c'] = gaussian_c
+    fig, axes = plt.subplots(nrows=3, ncols=5, figsize=(10, 10))
+    ax = axes.flatten()
+    for i, (k,v) in enumerate(img_map.items()):
+        ax[i].imshow(v, cmap='gray')
+        ax[i].set_title(k)
+    plt.show()
 
-    # 显示结果
-    cv2.imshow('Mean-C Adaptive Threshold', mean_c)
-    cv2.imshow('Gaussian-C Adaptive Threshold', gaussian_c)
-
-    # 显示结果
-    cv2.imshow('Canny', Canny)
-
-    # 显示结果
-    cv2.imshow('Scharr X Gradient', np.abs(scharr_x).astype(np.uint8))
-    cv2.imshow('blur_image', blur_image)
-    cv2.imshow('Scharr Y Gradient', np.abs(scharr_y).astype(np.uint8))
-    cv2.imshow('Gradient Magnitude', np.abs(magnitude).astype(np.uint8))
-    # 显示结果
-    cv2.imshow('Laplacian Filtered Image', np.abs(laplacian).astype(np.uint8))
-    cv2.imshow('Sobel Filtered Image', np.abs(sobel).astype(np.uint8))
-
-    # 显示结果
-    cv2.imshow('Original Image', image)
-    cv2.imshow('Filtered Image', filtered_image)
-    cv2.imshow('medianBlur', medianBlur)
-    cv2.imshow('GaussianBlur', GaussianBlur)
-    cv2.imshow('bilateralFilter', bilateralFilter)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # 显示结果 by cv
+    # cv2.imshow('Original Image', image)
+    # cv2.imshow('Mean-C Adaptive Threshold', mean_c)
+    # cv2.imshow('Gaussian-C Adaptive Threshold', gaussian_c)
+    # cv2.imshow('Canny', Canny)
+    # cv2.imshow('Scharr X Gradient', np.abs(scharr_x).astype(np.uint8))
+    # cv2.imshow('blur_image', blur_image)
+    # cv2.imshow('Scharr Y Gradient', np.abs(scharr_y).astype(np.uint8))
+    # cv2.imshow('Gradient Magnitude', np.abs(magnitude).astype(np.uint8))
+    # cv2.imshow('Laplacian Filtered Image', np.abs(laplacian).astype(np.uint8))
+    # cv2.imshow('Sobel Filtered Image', np.abs(sobel).astype(np.uint8))
+    # cv2.imshow('Filtered Image', filtered_image)
+    # cv2.imshow('medianBlur', medianBlur)
+    # cv2.imshow('GaussianBlur', GaussianBlur)
+    # cv2.imshow('bilateralFilter', bilateralFilter)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
 
 def morphology():
@@ -570,7 +582,6 @@ def contours():
     cv2.destroyAllWindows()
 
 
-
 def feature_detect():
     # 读取图像并转换为灰度图像
     image = cv2.imread('../data/img_align_celeba/000001.jpg')
@@ -649,4 +660,4 @@ def gaussian_pyramid():
 
 
 if __name__ == '__main__':
-    selective_anchor()
+    boxFilter()

@@ -1,18 +1,41 @@
 import matplotlib.pyplot as plt
 
 import os
-import torch
-import torchvision
-
-from torchvision.io import read_image
 from torchvision.ops.boxes import masks_to_boxes
 from torchvision import tv_tensors
 from torchvision.transforms.v2 import functional as F
-from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
+from torchvision.io import read_image
+import torch
+import cv2
+import numpy as np
+
+import kornia
 
 DEVICE = torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
 
+
+def concat_opencv(image):
+    gray_image = kornia.color.rgb_to_grayscale(image)
+    numpy_gray = gray_image.squeeze().numpy()
+    laplacian = cv2.Laplacian(numpy_gray, cv2.CV_64F)
+    sobelx = cv2.Sobel(numpy_gray, cv2.CV_64F, 1, 0, ksize=3)
+    sobely = cv2.Sobel(numpy_gray, cv2.CV_64F, 0, 1, ksize=3)
+    sobel = np.sqrt(sobelx ** 2 + sobely ** 2)
+    Canny = cv2.Canny(numpy_gray, threshold1=50, threshold2=150)
+    mean_c = cv2.adaptiveThreshold(numpy_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C,
+                                   cv2.THRESH_BINARY, 11, 2)
+    gaussian_c = cv2.adaptiveThreshold(numpy_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                       cv2.THRESH_BINARY, 11, 2)
+
+    # 将所有图像转换为张量并拼接
+    laplacian = torch.from_numpy(laplacian).unsqueeze(0)
+    sobel = torch.from_numpy(sobel).unsqueeze(0)
+    Canny = torch.from_numpy(Canny).unsqueeze(0)
+    mean_c = torch.from_numpy(mean_c).unsqueeze(0)
+    gaussian_c = torch.from_numpy(gaussian_c).unsqueeze(0)
+
+    return torch.cat([image, gray_image, laplacian, sobel, Canny, mean_c, gaussian_c],
+                     dim=-3)
 
 class PennFudanDataset(torch.utils.data.Dataset):
     def __init__(self, root, transforms):
@@ -51,8 +74,7 @@ class PennFudanDataset(torch.utils.data.Dataset):
         iscrowd = torch.zeros((num_objs,), dtype=torch.int64)
 
         # Wrap sample and targets into torchvision tv_tensors:
-        img = tv_tensors.Image(img)
-
+        img = tv_tensors.Image(concat_opencv(img))
         target = {}
         target["boxes"] = tv_tensors.BoundingBoxes(boxes, format="XYXY", canvas_size=F.get_size(img))
         target["masks"] = tv_tensors.Mask(masks)

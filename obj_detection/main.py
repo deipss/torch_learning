@@ -1,12 +1,13 @@
 import utils
-from PennFudanDataset import  PennFudanDataset
+from PennFudanDataset import PennFudanDataset
 from DeepFishSegm import DeepFishSegm
-from torchvision.transforms import v2 as T
-import torch
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from torchvision.io import read_image
+import torch.nn as nn
+from torchvision.transforms import v2 as T
+import torch
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -18,6 +19,8 @@ def get_transform(train):
     transforms.append(T.ToDtype(torch.float, scale=True))
     transforms.append(T.ToPureTensor())
     return T.Compose(transforms)
+
+
 
 
 def demo_run():
@@ -44,6 +47,24 @@ def demo_run():
     print(predictions[0])
 
 
+class CustomFasterRCNNPredictor(nn.Module):
+    def __init__(self, in_channels, num_classes, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.conv1 = nn.Conv2d(in_channels, 3, kernel_size=3, stride=2, padding=3, bias=False)
+        self.bn1 = nn.BatchNorm2d(num_features=3)
+        self.relu = nn.ReLU(inplace=True)
+        self.inner = get_model_instance_segmentation(num_classes)
+    def forward(self, images, targets=None):
+        x = self.conv1(images)
+        x = self.bn1(x)
+        x = self.relu(x)
+        return self.inner(x,targets)
+
+
+def get_model_detection_new(in_channels, num_classes):
+    return CustomFasterRCNNPredictor(in_channels, num_classes)
+
+
 def get_model_instance_segmentation(num_classes):
     # load an instance segmentation cnn_model pre-trained on COCO
     model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights="DEFAULT")
@@ -65,6 +86,7 @@ def get_model_instance_segmentation(num_classes):
 
     return model
 
+
 def trainPennFudanDataset():
     from engine import train_one_epoch, evaluate
 
@@ -73,8 +95,8 @@ def trainPennFudanDataset():
     # our dataset has two classes only - background and person
     num_classes = 2
     # use our dataset and defined transformations
-    dataset = PennFudanDataset('/data/ai_data/PennFudanPed', get_transform(train=True))
-    dataset_test = PennFudanDataset('/data/ai_data/PennFudanPed', get_transform(train=False))
+    dataset = PennFudanDataset('../data/PennFudanPed', get_transform(train=True))
+    dataset_test = PennFudanDataset('../data/PennFudanPed', get_transform(train=False))
 
     # split the dataset in train and test set
     indices = torch.randperm(len(dataset)).tolist()
@@ -99,7 +121,7 @@ def trainPennFudanDataset():
     )
 
     # get the cnn_model using our helper function
-    model = get_model_instance_segmentation(num_classes)
+    model = get_model_detection_new(in_channels=9,num_classes=num_classes)
 
     # move cnn_model to the right device
     model.to(device)
@@ -204,6 +226,7 @@ def trainDeepFishSegm():
     print("That's it!")
     torch.save(model.state_dict(), "../data/model_state_dict_deep_fish.pth")
 
+
 def show():
     import matplotlib.pyplot as plt
 
@@ -213,8 +236,9 @@ def show():
     model.load_state_dict(torch.load("../data/model_state_dict_deep_fish.pth"))
     model.to(device)
 
-    #image = read_image("/data/ai_data/PennFudanPed/PNGImages/FudanPed00046.png")
-    image = read_image("/data/ai_data/DeepFish/Segmentation/images/valid/7117_Lutjanus_argentimaculatus_adult_2_f000060.jpg")
+    # image = read_image("/data/ai_data/PennFudanPed/PNGImages/FudanPed00046.png")
+    image = read_image(
+        "/data/ai_data/DeepFish/Segmentation/images/valid/7117_Lutjanus_argentimaculatus_adult_2_f000060.jpg")
     eval_transform = get_transform(train=False)
 
     model.eval()
@@ -240,4 +264,4 @@ def show():
 
 
 if __name__ == '__main__':
-    show()
+    trainPennFudanDataset()
