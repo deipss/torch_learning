@@ -10,13 +10,11 @@ def multiple_channel():
     transforms = []
     transforms.append(T.RandomHorizontalFlip(0.5))
     transforms.append(T.ToDtype(torch.float, scale=True))
-    transforms.append(T.ToPureTensor())
-
+    transforms.append(T.ToTensor())
+    transforms.append(T.Normalize(mean=[0.485, 0.456, 0.406,0.485, 0.456, 0.406,0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225,0.229, 0.224, 0.225,0.229, 0.224, 0.225]))
     transforms = T.Compose(transforms)
-
     img = torch.randint(0, 255, (1, 7, 3, 3), dtype=torch.int32)
     print(img)
-
     t_img = transforms(img)
     print(t_img.shape)
     print(t_img)

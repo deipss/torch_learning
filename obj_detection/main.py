@@ -17,35 +17,9 @@ def get_transform(train):
     if train:
         transforms.append(T.RandomHorizontalFlip(0.5))
     transforms.append(T.ToDtype(torch.float, scale=True))
-    transforms.append(T.ToPureTensor())
+    transforms.append(T.ToTensor())
+    transforms.append(T.Normalize(mean=[0.485, 0.456, 0.406,0.485, 0.456, 0.406,0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225,0.229, 0.224, 0.225,0.229, 0.224, 0.225]))
     return T.Compose(transforms)
-
-
-
-
-def demo_run():
-    global dataset
-    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(weights="DEFAULT")
-    dataset = PennFudanDataset('../data/PennFudanPed', get_transform(train=True))
-    data_loader = torch.utils.data.DataLoader(
-        dataset,
-        batch_size=2,
-        shuffle=True,
-        collate_fn=utils.collate_fn
-    )
-    # For Training iter把数据集加载器中每个batch都串起来，变成一个迭代器，next取迭代器中第一个元素。
-    # 相当于取的第一个batch中的数据
-    images, targets = next(iter(data_loader))
-    images = list(image for image in images)
-    targets = [{k: v for k, v in t.items()} for t in targets]
-    output = model(images, targets)  # Returns losses and detections
-    print(output)
-    # For inference
-    model.eval()
-    x = [torch.rand(3, 300, 400), torch.rand(3, 500, 400)]
-    predictions = model(x)  # Returns predictions
-    print(predictions[0])
-
 
 class CustomFasterRCNNPredictor(nn.Module):
     def __init__(self, in_channels, num_classes, *args, **kwargs):
@@ -55,13 +29,17 @@ class CustomFasterRCNNPredictor(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.inner = get_model_instance_segmentation(num_classes)
     def forward(self, images, targets=None):
-        x = self.conv1(images)
-        x = self.bn1(x)
-        x = self.relu(x)
-        return self.inner(x,targets)
+        inner_img = []
+        for i in images:
+            x = self.conv1(i)
+            x=x.unsqueeze(0)
+            x = self.bn1(x)
+            x = self.relu(x)
+            inner_img.append(x.squeeze())
+        return self.inner(inner_img,targets)
 
 
-def get_model_detection_new(in_channels, num_classes):
+def get_model_detection_customized_segmentation(in_channels, num_classes):
     return CustomFasterRCNNPredictor(in_channels, num_classes)
 
 
@@ -121,7 +99,7 @@ def trainPennFudanDataset():
     )
 
     # get the cnn_model using our helper function
-    model = get_model_detection_new(in_channels=9,num_classes=num_classes)
+    model = get_model_detection_customized_segmentation(in_channels=9, num_classes=num_classes)
 
     # move cnn_model to the right device
     model.to(device)
@@ -143,7 +121,7 @@ def trainPennFudanDataset():
     )
 
     # let's train it just for 2 epochs
-    num_epochs = 100
+    num_epochs = 10
 
     for epoch in range(num_epochs):
         # train for one epoch, printing every 10 iterations
