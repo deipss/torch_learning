@@ -8,10 +8,10 @@ from torchvision.io import read_image
 import torch.nn as nn
 from torchvision.transforms import v2 as T
 import torch
-from _util.log_util import data_root_path
 import os
+import platform
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-
+data_root_path = '/data/ai_data' if platform.system()=='Linux' else '../data'
 
 def get_transform(train):
     transforms = []
