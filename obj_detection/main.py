@@ -18,35 +18,9 @@ def get_transform(train):
     transforms.append(T.ToDtype(torch.float, scale=True))
     transforms.append(T.ToPureTensor())
     return T.Compose(transforms)
-
-
-def demo_run():
-    global dataset
-    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(weights="DEFAULT")
-    dataset = PennFudanDataset('../data/PennFudanPed', get_transform(train=True))
-    data_loader = torch.utils.data.DataLoader(
-        dataset,
-        batch_size=2,
-        shuffle=True,
-        collate_fn=utils.collate_fn
-    )
-    # For Training iter把数据集加载器中每个batch都串起来，变成一个迭代器，next取迭代器中第一个元素。
-    # 相当于取的第一个batch中的数据
-    images, targets = next(iter(data_loader))
-    images = list(image for image in images)
-    targets = [{k: v for k, v in t.items()} for t in targets]
-    output = model(images, targets)  # Returns losses and detections
-    print(output)
-    # For inference
-    model.eval()
-    x = [torch.rand(3, 300, 400), torch.rand(3, 500, 400)]
-    predictions = model(x)  # Returns predictions
-    print(predictions[0])
-
-
 def get_model_instance_segmentation(num_classes):
     # load an instance segmentation cnn_model pre-trained on COCO
-    model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights="DEFAULT")
+    model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights=None,pretrained=False)
 
     # get number of input features for the classifier
     in_features = model.roi_heads.box_predictor.cls_score.in_features
@@ -73,8 +47,8 @@ def trainPennFudanDataset():
     # our dataset has two classes only - background and person
     num_classes = 2
     # use our dataset and defined transformations
-    dataset = PennFudanDataset('../data/PennFudanPed', get_transform(train=True))
-    dataset_test = PennFudanDataset('../data/PennFudanPed', get_transform(train=False))
+    dataset = PennFudanDataset('/data/ai_data/PennFudanPed', get_transform(train=True))
+    dataset_test = PennFudanDataset('/data/ai_data/PennFudanPed', get_transform(train=False))
 
     # split the dataset in train and test set
     indices = torch.randperm(len(dataset)).tolist()
@@ -121,7 +95,7 @@ def trainPennFudanDataset():
     )
 
     # let's train it just for 2 epochs
-    num_epochs = 100
+    num_epochs = 10
 
     for epoch in range(num_epochs):
         # train for one epoch, printing every 10 iterations
