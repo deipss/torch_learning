@@ -7,7 +7,10 @@ import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from torchvision.io import read_image
-
+import os
+import platform
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+data_root_path = '/data/ai_data' if platform.system()=='Linux' else '../data'
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 
@@ -47,8 +50,8 @@ def trainPennFudanDataset():
     # our dataset has two classes only - background and person
     num_classes = 2
     # use our dataset and defined transformations
-    dataset = PennFudanDataset('/data/ai_data/PennFudanPed', get_transform(train=True))
-    dataset_test = PennFudanDataset('/data/ai_data/PennFudanPed', get_transform(train=False))
+    dataset = PennFudanDataset(os.path.join(data_root_path,'PennFudanPed'), get_transform(train=True))
+    dataset_test = PennFudanDataset(os.path.join(data_root_path,'PennFudanPed'), get_transform(train=False))
 
     # split the dataset in train and test set
     indices = torch.randperm(len(dataset)).tolist()
@@ -117,8 +120,8 @@ def trainDeepFishSegm():
     # our dataset has two classes only - background and person
     num_classes = 2
     # use our dataset and defined transformations
-    dataset = DeepFishSegm('/data/ai_data/DeepFish/Segmentation', get_transform(train=True))
-    dataset_test = DeepFishSegm('/data/ai_data/DeepFish/Segmentation', get_transform(train=False))
+    dataset = DeepFishSegm(os.path.join(data_root_path,'DeepFish/Segmentation'), get_transform(train=True))
+    dataset_test = DeepFishSegm(os.path.join(data_root_path,'DeepFish/Segmentation'), get_transform(train=False))
 
     # split the dataset in train and test set
     indices = torch.randperm(len(dataset)).tolist()
