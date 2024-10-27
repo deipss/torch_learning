@@ -8,7 +8,8 @@ from torchvision.io import read_image
 import torch.nn as nn
 from torchvision.transforms import v2 as T
 import torch
-
+from _util.log_util import data_root_path
+import os
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 
@@ -73,8 +74,8 @@ def trainPennFudanDataset():
     # our dataset has two classes only - background and person
     num_classes = 2
     # use our dataset and defined transformations
-    dataset = PennFudanDataset('../data/PennFudanPed', get_transform(train=True))
-    dataset_test = PennFudanDataset('../data/PennFudanPed', get_transform(train=False))
+    dataset = PennFudanDataset(os.path.join(data_root_path,'PennFudanPed'), get_transform(train=True))
+    dataset_test = PennFudanDataset(os.path.join(data_root_path,'PennFudanPed'), get_transform(train=False))
 
     # split the dataset in train and test set
     indices = torch.randperm(len(dataset)).tolist()
@@ -132,7 +133,7 @@ def trainPennFudanDataset():
         evaluate(model, data_loader_test, device=device)
 
     print("That's it!")
-    torch.save(model.state_dict(), "../data/model_state_dict_penn.pth")
+    torch.save(model.state_dict(), os.path.join(data_root_path,'model_state_dict_penn.pth'))
 
 
 def trainDeepFishSegm():
@@ -143,8 +144,8 @@ def trainDeepFishSegm():
     # our dataset has two classes only - background and person
     num_classes = 2
     # use our dataset and defined transformations
-    dataset = DeepFishSegm('/data/ai_data/DeepFish/Segmentation', get_transform(train=True))
-    dataset_test = DeepFishSegm('/data/ai_data/DeepFish/Segmentation', get_transform(train=False))
+    dataset = DeepFishSegm(os.path.join(data_root_path,'DeepFish/Segmentation'), get_transform(train=True))
+    dataset_test = DeepFishSegm(os.path.join(data_root_path,'DeepFish/Segmentation'), get_transform(train=False))
 
     # split the dataset in train and test set
     indices = torch.randperm(len(dataset)).tolist()

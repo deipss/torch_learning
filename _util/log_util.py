@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import os
 import random
 from torchvision.io import read_image
-
-root_path = '../data'
+import platform
+data_root_path = '/data/ai_data' if platform.system()=='Linux' else '../data'
 
 def show_img_by_folder(path: str, col=5):
     paths = os.listdir(path)
@@ -84,7 +84,7 @@ def save_json(filename='', modelname='', json_data=None, **param):
     dict_format = '_'.join(["{0}={1}_".format(k, v) for k, v in param.items()])
     fname = '_'.join([modelname, filename, dict_format, formatted_time])
     fname += '.json'
-    fpath = os.path.join(root_path, 'log', fname)
+    fpath = os.path.join(data_root_path, 'log', fname)
     with open(fpath, 'w') as file:
         json.dump(json_data, file)
     print(fname + " area saved")
@@ -95,7 +95,7 @@ def save_model(filename='', model=None, replace=True, **model_param):
     dict_format = '_'.join(["{0}={1}_".format(k, v) for k, v in model_param.items()])
     fname = '_'.join([filename, dict_format, formatted_time])
     fname += '.pkl'
-    fpath = os.path.join(root_path, 'pkl', fname)
+    fpath = os.path.join(data_root_path, 'pkl', fname)
     torch.save(model.state_dict(), fpath)
 
 
@@ -103,4 +103,5 @@ if __name__ == '__main__':
     # print_loss(1, 1, **{'a': 'b', 'c': 'd'})
     # save_json(filename='aaa', modelname='cnn_model', json_data={1: 2}, **{'a': 'b', 'c': 'd'})
     # save_model(filename='aaa', model=torch.nn.Linear(3,4), **{'a': 'b', 'c': 'd'})
-    show_img_by_path('/Users/deipss/workspace/ai/torch_learning/data/PennFudanPed/PNGImages/FudanPed00002.png')
+    # show_img_by_path('/Users/deipss/workspace/ai/torch_learning/data/PennFudanPed/PNGImages/FudanPed00002.png')
+    pass
