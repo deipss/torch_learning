@@ -23,7 +23,7 @@ def get_transform(train):
     return T.Compose(transforms)
 def get_model_instance_segmentation(num_classes):
     # load an instance segmentation cnn_model pre-trained on COCO
-    model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights=None,pretrained=False)
+    model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights=None,weights_backbone=None)
 
     # get number of input features for the classifier
     in_features = model.roi_heads.box_predictor.cls_score.in_features
@@ -109,7 +109,7 @@ def trainPennFudanDataset():
         evaluate(model, data_loader_test, device=device)
 
     print("That's it!")
-    torch.save(model.state_dict(), "../data/model_state_dict_penn.pth")
+    torch.save(model.state_dict(), "/data/workspace/torch_learning/data/model_state_dict_penn_v2.pth")
 
 
 def trainDeepFishSegm():
@@ -179,7 +179,7 @@ def trainDeepFishSegm():
         evaluate(model, data_loader_test, device=device)
 
     print("That's it!")
-    torch.save(model.state_dict(), "../data/model_state_dict_deep_fish.pth")
+    torch.save(model.state_dict(), "/data/workspace/torch_learning/data/model_state_dict_deep_fish_v2.pth")
 
 def show():
     import matplotlib.pyplot as plt
