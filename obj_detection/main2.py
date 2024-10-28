@@ -13,7 +13,11 @@ import os
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 data_root_path = '/data/ai_data' if platform.system()=='Linux' else '../data'
 
-
+class weight_mlp_layer(nn.Module):
+    def __init__(self ,inner_model,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+    def forward(self, images,target,*args,**kwargs):
+        pass
 def get_transform(train):
     transforms = []
     if train:
@@ -69,7 +73,7 @@ def trainPennFudanDataset():
     # define training and validation data loaders
     data_loader = torch.utils.data.DataLoader(
         dataset,
-        batch_size=2,
+        batch_size=1,
         shuffle=True,
         collate_fn=utils.collate_fn
     )
@@ -104,7 +108,7 @@ def trainPennFudanDataset():
     )
 
     # let's train it just for 2 epochs
-    num_epochs = 10
+    num_epochs = 500
 
     for epoch in range(num_epochs):
         # train for one epoch, printing every 10 iterations
