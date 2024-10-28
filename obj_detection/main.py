@@ -98,7 +98,7 @@ def trainPennFudanDataset():
     )
 
     # let's train it just for 2 epochs
-    num_epochs = 10
+    num_epochs = 500
 
     for epoch in range(num_epochs):
         # train for one epoch, printing every 10 iterations
@@ -109,7 +109,7 @@ def trainPennFudanDataset():
         evaluate(model, data_loader_test, device=device)
 
     print("That's it!")
-    torch.save(model.state_dict(), "/data/workspace/torch_learning/data/model_state_dict_penn_v2.pth")
+    torch.save(model.state_dict(), "/data/workspace/torch_learning/data/model_state_dict_penn_v3.pth")
 
 
 def trainDeepFishSegm():
