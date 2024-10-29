@@ -20,7 +20,13 @@ data_root_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
 torch.manual_seed(1234567)
 
 
+
+"""
 # pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cpu.html
+TransformerConv
+AGNNConv
+FastRGCNConv
+"""
 def visualize(h, color):
     z = TSNE(n_components=2).fit_transform(h.detach().cpu().numpy())
 
