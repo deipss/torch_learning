@@ -19,10 +19,9 @@ device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 data_root_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
 torch.manual_seed(1234567)
 
-
-
 """
 # python -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cpu.html
+# python -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cu121.html
 # pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cpu.html
 # pip uninstall pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv 
 libpyg.so, 0x0006): Library not loaded: /Library/Frameworks/Python.framework/Versions/3.11/Python
@@ -34,7 +33,12 @@ libpyg.so, 0x0006): Library not loaded: /Library/Frameworks/Python.framework/Ver
 TransformerConv
 AGNNConv
 FastRGCNConv
+
+
+['ind.cora.x', 'ind.cora.tx', 'ind.cora.allx', 'ind.cora.y', 'ind.cora.ty', 'ind.cora.ally', 'ind.cora.graph', 'ind.cora.test.index']
 """
+
+
 def visualize(h, color):
     z = TSNE(n_components=2).fit_transform(h.detach().cpu().numpy())
 
@@ -71,6 +75,7 @@ def load_data():
     print(f'Has isolated nodes: {data.has_isolated_nodes()}')
     print(f'Has self-loops: {data.has_self_loops()}')
     print(f'Is undirected: {data.is_undirected()}')
+    dataset.to(device=device)
     return dataset
 
 
@@ -94,23 +99,24 @@ def show_graph():
 class MLP(torch.nn.Module):
     def __init__(self, hidden_channels, dataset):
         super().__init__()
-
-        self.lin1 = nn.Linear(dataset.num_features, hidden_channels)
-        self.lin2 = nn.Linear(hidden_channels, dataset.num_classes)
+        self.lines = nn.Sequential(
+            nn.Linear(dataset.num_features, 512),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(64, dataset.num_classes)
+        )
 
     def forward(self, x):
-        x1 = self.lin1(x)
-        x1 = x1.relu()
-        x1 = F.dropout(x1, p=0.5, training=self.training)
-        y = self.lin2(x + x1)
-        return y
-
-    # def forward(self, x):
-    #     x = self.lin1(x)
-    #     x = x.relu()
-    #     x = F.dropout(x, p=0.5, training=self.training)
-    #     y = self.lin2(x)
-    #     return y
+        return self.lines(x)
 
 
 def make_graph():
@@ -137,17 +143,22 @@ def make_graph():
 class GCN(torch.nn.Module):
     def __init__(self, hidden_channels, dataset):
         super().__init__()
-        self.conv1 = GCNConv(dataset.num_features, hidden_channels)
-        self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
+        self.conv1_list = nn.Sequential()
+        hidden_list = [dataset.num_features, dataset.num_features // 2, dataset.num_features // 4,
+                       dataset.num_classes]
+        for i, num in enumerate(hidden_list):
+            if (i > 0):
+                self.conv1_list.add_module(f'conv{i}', GCNConv(hidden_list[i - 1], hidden_list[i]))
+
 
     def forward(self, x, edge_index):
-        return self.rest_forward(x, edge_index)
+        return self.raw_forward(x, edge_index)
 
     def raw_forward(self, x, edge_index):
-        x = self.conv1(x, edge_index)
-        x = x.relu()
-        x = F.dropout(x, p=0.5, training=self.training)
-        x = self.conv2(x, edge_index)
+        for conv1 in self.conv1_list:
+            x = conv1(x, edge_index)
+            x = x.relu()
+            x = F.dropout(x, p=0.2, training=self.training)
         return x
 
     def rest_forward(self, x, edge_index):
@@ -160,12 +171,13 @@ class GCN(torch.nn.Module):
 
 def train_mlp():
     data = load_data()
-    model = MLP(hidden_channels=16)
+    model = MLP(hidden_channels=16, dataset=data)
     criterion = torch.nn.CrossEntropyLoss()  # Define loss criterion.
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)  # Define optimizer.
 
     def train():
         model.train()
+        model.to(device=device)
         optimizer.zero_grad()  # Clear gradients.
         out = model(data.x)  # Perform a single forward pass.
         loss = criterion(out[data.train_mask],
@@ -182,7 +194,7 @@ def train_mlp():
         test_acc = int(test_correct.sum()) / int(data.test_mask.sum())  # Derive ratio of correct predictions.
         return test_acc
 
-    for epoch in range(1, 201):
+    for epoch in range(1, 1001):
         loss = train()
         print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
     test_acc = eva()
@@ -190,21 +202,23 @@ def train_mlp():
 
 
 def train_gcn():
-    data = make_graph()
+    data = load_data()
     model = GCN(hidden_channels=data.num_features, dataset=data)
+    model.to(device=device)
     print(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     criterion = torch.nn.CrossEntropyLoss()
+    criterion.to(device=device)
 
     def train():
         model.train()
         optimizer.zero_grad()  # Clear gradients.
         out = model(data.x, data.edge_index)  # Perform a single forward pass.
-        loss = criterion(out[data.train_mask],
-                         data.y[data.train_mask])  # Compute the loss solely based on the training nodes.
-        loss.backward()  # Derive gradients.
+        inner_loss = criterion(out[data.train_mask],
+                               data.y[data.train_mask])  # Compute the loss solely based on the training nodes.
+        inner_loss.backward()  # Derive gradients.
         optimizer.step()  # Update parameters based on gradients.
-        return loss
+        return inner_loss
 
     def eva():
         model.eval()
@@ -219,15 +233,21 @@ def train_gcn():
     # max_eva=0.2448559670781893
     epoch = 0
     max_eva = -1
-    while loss > 0.1 and epoch < 47223:
+    while loss.item() > 0.001 and epoch < 2000:
         loss = train()
-        if epoch % 99 == 0:
+        if epoch % 2 == 0:
             test_acc = eva()
             print(f'Epoch: {epoch:010d}, Loss: {loss:.4f},Test Accuracy: {test_acc:.4f}')
-            max_eva=max(test_acc, max_eva)
+            max_eva = max(test_acc, max_eva)
         epoch += 1
     print(f'max_eva={max_eva}')
 
 
 if __name__ == '__main__':
-    pass
+    # 821
+    # train_gcn()
+
+    m = nn.Conv1d(1, 1, 3, stride=2)
+    input = torch.randn( 1, 50)
+    output = m(input)
+    print(output.shape)
