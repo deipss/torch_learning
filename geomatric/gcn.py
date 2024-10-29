@@ -22,7 +22,15 @@ torch.manual_seed(1234567)
 
 
 """
+# python -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cpu.html
 # pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cpu.html
+# pip uninstall pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv 
+libpyg.so, 0x0006): Library not loaded: /Library/Frameworks/Python.framework/Versions/3.11/Python
+- https://stackoverflow.com/questions/77664847/although-installed-pyg-lib-successfully-getting-error-while-importing
+- Reference: What's the difference between "pip install" and "python -m pip install"?
+
+
+
 TransformerConv
 AGNNConv
 FastRGCNConv
@@ -222,4 +230,4 @@ def train_gcn():
 
 
 if __name__ == '__main__':
-    train_gcn()
+    pass
