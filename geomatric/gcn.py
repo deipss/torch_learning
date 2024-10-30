@@ -134,28 +134,19 @@ def make_graph():
     return data
 
 
-class GCN(torch.nn.Module):
+class RestGCNEqualHidden(torch.nn.Module):
     def __init__(self, hidden_channels, dataset):
         super().__init__()
         self.conv1 = GCNConv(dataset.num_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index):
-        return self.rest_forward(x, edge_index)
-
-    def raw_forward(self, x, edge_index):
-        x = self.conv1(x, edge_index)
-        x = x.relu()
-        x = F.dropout(x, p=0.5, training=self.training)
-        x = self.conv2(x, edge_index)
-        return x
-
-    def rest_forward(self, x, edge_index):
         x1 = self.conv1(x, edge_index)
         x1 = x1.relu()
         x1 = F.dropout(x1, p=0.5, training=self.training)
         y = self.conv2(x1 + x, edge_index)
         return y
+
 
 
 def train_mlp():
@@ -230,4 +221,4 @@ def train_gcn():
 
 
 if __name__ == '__main__':
-    pass
+    load_data()
