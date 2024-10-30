@@ -150,6 +150,26 @@ class GCN(torch.nn.Module):
             if (i > 0):
                 self.conv1_list.add_module(f'conv{i}', GCNConv(hidden_list[i - 1], hidden_list[i]))
 
+    def forward(self, x, edge_index):
+        return self.raw_forward(x, edge_index)
+
+    def raw_forward(self, x, edge_index):
+        for conv1 in self.conv1_list:
+            x = conv1(x, edge_index)
+            x = x.relu()
+            x = F.dropout(x, p=0.2, training=self.training)
+        return x
+
+
+class GCN_CNN(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset):
+        super().__init__()
+        self.conv1_list = nn.Sequential()
+        hidden_list = [dataset.num_features, dataset.num_features // 2, dataset.num_features // 4,
+                       dataset.num_classes]
+        for i, num in enumerate(hidden_list):
+            if (i > 0):
+                self.conv1_list.add_module(f'conv{i}', GCNConv(hidden_list[i - 1], hidden_list[i]))
 
     def forward(self, x, edge_index):
         return self.raw_forward(x, edge_index)
@@ -161,12 +181,29 @@ class GCN(torch.nn.Module):
             x = F.dropout(x, p=0.2, training=self.training)
         return x
 
-    def rest_forward(self, x, edge_index):
-        x1 = self.conv1(x, edge_index)
-        x1 = x1.relu()
-        x1 = F.dropout(x1, p=0.5, training=self.training)
-        y = self.conv2(x1 + x, edge_index)
-        return y
+
+class RestGCN(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset):
+        super().__init__()
+        self.conv1 = GCNConv(dataset.num_features, dataset.num_features // 2)
+        self.conv1d = nn.Conv1d(in_channels=1, out_channels=1, stride=1, padding=0, kernel_size=3)
+        self.conv1d_norm = nn.BatchNorm1d(num_features=1)
+        self.conv2 = GCNConv(714, dataset.num_features // 4)
+        self.conv3 = GCNConv(dataset.num_features // 4, dataset.num_classes)
+
+    def forward(self, x, edge_index):
+        x = self.conv1(x, edge_index)
+        x = self.conv1d_norm(self.conv1d(x.unsqueeze(1)))
+        x = x.squeeze(1)
+        x = x.relu()
+        x = F.dropout(x, p=0.2, training=self.training)
+        x = self.conv2(x, edge_index)
+        x = x.relu()
+        x = F.dropout(x, p=0.2, training=self.training)
+        x = self.conv3(x, edge_index)
+        x = x.relu()
+        x = F.dropout(x, p=0.2, training=self.training)
+        return x
 
 
 def train_mlp():
@@ -203,7 +240,7 @@ def train_mlp():
 
 def train_gcn():
     data = load_data()
-    model = GCN(hidden_channels=data.num_features, dataset=data)
+    model = RestGCN(hidden_channels=data.num_features, dataset=data)
     model.to(device=device)
     print(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
@@ -245,9 +282,16 @@ def train_gcn():
 
 if __name__ == '__main__':
     # 821
-    # train_gcn()
+    train_gcn()
 
-    m = nn.Conv1d(1, 1, 3, stride=2)
-    input = torch.randn( 1, 50)
-    output = m(input)
-    print(output.shape)
+    # 定义一个一维批量归一化层
+    batch_norm = nn.BatchNorm1d(num_features=1)
+    conv1d = nn.Conv1d(in_channels=1, out_channels=1, stride=1,  kernel_size=3)
+
+    # 创建一个输入张量，形状为 (batch_size, num_features, sequence_length)
+    input_tensor = torch.randn(1, 1, 1433//2)
+
+    # 应用批量归一化操作
+    output_tensor = conv1d(input_tensor)
+
+    print(output_tensor.shape)  # 输出形状为 (10, 16, 50)
