@@ -5,7 +5,6 @@ import platform
 from torch_geometric.data import Data
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, GATConv
-import networkx as nwx
 from torch_geometric.datasets import Planetoid
 from torch_geometric.transforms import NormalizeFeatures
 import numpy as np
@@ -26,6 +25,7 @@ random.seed(seed)  # 为Python的random模块设置随机种子
 
 """
 # python -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cpu.html
+# python -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cu121.html
 # pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cpu.html
 # pip uninstall pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv 
 libpyg.so, 0x0006): Library not loaded: /Library/Frameworks/Python.framework/Versions/3.11/Python
@@ -49,10 +49,11 @@ GCN
 使用GCN+MLP双塔结构
 使用AGN+MLP双塔结构
 
+['ind.cora.x', 'ind.cora.tx', 'ind.cora.allx', 'ind.cora.y', 'ind.cora.ty', 'ind.cora.ally', 'ind.cora.graph', 'ind.cora.test.index']
+
 
 """
 def visualize(h, color):
-
     z = TSNE(n_components=2).fit_transform(h.detach().cpu().numpy())
 
     plt.figure(figsize=(10, 10))
@@ -88,6 +89,7 @@ def load_data():
     print(f'Has isolated nodes: {data.has_isolated_nodes()}')
     print(f'Has self-loops: {data.has_self_loops()}')
     print(f'Is undirected: {data.is_undirected()}')
+    dataset.to(device=device)
     return dataset
 
 
@@ -131,7 +133,6 @@ def show_graph():
 class MLP(torch.nn.Module):
     def __init__(self, hidden_channels, dataset):
         super().__init__()
-
         self.lin1 = nn.Linear(dataset.num_features, hidden_channels)
         self.lin2 = nn.Linear(hidden_channels, dataset.num_classes)
 
@@ -231,12 +232,13 @@ class GAT_GCN(torch.nn.Module):
 
 def train_mlp():
     data = load_data()
-    model = MLP(hidden_channels=16)
+    model = MLP(hidden_channels=16, dataset=data)
     criterion = torch.nn.CrossEntropyLoss()  # Define loss criterion.
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)  # Define optimizer.
 
     def train():
         model.train()
+        model.to(device=device)
         optimizer.zero_grad()  # Clear gradients.
         out = model(data.x)  # Perform a single forward pass.
         loss = criterion(out[data.train_mask],
@@ -253,7 +255,7 @@ def train_mlp():
         test_acc = int(test_correct.sum()) / int(data.test_mask.sum())  # Derive ratio of correct predictions.
         return test_acc
 
-    for epoch in range(1, 201):
+    for epoch in range(1, 1001):
         loss = train()
         print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
     test_acc = eva()
@@ -261,21 +263,23 @@ def train_mlp():
 
 
 def train_gcn():
-    data = make_graph()
-    model = GAT(hidden_channels=data.num_features, dataset=data)
+    data = load_data()
+    model = RestGCNEqualHidden(hidden_channels=data.num_features, dataset=data)
+    model.to(device=device)
     print(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     criterion = torch.nn.CrossEntropyLoss()
+    criterion.to(device=device)
 
     def train():
         model.train()
         optimizer.zero_grad()  # Clear gradients.
         out = model(data.x, data.edge_index)  # Perform a single forward pass.
-        loss = criterion(out[data.train_mask],
-                         data.y[data.train_mask])  # Compute the loss solely based on the training nodes.
-        loss.backward()  # Derive gradients.
+        inner_loss = criterion(out[data.train_mask],
+                               data.y[data.train_mask])  # Compute the loss solely based on the training nodes.
+        inner_loss.backward()  # Derive gradients.
         optimizer.step()  # Update parameters based on gradients.
-        return loss
+        return inner_loss
 
     def eva():
         model.eval()
@@ -301,10 +305,4 @@ def train_gcn():
 
 
 if __name__ == '__main__':
-    pairs = [(1, 'a'), (2, 'b'), (3, 'c')]
-
-    # 解压
-    print(*pairs)  # (1, 'a') (2, 'b') (3, 'c')
-    numbers, letters = zip(*pairs)
-    print(numbers)  # 输出: (1, 2, 3)
-    print(letters)  # 输出: ('a', 'b', 'c')
+    train_gcn()
