@@ -1,24 +1,27 @@
 import os.path
-
-from torch_geometric.datasets import Planetoid
 import torch
 import torch.nn as nn
 import platform
-import os.path as path
 from torch_geometric.data import Data
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, GATConv
 import networkx as nwx
 from torch_geometric.datasets import Planetoid
 from torch_geometric.transforms import NormalizeFeatures
-
+import numpy as np
+import random
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 data_root_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
-torch.manual_seed(1234567)
-
+seed = 1024
+torch.manual_seed(seed)
+torch.manual_seed(seed)  # 为当前CPU设置随机种子
+torch.cuda.manual_seed(seed)  # 为当前GPU设置随机种子
+torch.cuda.manual_seed_all(seed)  # 为所有GPU设置随机种子
+np.random.seed(seed)  # 为NumPy设置随机种子
+random.seed(seed)  # 为Python的random模块设置随机种子
 
 
 """
@@ -34,8 +37,22 @@ libpyg.so, 0x0006): Library not loaded: /Library/Frameworks/Python.framework/Ver
 TransformerConv
 AGNNConv
 FastRGCNConv
+GCN
+
+10-29 
+在Core数据集上，使用Conv1d做残差网络的效果并不好 
+在Core数据集上，使用隐藏层直接相加，作为残差，的效果比不上，直接输入上一层的，不做残差
+在随机生成的数据集上， 使用隐藏层直接相加，作为残差，的效果优胜于，直接输入上一层的，不做残差
+
+10-30 
+使用AGN+GCN双塔结构
+使用GCN+MLP双塔结构
+使用AGN+MLP双塔结构
+
+
 """
 def visualize(h, color):
+
     z = TSNE(n_components=2).fit_transform(h.detach().cpu().numpy())
 
     plt.figure(figsize=(10, 10))
@@ -73,6 +90,26 @@ def load_data():
     print(f'Is undirected: {data.is_undirected()}')
     return dataset
 
+
+def make_graph():
+    from torch_geometric.utils import barabasi_albert_graph
+    node = 1024
+    edge = node // 70
+    num_classes = 8
+    x = torch.randint(0, 8, (node, 32), dtype=torch.float)
+    edge_index = barabasi_albert_graph(node, edge)
+    y = torch.randint(0, num_classes, (node,), dtype=torch.long)
+
+    train_mask = torch.randint(0, 2, (node,), dtype=torch.bool)
+    val_mask = torch.randint(0, 2, (node,), dtype=torch.bool)
+    test_mask = torch.randint(0, 2, (node,), dtype=torch.bool)
+
+    data = Data(x=x, edge_index=edge_index, y=y, train_mask=train_mask, val_mask=val_mask, test_mask=test_mask)
+    data.num_classes = num_classes
+    print(f'num_features={data.num_features},num_classes={data.num_classes}')
+    print(f'data.x= {data.x}')
+    print(f'data.y= {data.y}')
+    return data
 
 def show_graph():
     import matplotlib.pyplot as plt
@@ -113,28 +150,8 @@ class MLP(torch.nn.Module):
     #     return y
 
 
-def make_graph():
-    from torch_geometric.utils import barabasi_albert_graph
-    node = 1024
-    edge = node // 70
-    num_classes = 8
-    x = torch.randint(0, 8, (node, 32), dtype=torch.float)
-    edge_index = barabasi_albert_graph(node, edge)
-    y = torch.randint(0, num_classes, (node,), dtype=torch.long)
-
-    train_mask = torch.randint(0, 2, (node,), dtype=torch.bool)
-    val_mask = torch.randint(0, 2, (node,), dtype=torch.bool)
-    test_mask = torch.randint(0, 2, (node,), dtype=torch.bool)
-
-    data = Data(x=x, edge_index=edge_index, y=y, train_mask=train_mask, val_mask=val_mask, test_mask=test_mask)
-    data.num_classes = num_classes
-    print(f'num_features={data.num_features},num_classes={data.num_classes}')
-    print(f'data.x= {data.x}')
-    print(f'data.y= {data.y}')
-    return data
-
-
 class RestGCNEqualHidden(torch.nn.Module):
+    # max_eva=0.26262626262626265
     def __init__(self, hidden_channels, dataset):
         super().__init__()
         self.conv1 = GCNConv(dataset.num_features, hidden_channels)
@@ -146,6 +163,69 @@ class RestGCNEqualHidden(torch.nn.Module):
         x1 = F.dropout(x1, p=0.5, training=self.training)
         y = self.conv2(x1 + x, edge_index)
         return y
+
+class GCN(torch.nn.Module):
+    # max_eva=0.2404040404040404
+    def __init__(self, hidden_channels, dataset):
+        super().__init__()
+        self.conv1 = GCNConv(dataset.num_features, hidden_channels)
+        self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
+
+    def forward(self, x, edge_index):
+        x1 = self.conv1(x, edge_index)
+        x1 = x1.relu()
+        x1 = F.dropout(x1, p=0.5, training=self.training)
+        y = self.conv2(x1, edge_index)
+        return y
+
+
+class GAT(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset):
+        super().__init__()
+        self.conv1_t = GATConv(in_channels=dataset.num_features,out_channels=hidden_channels,heads=4,dropout=0.2)
+        self.conv2_t = GATConv(in_channels=hidden_channels*4,out_channels=dataset.num_classes,heads=1,dropout=0.2)
+
+        self.conv1 = GCNConv(dataset.num_features, hidden_channels)
+        self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
+
+        self.lin1 = nn.Linear(dataset.dataset.num_classes*2, dataset.num_classes)
+
+        self.weight_t = torch.tensor(0.5, requires_grad=True)
+        self.weight_c = torch.tensor(0.5, requires_grad=True)
+
+    def forward(self, x, edge_index):
+        # gat
+        x_gat = F.dropout(x, p=0.6, training=self.training)
+        x_gat = self.conv1_t(x_gat, edge_index)
+        x_gat = F.elu(x_gat)
+        x_gat = F.dropout(x_gat, p=0.6, training=self.training)
+        x_gat = self.conv2_t(x_gat, edge_index)
+
+        x_gcn = self.conv1(x, edge_index)
+        x_gcn = x_gcn.relu()
+        x_gcn = F.dropout(x_gcn, p=0.5, training=self.training)
+        x_gcn = self.conv2(x_gcn, edge_index)
+
+        x = torch.cat([x_gcn*self.weight_c, x_gat*self.weight_t])
+        y = self.lin1(x)
+
+        return y
+
+
+
+class GAT_GCN(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset):
+        super().__init__()
+        self.conv1 = GATConv(in_channels=dataset.num_features,out_channels=hidden_channels,heads=4,dropout=0.2)
+        self.conv2 = GATConv(in_channels=hidden_channels*4,out_channels=dataset.num_classes,heads=1,dropout=0.2)
+
+    def forward(self, x, edge_index):
+        x = F.dropout(x, p=0.6, training=self.training)
+        x = self.conv1(x, edge_index)
+        x = F.elu(x)
+        x = F.dropout(x, p=0.6, training=self.training)
+        x = self.conv2(x, edge_index)
+        return x
 
 
 
@@ -182,7 +262,7 @@ def train_mlp():
 
 def train_gcn():
     data = make_graph()
-    model = GCN(hidden_channels=data.num_features, dataset=data)
+    model = GAT(hidden_channels=data.num_features, dataset=data)
     print(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     criterion = torch.nn.CrossEntropyLoss()
@@ -221,4 +301,10 @@ def train_gcn():
 
 
 if __name__ == '__main__':
-    load_data()
+    pairs = [(1, 'a'), (2, 'b'), (3, 'c')]
+
+    # 解压
+    print(*pairs)  # (1, 'a') (2, 'b') (3, 'c')
+    numbers, letters = zip(*pairs)
+    print(numbers)  # 输出: (1, 2, 3)
+    print(letters)  # 输出: ('a', 'b', 'c')
