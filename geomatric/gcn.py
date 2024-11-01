@@ -1,7 +1,5 @@
 import os.path
-import torch
 import torch.nn as nn
-import platform
 from torch_geometric.data import Data
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, GATConv
@@ -15,7 +13,7 @@ import argparse
 
 from basics import *
 
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 data_root_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
 seed = 1024
 torch.manual_seed(seed)
@@ -70,13 +68,13 @@ parser.add_argument('--name', type=str, default='mlp')
 parser.add_argument('--ds', type=str, default='PubMed', help='CiteSeer,Cora,PubMed')
 parser.add_argument('--ds_split', type=str, default='public', help=' to see Planetoid')
 parser.add_argument('--max_acc', type=float, default=0.01)
-parser.add_argument('--ep', type=int, default=3)
+parser.add_argument('--ep', type=int, default=4096)
 parser.add_argument('--heads', type=int, default=4)
 parser.add_argument('--lr', default=1e-3, type=float, help='Learning rate')
 parser.add_argument('--drop', type=float, default=0.5)
 parser.add_argument('--loss', type=float, default=0.01)
 parser.add_argument('--hidden', type=int, default=64)
-parser.add_argument('--min_acc', type=int, default=0.12)
+parser.add_argument('--min_acc', type=int, default=0.52)
 # 解析命令行参数
 args = parser.parse_args()
 
@@ -134,7 +132,7 @@ def load_data():
     print(f'Has isolated nodes: {data.has_isolated_nodes()}')
     print(f'Has self-loops: {data.has_self_loops()}')
     print(f'Is undirected: {data.is_undirected()}')
-    dataset.to(device=device)
+    dataset.to(device=_device)
     return dataset
 
 
@@ -303,7 +301,7 @@ def train_mlp():
 
     def train():
         model.train()
-        model.to(device=device)
+        model.to(device=_device)
         optimizer.zero_grad()  # Clear gradients.
         out = model(data.x)  # Perform a single forward pass.
         loss = criterion(out[data.train_mask],
@@ -351,10 +349,11 @@ def train_gcn():
         model = RestGCNEqualHidden(hidden_channels=args.hidden, dataset=data)
     if (args.name == 'GAT_GCN'):
         model = GAT_GCN(hidden_channels=args.hidden, dataset=data)
+    model.to(device=_device)
     print(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=3e-4)
     criterion = torch.nn.CrossEntropyLoss()
-    criterion.to(device=device)
+    criterion.to(device=_device)
 
     def train():
         model.train()

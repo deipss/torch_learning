@@ -5,7 +5,7 @@ import os
 from torchsummary import summary
 import platform
 
-data_root_path = '/data/ai_data' if platform.system() == 'Linux' else os.path.join(
+data_root_path = '/data' if platform.system() == 'Linux' else os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
 separator = '__'
 
@@ -50,7 +50,7 @@ def save_json(records=None, **param):
             logs += "{0}={1}_".format(k, v)
     f_name = separator.join([logs, formatted_time])
     f_name += '.json'
-    fpath = os.path.join(data_root_path, 'log', f_name)
+    fpath = os.path.join(data_root_path, 'logs', f_name)
     _ = {'records': records, 'param': param}
     with open(fpath, 'w') as file:
         json.dump(_, file)
@@ -65,7 +65,7 @@ def save_model(model=None, **model_param):
     dict_format = separator.join(["{0}={1}_".format(k, v) for k, v in model_param.items()])
     f_name = separator.join([dict_format, formatted_time])
     f_name += '.pkl'
-    fpath = os.path.join(data_root_path, 'pkl', f_name)
+    fpath = os.path.join(data_root_path, 'pkls', f_name)
     torch.save(model.state_dict, fpath)
     #print(f_name + ' model saved on ' + fpath)
 
