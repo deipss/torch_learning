@@ -11,6 +11,10 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
+import argparse
+
+from basics import *
+
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 data_root_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
@@ -49,11 +53,38 @@ GCN
 使用AGN+MLP双塔结构 the experiment is not good 
 
 ['ind.cora.x', 'ind.cora.tx', 'ind.cora.allx', 'ind.cora.y', 'ind.cora.ty', 'ind.cora.ally', 'ind.cora.graph', 'ind.cora.test.index']
+
+10-31 图结点的分类问题，有最佳的模型
 - https://paperswithcode.com/paper/optimization-of-graph-neural-networks-with
 - https://github.com/russellizadi/ssp
 - https://arxiv.org/pdf/2008.09624
 
 """
+
+# 定义全局变量 args
+args = None
+
+
+def init_parse_arguments():
+    global args
+    # 创建 ArgumentParser 对象
+    parser = argparse.ArgumentParser(description="Process some files.")
+
+    # 添加位置参数,位置参数（positional arguments）是指那些没有前缀（如 - 或 --）的命令行参数。它们通常用于指定必填的参数，顺序固定，且必须按顺序提供。
+    # parser.add_argument('filename', type=str, help='The name of the file to process')
+
+    # 添加可选参数
+    parser.add_argument('--name', type=str, default='mlp')
+    parser.add_argument('--ds', type=str, default='PubMed')
+    parser.add_argument('--ep', type=int, default=1024)
+    parser.add_argument('--lr', default=1e-3, type=float, help='Learning rate')
+    parser.add_argument('--drop', type=float, default=0.2)
+    parser.add_argument('--loss', type=float, default=0.01)
+    parser.add_argument('--hidden', type=int, default=64)
+    parser.add_argument('--min_eva', type=int, default=0.12)
+
+    # 解析命令行参数
+    args = parser.parse_args()
 
 
 def visualize(h, color):
@@ -68,7 +99,11 @@ def visualize(h, color):
 
 
 def load_data():
-    dataset = Planetoid(root=os.path.join(data_root_path, 'Planetoid'), name='PubMed', transform=NormalizeFeatures())
+    if platform.system() != 'Linux':
+        print('user faker graph data by make_traph()')
+        return make_graph()
+    dataset = Planetoid(root=os.path.join(data_root_path, 'Planetoid'), name=args.dataset,
+                        transform=NormalizeFeatures())
     """
     https://github.com/kimiyoung/planetoid/raw/master/data/ind.pubmed.x
     https://github.com/kimiyoung/planetoid/raw/master/data/ind.pubmed.tx
@@ -200,8 +235,8 @@ class GAT_GCN(torch.nn.Module):
         self.conv1 = GCNConv(dataset.num_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
 
-        self.lin1 = nn.Linear(dataset.num_classes * 2, hidden_channels*2)
-        self.lin2 = nn.Linear(hidden_channels*2, hidden_channels)
+        self.lin1 = nn.Linear(dataset.num_classes * 2, hidden_channels * 2)
+        self.lin2 = nn.Linear(hidden_channels * 2, hidden_channels)
         self.lin3 = nn.Linear(hidden_channels, dataset.num_classes)
 
         self.weight_t = torch.tensor(0.611, requires_grad=True)
@@ -246,9 +281,9 @@ class GAT(torch.nn.Module):
 
 def train_mlp():
     data = load_data()
-    model = MLP(hidden_channels=16, dataset=data)
+    model = MLP(hidden_channels=args.hidden, dataset=data)
     criterion = torch.nn.CrossEntropyLoss()  # Define loss criterion.
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)  # Define optimizer.
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=5e-4)  # Define optimizer.
 
     def train():
         model.train()
@@ -270,15 +305,19 @@ def train_mlp():
         return test_acc
 
     max_acc = -1
-    cur_epoch = 1
-    for epoch in range(1, 1001):
+    records = []
+    for cur_epoch in range(1, 100):
         loss = train()
-        cur_epoch += 1
         test_acc = eva()
-        max_acc = max(max_acc, test_acc)
-        if (epoch % 30 == 0):
-            cur_epoch = 30
-            print(f'Epoch: {epoch:03d}, Loss: {loss:.8f},Test Accuracy: {test_acc:.4f}')
+        if (max_acc < test_acc):
+            max_acc = test_acc
+            if (max_acc > args.min_eva):
+                save_model(model=model, **vars(args))
+        if (cur_epoch % 30 == 0):
+            print_loss(epoch=cur_epoch, loss=loss.item(), test_acc=test_acc)
+            records.append({'epoch': cur_epoch, 'loss': loss.item(), 'test_acc': test_acc})
+    args.max_acc = max_acc
+    save_json(records=records, **vars(args))
     print(max_acc)
 
 
@@ -287,10 +326,10 @@ def train_gcn():
     # Core
     # CiteSeer  GAT_GCN=0.6970 GCN=0.704
     # PubMed GAT_GCN=0.7940 GCN=0.7970 GAT=0.7870
-    model = GAT_GCN(hidden_channels=256, dataset=data)
+    model = GAT_GCN(hidden_channels=args.hidden, dataset=data)
     model.to(device=device)
     print(model)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.004, weight_decay=3e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=3e-4)
     criterion = torch.nn.CrossEntropyLoss()
     criterion.to(device=device)
 
@@ -315,17 +354,29 @@ def train_gcn():
     loss = train()
     # 47223  0.2160
     # max_eva=0.2448559670781893
-    epoch = 0
-    max_eva = -1
-    while loss > 0.0001 and epoch < 47223:
+    epoch =0
+    max_acc = -1
+    records= []
+    while loss > 0.0001 and epoch < args.ep:
         loss = train()
-        if epoch % 3 == 0:
-            test_acc = eva()
-            max_eva = max(test_acc, max_eva)
-            print(f'Epoch: {epoch:07d}, Loss: {loss:.8f},Test Accuracy: {test_acc:.8f},Max Accuracy: {max_eva:.4f}')
+        test_acc = eva()
+        if (max_acc < test_acc):
+            max_acc = test_acc
+            if (max_acc > args.min_eva):
+                save_model(model=model, **vars(args))
+        if epoch % 99 == 0:
+            print_loss(epoch=epoch, loss=loss.item(), test_acc=test_acc)
+            records.append({'epoch': epoch, 'loss': loss.item(), 'test_acc': test_acc})
+
         epoch += 1
-    print(f'max_eva={max_eva}')
+
+    args.max_acc = max_acc
+    save_json(records=records, **vars(args))
+    print(max_acc)
+
 
 
 if __name__ == '__main__':
+    init_parse_arguments()
+    args.name='GAT_GCN'
     train_gcn()
