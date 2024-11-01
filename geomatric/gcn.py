@@ -15,7 +15,6 @@ import argparse
 
 from basics import *
 
-
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 data_root_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
 seed = 1024
@@ -59,33 +58,30 @@ GCN
 - https://github.com/russellizadi/ssp
 - https://arxiv.org/pdf/2008.09624
 
+11-1
 """
+#########################################################################
+# 创建 ArgumentParser 对象
+parser = argparse.ArgumentParser(description="Process some files.")
+# 添加位置参数,位置参数（positional arguments）是指那些没有前缀（如 - 或 --）的命令行参数。它们通常用于指定必填的参数，顺序固定，且必须按顺序提供。
+# parser.add_argument('filename', type=str, help='The name of the file to process')
+# 添加可选参数
+parser.add_argument('--name', type=str, default='mlp')
+parser.add_argument('--ds', type=str, default='PubMed', help='CiteSeer,Cora,PubMed')
+parser.add_argument('--ds_split', type=str, default='public', help=' to see Planetoid')
+parser.add_argument('--max_acc', type=float, default=0.01)
+parser.add_argument('--ep', type=int, default=3)
+parser.add_argument('--heads', type=int, default=4)
+parser.add_argument('--lr', default=1e-3, type=float, help='Learning rate')
+parser.add_argument('--drop', type=float, default=0.5)
+parser.add_argument('--loss', type=float, default=0.01)
+parser.add_argument('--hidden', type=int, default=64)
+parser.add_argument('--min_acc', type=int, default=0.12)
+# 解析命令行参数
+args = parser.parse_args()
 
-# 定义全局变量 args
-args = None
 
-
-def init_parse_arguments():
-    global args
-    # 创建 ArgumentParser 对象
-    parser = argparse.ArgumentParser(description="Process some files.")
-
-    # 添加位置参数,位置参数（positional arguments）是指那些没有前缀（如 - 或 --）的命令行参数。它们通常用于指定必填的参数，顺序固定，且必须按顺序提供。
-    # parser.add_argument('filename', type=str, help='The name of the file to process')
-
-    # 添加可选参数
-    parser.add_argument('--name', type=str, default='mlp')
-    parser.add_argument('--ds', type=str, default='PubMed')
-    parser.add_argument('--ep', type=int, default=1024)
-    parser.add_argument('--lr', default=1e-3, type=float, help='Learning rate')
-    parser.add_argument('--drop', type=float, default=0.2)
-    parser.add_argument('--loss', type=float, default=0.01)
-    parser.add_argument('--hidden', type=int, default=64)
-    parser.add_argument('--min_eva', type=int, default=0.12)
-
-    # 解析命令行参数
-    args = parser.parse_args()
-
+#########################################################################
 
 def visualize(h, color):
     z = TSNE(n_components=2).fit_transform(h.detach().cpu().numpy())
@@ -102,7 +98,8 @@ def load_data():
     if platform.system() != 'Linux':
         print('user faker graph data by make_traph()')
         return make_graph()
-    dataset = Planetoid(root=os.path.join(data_root_path, 'Planetoid'), name=args.dataset,
+    dataset = Planetoid(root=os.path.join(data_root_path, 'Planetoid'), name=args.ds,
+                        split=args.ds_split,
                         transform=NormalizeFeatures())
     """
     https://github.com/kimiyoung/planetoid/raw/master/data/ind.pubmed.x
@@ -188,7 +185,7 @@ class MLP(torch.nn.Module):
     def forward(self, x):
         x1 = self.lin1(x)
         x1 = x1.relu()
-        x1 = F.dropout(x1, p=0.5, training=self.training)
+        x1 = F.dropout(x1, p=args.drop, training=self.training)
         y = self.lin2(x1)  # acc = 0.55
         # y = self.lin2(x1+x)
         return y
@@ -199,13 +196,31 @@ class RestGCNEqualHidden(torch.nn.Module):
     def __init__(self, hidden_channels, dataset):
         super().__init__()
         self.conv1 = GCNConv(dataset.num_features, hidden_channels)
-        self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
+        self.conv2 = GCNConv(hidden_channels, hidden_channels)
+        self.conv3 = GCNConv(hidden_channels, hidden_channels)
+        self.conv3 = GCNConv(hidden_channels, hidden_channels)
+        self.conv4 = GCNConv(hidden_channels, hidden_channels)
+        self.conv5 = GCNConv(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index):
         x1 = self.conv1(x, edge_index)
         x1 = x1.relu()
-        x1 = F.dropout(x1, p=0.5, training=self.training)
-        y = self.conv2(x1 + x, edge_index)
+        x1 = F.dropout(x1, p=args.drop, training=self.training)
+
+        x2 = self.conv2(x1, edge_index)
+        x2 = x2.relu()
+        x2 = F.dropout(x2, p=args.drop, training=self.training)
+
+        x3 = self.conv3(x2 + x1, edge_index)
+        x3 = x3.relu()
+        x3 = F.dropout(x3, p=args.drop, training=self.training)
+
+        x4 = self.conv4(x2 + x3, edge_index)
+        x4 = x4.relu()
+        x4 = F.dropout(x4, p=args.drop, training=self.training)
+
+        x5 = self.conv4(x4 + x3, edge_index)
+        y = x5.relu()
         return y
 
 
@@ -219,7 +234,7 @@ class GCN(torch.nn.Module):
     def forward(self, x, edge_index):
         x1 = self.conv1(x, edge_index)
         x1 = x1.relu()
-        x1 = F.dropout(x1, p=0.5, training=self.training)
+        x1 = F.dropout(x1, p=args.drop, training=self.training)
         y = self.conv2(x1, edge_index)
         return y
 
@@ -229,8 +244,9 @@ class GAT_GCN(torch.nn.Module):
     def __init__(self, hidden_channels, dataset, training=True):
         super().__init__()
         self.training = training
-        self.conv1_t = GATConv(in_channels=dataset.num_features, out_channels=hidden_channels, heads=2, dropout=0.2)
-        self.conv2_t = GATConv(in_channels=hidden_channels * 2, out_channels=dataset.num_classes, heads=1, dropout=0.2)
+        self.conv1_t = GATConv(in_channels=dataset.num_features, out_channels=hidden_channels, heads=args.heads,
+                               dropout=args.drop)
+        self.conv2_t = GATConv(in_channels=args.heads * hidden_channels, out_channels=dataset.num_classes, heads=1, dropout=args.drop)
 
         self.conv1 = GCNConv(dataset.num_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
@@ -244,15 +260,15 @@ class GAT_GCN(torch.nn.Module):
 
     def forward(self, x, edge_index):
         # gat
-        x_gat = F.dropout(x, p=0.75, training=self.training)
+        x_gat = F.dropout(x, p=args.drop, training=self.training)
         x_gat = self.conv1_t(x_gat, edge_index)
         x_gat = F.elu(x_gat)
-        x_gat = F.dropout(x_gat, p=0.75, training=self.training)
+        x_gat = F.dropout(x_gat, p=args.drop, training=self.training)
         x_gat = self.conv2_t(x_gat, edge_index)
 
         x_gcn = self.conv1(x, edge_index)
         x_gcn = x_gcn.relu()
-        x_gcn = F.dropout(x_gcn, p=0.75, training=self.training)
+        x_gcn = F.dropout(x_gcn, p=args.drop, training=self.training)
         x_gcn = self.conv2(x_gcn, edge_index)
 
         x_cat = torch.cat([x_gcn * self.weight_c, x_gat * self.weight_t], dim=1)
@@ -267,14 +283,14 @@ class GAT(torch.nn.Module):
     # 0.8220
     def __init__(self, hidden_channels, dataset):
         super().__init__()
-        self.conv1 = GATConv(in_channels=dataset.num_features, out_channels=hidden_channels, heads=2, dropout=0.2)
-        self.conv2 = GATConv(in_channels=hidden_channels * 2, out_channels=dataset.num_classes, heads=1, dropout=0.2)
+        self.conv1 = GATConv(in_channels=dataset.num_features, out_channels=hidden_channels, heads=args.heads)
+        self.conv2 = GATConv(in_channels=hidden_channels * args.heads, out_channels=dataset.num_classes, heads=1)
 
     def forward(self, x, edge_index):
-        x = F.dropout(x, p=0.3, training=self.training)
+        x = F.dropout(x, p=args.drop, training=self.training)
         x = self.conv1(x, edge_index)
         x = F.elu(x)
-        x = F.dropout(x, p=0.3, training=self.training)
+        x = F.dropout(x, p=args.drop, training=self.training)
         x = self.conv2(x, edge_index)
         return x
 
@@ -311,7 +327,7 @@ def train_mlp():
         test_acc = eva()
         if (max_acc < test_acc):
             max_acc = test_acc
-            if (max_acc > args.min_eva):
+            if (max_acc > args.min_acc):
                 save_model(model=model, **vars(args))
         if (cur_epoch % 30 == 0):
             print_loss(epoch=cur_epoch, loss=loss.item(), test_acc=test_acc)
@@ -322,12 +338,19 @@ def train_mlp():
 
 
 def train_gcn():
+    model = None
     data = load_data()
     # Core
     # CiteSeer  GAT_GCN=0.6970 GCN=0.704
     # PubMed GAT_GCN=0.7940 GCN=0.7970 GAT=0.7870
-    model = GAT_GCN(hidden_channels=args.hidden, dataset=data)
-    model.to(device=device)
+    if (args.name == 'GCN'):
+        model = GCN(hidden_channels=args.hidden, dataset=data)
+    if (args.name == 'GAT'):
+        model = GAT(hidden_channels=args.hidden, dataset=data)
+    if (args.name == 'RestGCNEqualHidden'):
+        model = RestGCNEqualHidden(hidden_channels=args.hidden, dataset=data)
+    if (args.name == 'GAT_GCN'):
+        model = GAT_GCN(hidden_channels=args.hidden, dataset=data)
     print(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=3e-4)
     criterion = torch.nn.CrossEntropyLoss()
@@ -354,29 +377,37 @@ def train_gcn():
     loss = train()
     # 47223  0.2160
     # max_eva=0.2448559670781893
-    epoch =0
+    epoch = 0
     max_acc = -1
-    records= []
+    records = []
     while loss > 0.0001 and epoch < args.ep:
         loss = train()
         test_acc = eva()
         if (max_acc < test_acc):
             max_acc = test_acc
-            if (max_acc > args.min_eva):
+            if (max_acc > args.min_acc):
                 save_model(model=model, **vars(args))
-        if epoch % 99 == 0:
-            print_loss(epoch=epoch, loss=loss.item(), test_acc=test_acc)
+        if epoch % 9 == 0:
+            print_loss(epoch=epoch, loss=loss.item(), test_acc=test_acc, max_acc=max_acc)
             records.append({'epoch': epoch, 'loss': loss.item(), 'test_acc': test_acc})
-
         epoch += 1
-
     args.max_acc = max_acc
     save_json(records=records, **vars(args))
     print(max_acc)
-
+    return max_acc
 
 
 if __name__ == '__main__':
-    init_parse_arguments()
-    args.name='GAT_GCN'
-    train_gcn()
+    args.name = 'GAT_GCN'
+    ds_list = ['CiteSeer', 'Cora', 'PubMed']
+    ds_split = ['full', 'random', 'public']
+    models = ['GAT', 'GAT_GCN','RestGCNEqualHidden','GCN'  ]
+    for m in models:
+        for s in ds_split:
+            for ds in ds_list:
+                args.ds = ds
+                args.ds_split = s
+                args.name = m
+
+                acc = train_gcn()
+                print(f'model={m},ds={ds},ds_split={s},acc={acc:.4f}')
