@@ -49,7 +49,6 @@ GCN
 使用GCN+MLP双塔结构
 使用AGN+MLP双塔结构 the experiment is not good 
 
-['ind.cora.x', 'ind.cora.tx', 'ind.cora.allx', 'ind.cora.y', 'ind.cora.ty', 'ind.cora.ally', 'ind.cora.graph', 'ind.cora.test.index']
 
 10-31 图结点的分类问题，有最佳的模型
 - https://paperswithcode.com/paper/optimization-of-graph-neural-networks-with
@@ -84,6 +83,7 @@ parser.add_argument('--drop', type=float, default=0.5)
 parser.add_argument('--loss', type=float, default=0.01)
 parser.add_argument('--hidden', type=int, default=64)
 parser.add_argument('--min_acc', type=int, default=0.52)
+parser.add_argument('--debug', type=bool, default=False)
 # 解析命令行参数
 args = parser.parse_args()
 
@@ -109,14 +109,8 @@ def load_data():
                         split=args.ds_split,
                         transform=NormalizeFeatures())
     """
-    https://github.com/kimiyoung/planetoid/raw/master/data/ind.pubmed.x
-    https://github.com/kimiyoung/planetoid/raw/master/data/ind.pubmed.tx
-    https://github.com/kimiyoung/planetoid/raw/master/data/ind.pubmed.allx
-    https://github.com/kimiyoung/planetoid/raw/master/data/ind.pubmed.y
-    https://github.com/kimiyoung/planetoid/raw/master/data/ind.pubmed.ty
-    https://github.com/kimiyoung/planetoid/raw/master/data/ind.pubmed.ally
-    https://github.com/kimiyoung/planetoid/raw/master/data/ind.pubmed.graph
-    https://github.com/kimiyoung/planetoid/raw/master/data/ind.pubmed.test.index
+    ['ind.cora.x', 'ind.cora.tx', 'ind.cora.allx', 'ind.cora.y', 'ind.cora.ty', 'ind.cora.ally', 'ind.cora.graph', 'ind.cora.test.index']
+    https://github.com/kimiyoung/planetoid/raw/master/data
  
     """
     print()
@@ -183,28 +177,11 @@ def show_graph():
     plt.show()
 
 
-class MLP(torch.nn.Module):
-    def __init__(self, hidden_channels, dataset):
-        super().__init__()
-        self.lin1 = nn.Linear(dataset.num_features, hidden_channels)
-        self.lin2 = nn.Linear(hidden_channels, dataset.num_classes)
-
-    def forward(self, x):
-        x1 = self.lin1(x)
-        x1 = x1.relu()
-        x1 = F.dropout(x1, p=args.drop, training=self.training)
-        y = self.lin2(x1)  # acc = 0.55
-        # y = self.lin2(x1+x)
-        return y
-
-
 class RestGCNEqualHidden(torch.nn.Module):
-    # max_eva=0.26262626262626265 max_eva=0.825
     def __init__(self, hidden_channels, dataset):
         super().__init__()
         self.conv1 = GCNConv(dataset.num_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, hidden_channels)
-        self.conv3 = GCNConv(hidden_channels, hidden_channels)
         self.conv3 = GCNConv(hidden_channels, hidden_channels)
         self.conv4 = GCNConv(hidden_channels, hidden_channels)
         self.conv5 = GCNConv(hidden_channels, dataset.num_classes)
@@ -232,7 +209,6 @@ class RestGCNEqualHidden(torch.nn.Module):
 
 
 class GCN(torch.nn.Module):
-    # max_eva=0.2404040404040404 Accuracy: 0.8280
     def __init__(self, hidden_channels, dataset):
         super().__init__()
         self.conv1 = GCNConv(dataset.num_features, hidden_channels)
@@ -247,13 +223,13 @@ class GCN(torch.nn.Module):
 
 
 class GAT_GCN(torch.nn.Module):
-    # Max Accuracy: 0.8210
     def __init__(self, hidden_channels, dataset, training=True):
         super().__init__()
         self.training = training
         self.conv1_t = GATConv(in_channels=dataset.num_features, out_channels=hidden_channels, heads=args.heads,
                                dropout=args.drop)
-        self.conv2_t = GATConv(in_channels=args.heads * hidden_channels, out_channels=dataset.num_classes, heads=1, dropout=args.drop)
+        self.conv2_t = GATConv(in_channels=args.heads * hidden_channels, out_channels=dataset.num_classes, heads=1,
+                               dropout=args.drop)
 
         self.conv1 = GCNConv(dataset.num_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
@@ -266,7 +242,6 @@ class GAT_GCN(torch.nn.Module):
         self.weight_c = torch.tensor(0.212, requires_grad=True)
 
     def forward(self, x, edge_index):
-        # gat
         x_gat = F.dropout(x, p=args.drop, training=self.training)
         x_gat = self.conv1_t(x_gat, edge_index)
         x_gat = F.elu(x_gat)
@@ -287,7 +262,6 @@ class GAT_GCN(torch.nn.Module):
 
 
 class GAT(torch.nn.Module):
-    # 0.8220
     def __init__(self, hidden_channels, dataset):
         super().__init__()
         self.conv1 = GATConv(in_channels=dataset.num_features, out_channels=hidden_channels, heads=args.heads)
@@ -302,54 +276,9 @@ class GAT(torch.nn.Module):
         return x
 
 
-def train_mlp():
-    data = load_data()
-    model = MLP(hidden_channels=args.hidden, dataset=data)
-    criterion = torch.nn.CrossEntropyLoss()  # Define loss criterion.
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=5e-4)  # Define optimizer.
-
-    def train():
-        model.train()
-        model.to(device=_device)
-        optimizer.zero_grad()  # Clear gradients.
-        out = model(data.x)  # Perform a single forward pass.
-        loss = criterion(out[data.train_mask],
-                         data.y[data.train_mask])  # Compute the loss solely based on the training nodes.
-        loss.backward()  # Derive gradients.
-        optimizer.step()  # Update parameters based on gradients.
-        return loss
-
-    def eva():
-        model.eval()
-        out = model(data.x)
-        pred = out.argmax(dim=1)  # Use the class with highest probability.
-        test_correct = pred[data.test_mask] == data.y[data.test_mask]  # Check against ground-truth labels.
-        test_acc = int(test_correct.sum()) / int(data.test_mask.sum())  # Derive ratio of correct predictions.
-        return test_acc
-
-    max_acc = -1
-    records = []
-    for cur_epoch in range(1, 100):
-        loss = train()
-        test_acc = eva()
-        if (max_acc < test_acc):
-            max_acc = test_acc
-            if (max_acc > args.min_acc):
-                save_model(model=model, **vars(args))
-        if (cur_epoch % 30 == 0):
-            print_loss(epoch=cur_epoch, loss=loss.item(), test_acc=test_acc)
-            records.append({'epoch': cur_epoch, 'loss': loss.item(), 'test_acc': test_acc})
-    args.max_acc = max_acc
-    save_json(records=records, **vars(args))
-    print(max_acc)
-
-
 def train_gcn():
     model = None
     data = load_data()
-    # Core
-    # CiteSeer  GAT_GCN=0.6970 GCN=0.704
-    # PubMed GAT_GCN=0.7940 GCN=0.7970 GAT=0.7870
     if (args.name == 'GCN'):
         model = GCN(hidden_channels=args.hidden, dataset=data)
     if (args.name == 'GAT'):
@@ -383,8 +312,7 @@ def train_gcn():
         return test_acc
 
     loss = train()
-    # 47223  0.2160
-    # max_eva=0.2448559670781893
+
     epoch = 0
     max_acc = -1
     records = []
@@ -394,13 +322,13 @@ def train_gcn():
         if (max_acc < test_acc):
             max_acc = test_acc
             if (max_acc > args.min_acc):
-                save_model(model=model, **vars(args))
+                save_model(model=model, is_debug=args.debug, **vars(args))
         if epoch % 9 == 0:
-            print_loss(epoch=epoch, loss=loss.item(), test_acc=test_acc, max_acc=max_acc)
+            print_loss(epoch=epoch, is_debug=args.debug, loss=loss.item(), test_acc=test_acc, max_acc=max_acc)
             records.append({'epoch': epoch, 'loss': loss.item(), 'test_acc': test_acc})
         epoch += 1
     args.max_acc = max_acc
-    save_json(records=records, **vars(args))
+    save_json(records=records, is_debug=args.debug, **vars(args))
     print(max_acc)
     return max_acc
 
@@ -409,13 +337,12 @@ if __name__ == '__main__':
     args.name = 'GAT_GCN'
     ds_list = ['CiteSeer', 'Cora', 'PubMed']
     ds_split = ['full', 'random', 'public']
-    models = ['GAT', 'GAT_GCN','RestGCNEqualHidden','GCN'  ]
+    models = ['GAT', 'GAT_GCN', 'RestGCNEqualHidden', 'GCN']
     for m in models:
         for s in ds_split:
             for ds in ds_list:
                 args.ds = ds
                 args.ds_split = s
                 args.name = m
-
                 acc = train_gcn()
                 print(f'model={m},ds={ds},ds_split={s},acc={acc:.4f}')
