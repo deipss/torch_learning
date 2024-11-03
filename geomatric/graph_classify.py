@@ -4,6 +4,8 @@ import torch.nn as nn
 import platform
 import numpy as np
 import random
+
+from fontTools.misc.cython import returns
 from torch_geometric.loader import DataLoader
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
@@ -11,8 +13,8 @@ from torch_geometric.nn import global_mean_pool
 
 from torch_geometric.datasets import TUDataset
 
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-data_root_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
+_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+data_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
 seed = 1024
 torch.manual_seed(seed)
 torch.manual_seed(seed)  # 为当前CPU设置随机种子
@@ -24,7 +26,7 @@ import argparse
 from basics import *
 
 """
-
+toluene dataset need more memory
 """
 
 #########################################################################
@@ -41,8 +43,8 @@ parser.add_argument('--max_acc', type=float, default=0.01)
 parser.add_argument('--ep', type=int, default=4096)
 parser.add_argument('--heads', type=int, default=4)
 parser.add_argument('--lr', default=1e-2, type=float, help='Learning rate')
-parser.add_argument('--drop', type=float, default=0.5)
-parser.add_argument('--loss', type=float, default=0.01)
+parser.add_argument('--drop', type=float, default=0.7)
+parser.add_argument('--loss', type=float, default=0.001)
 parser.add_argument('--hidden', type=int, default=64)
 parser.add_argument('--min_acc', type=int, default=0.52)
 parser.add_argument('--debug', type=bool, default=False)
@@ -53,8 +55,8 @@ args = parser.parse_args()
 #########################################################################
 
 def load_data():
-    dataset = TUDataset(root=os.path.join(data_root_path, 'TUDataset'), name=args.ds)
-
+    dataset = TUDataset(root=os.path.join(data_path, 'TUDataset'), name=args.ds)
+    dataset.to(device=_device)
     print()
     print(f'Dataset: {dataset}:')
     print('====================')
@@ -170,9 +172,10 @@ def train_model():
     else:
         print('now model name ')
         return
-
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     criterion = torch.nn.CrossEntropyLoss()
+    model.to(device=_device)
+    criterion.to(device=_device)
 
     def train():
         model.train()
@@ -218,22 +221,34 @@ def train_model():
     print(max_acc)
     return max_acc
 
-
+def download_dataset():
+    for i  in ['MUTAG', 'DD', 'COIL-RAG', 'MSRC_9', 'AIDS','naphthalene', 'QM9', 'salicylic_acid','Mutagenicity']:
+        args.ds=i
+        load_data()
 
 if __name__ == '__main__':
-    models = ['RestGCN', 'GCN']
-    models = ['RestGCN']
-    ds_list = ['MUTAG', 'DD', 'COIL-RAG','MSRC_9','AIDS']
-    ds_list = ['naphthalene', 'QM9', 'salicylic_acid', 'toluene','Mutagenicity']
-    for m in models:
-            for ds in ds_list:
-                args.ds = ds
-                args.name = m
-                args.debug=True
-                args.ep=1
-                try:
-                    acc = train_model()
-                except Exception as e:
-                    print(f"ds={ds}发生了一个异常: {str(e)},")
-                print(f'model={m},ds={ds},acc={acc:.4f}')
+    """
+    name=RestGCN_ds=MUTAG_ds_split=public_max_acc=0.89474_
+    name=GCN_ds=MUTAG_ds_split=public_max_acc=0.86842_
+    ds=naphthalene发生了一个异常: expected scalar type Long but found Float,
+    ds=QM9发生了一个异常: The size of tensor a (64) must match the size of tensor b (19) at non-singleton dimension 1,
+    ds=salicylic_acid发生了一个异常: expected scalar type Long but found Float,
+    """
 
+    models = ['GCN','RestGCN']
+    ds_list = ['MUTAG', 'DD', 'COIL-RAG','MSRC_9','AIDS','Mutagenicity']
+    results=[]
+
+    for ds in ds_list:
+        for hi in [16,32,64,128,256]:
+            for m in models:
+                    args.ds = ds
+                    args.name = m
+                    args.hidden = hi
+                    try:
+                        acc = train_model()
+                    except Exception as e:
+                        print(f"ds={ds}发生了一个异常: {str(e)},")
+                    print(f'model={m},ds={ds},hidden={hi},acc={acc:.5f}')
+                    results.append(f'model={m},ds={ds},hidden={hi},acc={acc:.5f}')
+    save_records(records=results, is_debug=args.debug, file_name='graph_class')

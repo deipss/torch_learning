@@ -212,13 +212,21 @@ class GCN(torch.nn.Module):
     def __init__(self, hidden_channels, dataset):
         super().__init__()
         self.conv1 = GCNConv(dataset.num_features, hidden_channels)
-        self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
+        self.conv2 = GCNConv(hidden_channels, hidden_channels)
+        self.conv3 = GCNConv(hidden_channels, hidden_channels)
+        self.conv4 = GCNConv(hidden_channels, hidden_channels)
+        self.conv5 = GCNConv(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index):
-        x1 = self.conv1(x, edge_index)
-        x1 = x1.relu()
-        x1 = F.dropout(x1, p=args.drop, training=self.training)
-        y = self.conv2(x1, edge_index)
+        x = F.relu(self.conv1(x, edge_index))
+        x = F.dropout(x, p=args.drop, training=self.training)
+        x = F.relu(self.conv2(x, edge_index))
+        x = F.dropout(x, p=args.drop, training=self.training)
+        x = F.relu(self.conv3(x, edge_index))
+        x = F.dropout(x, p=args.drop, training=self.training)
+        x = F.relu(self.conv4(x, edge_index))
+        x = F.dropout(x, p=args.drop, training=self.training)
+        y = self.conv5(x, edge_index)
         return y
 
 
@@ -338,11 +346,14 @@ if __name__ == '__main__':
     ds_list = ['CiteSeer', 'Cora', 'PubMed']
     ds_split = ['full', 'random', 'public']
     models = ['GAT', 'GAT_GCN', 'RestGCNEqualHidden', 'GCN']
-    for m in models:
-        for s in ds_split:
-            for ds in ds_list:
+    results=[]
+    for s in ds_split:
+        for ds in ds_list:
+            for m in models:
                 args.ds = ds
                 args.ds_split = s
                 args.name = m
                 acc = train_gcn()
-                print(f'model={m},ds={ds},ds_split={s},acc={acc:.4f}')
+                results.append( f'model={m},ds={ds},ds_split={s},acc={acc:.5f}')
+                print(f'model={m},ds={ds},ds_split={s},acc={acc:.5f}')
+    save_records(records=results, is_debug=args.debug, file_name='node_class')

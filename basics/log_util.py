@@ -61,6 +61,21 @@ def save_json(records=None, is_debug=False,**param):
     print(f_name + " area saved on " + fpath)
 
 
+
+def save_records(records=None, is_debug=False,file_name=''):
+    """
+    保存训练记录
+    """
+    formatted_time = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+    f_name = separator.join([file_name, formatted_time])
+    f_name += '.json'
+    fpath = os.path.join(data_root_path, 'records', f_name)
+    _ = {'records': records}
+    with open(fpath, 'w') as file:
+        json.dump(_, file)
+    print(f_name + " are saved on " + fpath)
+
+
 def save_model(model=None,is_debug=False, **model_param):
     """
     保存模型
