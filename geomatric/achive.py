@@ -1,5 +1,50 @@
 
 """
+双塔结构
+
+class GAT_GCN(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset, training=True):
+        super().__init__()
+        self.training = training
+        self.conv1_t = GATConv(in_channels=dataset.num_features, out_channels=hidden_channels, heads=args.heads,
+                               dropout=args.drop)
+        self.conv2_t = GATConv(in_channels=args.heads * hidden_channels, out_channels=dataset.num_classes, heads=1,
+                               dropout=args.drop)
+
+        self.conv1 = GCNConv(dataset.num_features, hidden_channels)
+        self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
+
+        self.lin1 = nn.Linear(dataset.num_classes * 2, hidden_channels * 2)
+        self.lin2 = nn.Linear(hidden_channels * 2, hidden_channels)
+        self.lin3 = nn.Linear(hidden_channels, dataset.num_classes)
+
+        self.weight_t = torch.tensor(0.611, requires_grad=True)
+        self.weight_c = torch.tensor(0.212, requires_grad=True)
+
+    def forward(self, x, edge_index):
+        x_gat = F.dropout(x, p=args.drop, training=self.training)
+        x_gat = self.conv1_t(x_gat, edge_index)
+        x_gat = F.elu(x_gat)
+        x_gat = F.dropout(x_gat, p=args.drop, training=self.training)
+        x_gat = self.conv2_t(x_gat, edge_index)
+
+        x_gcn = self.conv1(x, edge_index)
+        x_gcn = x_gcn.relu()
+        x_gcn = F.dropout(x_gcn, p=args.drop, training=self.training)
+        x_gcn = self.conv2(x_gcn, edge_index)
+
+        x_cat = torch.cat([x_gcn * self.weight_c, x_gat * self.weight_t], dim=1)
+        y = self.lin1(x_cat)
+        y = self.lin2(y)
+        y = self.lin3(y)
+
+        return y
+
+
+"""
+
+
+"""
 
 class MLP(torch.nn.Module):
     def __init__(self, hidden_channels, dataset):
@@ -58,4 +103,50 @@ def train_mlp():
     save_json(records=records, **vars(args))
     print(max_acc)
 
+"""
+
+
+
+"""
+# python -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cpu.html
+# python -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cu121.html
+# pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cpu.html
+# pip uninstall pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv 
+libpyg.so, 0x0006): Library not loaded: /Library/Frameworks/Python.framework/Versions/3.11/Python
+- https://stackoverflow.com/questions/77664847/although-installed-pyg-lib-successfully-getting-error-while-importing
+- Reference: What's the difference between "pip install" and "python -m pip install"?
+
+
+
+TransformerConv
+AGNNConv
+FastRGCNConv
+GCN
+
+10-29 
+在Core数据集上，使用Conv1d做残差网络的效果并不好 
+在Core数据集上，使用隐藏层直接相加，作为残差，的效果比不上，直接输入上一层的，不做残差
+在随机生成的数据集上， 使用隐藏层直接相加，作为残差，的效果优胜于，直接输入上一层的，不做残差
+
+10-30 
+使用AGN+GCN双塔结构
+使用GCN+MLP双塔结构
+使用AGN+MLP双塔结构 the experiment is not good 
+
+
+10-31 图结点的分类问题，有最佳的模型
+- https://paperswithcode.com/paper/optimization-of-graph-neural-networks-with
+- https://github.com/russellizadi/ssp
+- https://arxiv.org/pdf/2008.09624
+
+11-1
+- 通过实验，发现rest-net是有效的
+- 通过实验，发现gat+gcn是有效的
+不足之处：
+1、模型不能过于简单
+2、工作量
+
+11-2 为此，准备2部分工作
+- 工作量：加数据集、加任务、
+- 模型：要设计时，复杂一些
 """

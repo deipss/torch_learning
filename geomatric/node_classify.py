@@ -1,5 +1,4 @@
 import os.path
-import torch.nn as nn
 from torch_geometric.data import Data
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, GATConv
@@ -10,63 +9,19 @@ import random
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 import argparse
-
+import time
 from basics import *
 
 _device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-data_root_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
+data_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
+############################### seed ##########################################
 seed = 1024
-torch.manual_seed(seed)
 torch.manual_seed(seed)  # 为当前CPU设置随机种子
 torch.cuda.manual_seed(seed)  # 为当前GPU设置随机种子
 torch.cuda.manual_seed_all(seed)  # 为所有GPU设置随机种子
 np.random.seed(seed)  # 为NumPy设置随机种子
 random.seed(seed)  # 为Python的random模块设置随机种子
-
-"""
-# python -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cpu.html
-# python -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cu121.html
-# pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cpu.html
-# pip uninstall pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv 
-libpyg.so, 0x0006): Library not loaded: /Library/Frameworks/Python.framework/Versions/3.11/Python
-- https://stackoverflow.com/questions/77664847/although-installed-pyg-lib-successfully-getting-error-while-importing
-- Reference: What's the difference between "pip install" and "python -m pip install"?
-
-
-
-TransformerConv
-AGNNConv
-FastRGCNConv
-GCN
-
-10-29 
-在Core数据集上，使用Conv1d做残差网络的效果并不好 
-在Core数据集上，使用隐藏层直接相加，作为残差，的效果比不上，直接输入上一层的，不做残差
-在随机生成的数据集上， 使用隐藏层直接相加，作为残差，的效果优胜于，直接输入上一层的，不做残差
-
-10-30 
-使用AGN+GCN双塔结构
-使用GCN+MLP双塔结构
-使用AGN+MLP双塔结构 the experiment is not good 
-
-
-10-31 图结点的分类问题，有最佳的模型
-- https://paperswithcode.com/paper/optimization-of-graph-neural-networks-with
-- https://github.com/russellizadi/ssp
-- https://arxiv.org/pdf/2008.09624
-
-11-1
-- 通过实验，发现rest-net是有效的
-- 通过实验，发现gat+gcn是有效的
-不足之处：
-1、模型不能过于简单
-2、工作量
-
-11-2 为此，准备2部分工作
-- 工作量：加数据集、加任务、
-- 模型：要设计时，复杂一些
-"""
-#########################################################################
+################################# args ########################################
 # 创建 ArgumentParser 对象
 parser = argparse.ArgumentParser(description="Process some files.")
 # 添加位置参数,位置参数（positional arguments）是指那些没有前缀（如 - 或 --）的命令行参数。它们通常用于指定必填的参数，顺序固定，且必须按顺序提供。
@@ -87,7 +42,6 @@ parser.add_argument('--debug', type=bool, default=False)
 # 解析命令行参数
 args = parser.parse_args()
 
-
 #########################################################################
 
 def visualize(h, color):
@@ -105,7 +59,7 @@ def load_data():
     if platform.system() != 'Linux':
         print('user faker graph data by make_traph()')
         return make_graph()
-    dataset = Planetoid(root=os.path.join(data_root_path, 'Planetoid'), name=args.ds,
+    dataset = Planetoid(root=os.path.join(data_path, 'Planetoid'), name=args.ds,
                         split=args.ds_split,
                         transform=NormalizeFeatures())
     """
@@ -177,7 +131,7 @@ def show_graph():
     plt.show()
 
 
-class RestGCNEqualHidden(torch.nn.Module):
+class ResGCN(torch.nn.Module):
     def __init__(self, hidden_channels, dataset):
         super().__init__()
         self.conv1 = GCNConv(dataset.num_features, hidden_channels)
@@ -204,69 +158,60 @@ class RestGCNEqualHidden(torch.nn.Module):
         x4 = F.dropout(x4, p=args.drop, training=self.training)
 
         x5 = self.conv4(x4 + x3, edge_index)
-        y = x5.relu()
-        return y
+        return x5
+
+
+class ResGAT(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset):
+        super().__init__()
+        self.conv1 = GATConv(in_channels=dataset.num_features, out_channels=hidden_channels, heads=args.heads)
+        self.conv2 = GATConv(in_channels=hidden_channels*args.heads, out_channels=hidden_channels, heads=args.heads)
+        self.conv3 = GATConv(in_channels=hidden_channels*args.heads, out_channels=hidden_channels, heads=args.heads)
+        self.conv4 = GATConv(in_channels=hidden_channels*args.heads, out_channels=hidden_channels, heads=args.heads)
+        self.conv5 = GATConv(in_channels=hidden_channels * args.heads, out_channels=dataset.num_classes, heads=1)
+
+    def forward(self, x, edge_index):
+        x1 = self.conv1(x, edge_index)
+        x1 = x1.relu()
+        x1 = F.dropout(x1, p=args.drop, training=self.training)
+
+        x2 = self.conv2(x1, edge_index)
+        x2 = x2.relu()
+        x2 = F.dropout(x2, p=args.drop, training=self.training)
+
+        x3 = self.conv3(x2 + x1, edge_index)
+        x3 = x3.relu()
+        x3 = F.dropout(x3, p=args.drop, training=self.training)
+
+        x4 = self.conv4(x2 + x3, edge_index)
+        x4 = x4.relu()
+        x4 = F.dropout(x4, p=args.drop, training=self.training)
+
+        x5 = self.conv4(x4 + x3, edge_index)
+        return x5
 
 
 class GCN(torch.nn.Module):
     def __init__(self, hidden_channels, dataset):
         super().__init__()
         self.conv1 = GCNConv(dataset.num_features, hidden_channels)
-        self.conv2 = GCNConv(hidden_channels, hidden_channels)
-        self.conv3 = GCNConv(hidden_channels, hidden_channels)
-        self.conv4 = GCNConv(hidden_channels, hidden_channels)
+        # self.conv2 = GCNConv(hidden_channels, hidden_channels)
+        # self.conv3 = GCNConv(hidden_channels, hidden_channels)
+        # self.conv4 = GCNConv(hidden_channels, hidden_channels)
         self.conv5 = GCNConv(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index):
         x = F.relu(self.conv1(x, edge_index))
-        x = F.dropout(x, p=args.drop, training=self.training)
-        x = F.relu(self.conv2(x, edge_index))
-        x = F.dropout(x, p=args.drop, training=self.training)
-        x = F.relu(self.conv3(x, edge_index))
-        x = F.dropout(x, p=args.drop, training=self.training)
-        x = F.relu(self.conv4(x, edge_index))
+        # x = F.dropout(x, p=args.drop, training=self.training)
+        # x = F.relu(self.conv2(x, edge_index))
+        # x = F.dropout(x, p=args.drop, training=self.training)
+        # x = F.relu(self.conv3(x, edge_index))
+        # x = F.dropout(x, p=args.drop, training=self.training)
+        # x = F.relu(self.conv4(x, edge_index))
         x = F.dropout(x, p=args.drop, training=self.training)
         y = self.conv5(x, edge_index)
         return y
 
-
-class GAT_GCN(torch.nn.Module):
-    def __init__(self, hidden_channels, dataset, training=True):
-        super().__init__()
-        self.training = training
-        self.conv1_t = GATConv(in_channels=dataset.num_features, out_channels=hidden_channels, heads=args.heads,
-                               dropout=args.drop)
-        self.conv2_t = GATConv(in_channels=args.heads * hidden_channels, out_channels=dataset.num_classes, heads=1,
-                               dropout=args.drop)
-
-        self.conv1 = GCNConv(dataset.num_features, hidden_channels)
-        self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
-
-        self.lin1 = nn.Linear(dataset.num_classes * 2, hidden_channels * 2)
-        self.lin2 = nn.Linear(hidden_channels * 2, hidden_channels)
-        self.lin3 = nn.Linear(hidden_channels, dataset.num_classes)
-
-        self.weight_t = torch.tensor(0.611, requires_grad=True)
-        self.weight_c = torch.tensor(0.212, requires_grad=True)
-
-    def forward(self, x, edge_index):
-        x_gat = F.dropout(x, p=args.drop, training=self.training)
-        x_gat = self.conv1_t(x_gat, edge_index)
-        x_gat = F.elu(x_gat)
-        x_gat = F.dropout(x_gat, p=args.drop, training=self.training)
-        x_gat = self.conv2_t(x_gat, edge_index)
-
-        x_gcn = self.conv1(x, edge_index)
-        x_gcn = x_gcn.relu()
-        x_gcn = F.dropout(x_gcn, p=args.drop, training=self.training)
-        x_gcn = self.conv2(x_gcn, edge_index)
-
-        x_cat = torch.cat([x_gcn * self.weight_c, x_gat * self.weight_t], dim=1)
-        y = self.lin1(x_cat)
-        y = self.lin2(y)
-        y = self.lin3(y)
-
-        return y
 
 
 class GAT(torch.nn.Module):
@@ -291,10 +236,10 @@ def train_gcn():
         model = GCN(hidden_channels=args.hidden, dataset=data)
     if (args.name == 'GAT'):
         model = GAT(hidden_channels=args.hidden, dataset=data)
-    if (args.name == 'RestGCNEqualHidden'):
-        model = RestGCNEqualHidden(hidden_channels=args.hidden, dataset=data)
-    if (args.name == 'GAT_GCN'):
-        model = GAT_GCN(hidden_channels=args.hidden, dataset=data)
+    if (args.name == 'ResGCN'):
+        model = ResGCN(hidden_channels=args.hidden, dataset=data)
+    if (args.name == 'ResGAT'):
+        model = ResGAT(hidden_channels=args.hidden, dataset=data)
     model.to(device=_device)
     print(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=3e-4)
@@ -342,10 +287,11 @@ def train_gcn():
 
 
 if __name__ == '__main__':
-    args.name = 'GAT_GCN'
+    args.ep=1
+    args.debug=True
     ds_list = ['CiteSeer', 'Cora', 'PubMed']
     ds_split = ['full', 'random', 'public']
-    models = ['GAT', 'GAT_GCN', 'RestGCNEqualHidden', 'GCN']
+    models = ['GAT', 'ResGAT', 'ResGCN', 'GCN']
     results=[]
     for s in ds_split:
         for ds in ds_list:
@@ -353,7 +299,10 @@ if __name__ == '__main__':
                 args.ds = ds
                 args.ds_split = s
                 args.name = m
+
+                start_time = time.time()
                 acc = train_gcn()
-                results.append( f'model={m},ds={ds},ds_split={s},acc={acc:.5f}')
-                print(f'model={m},ds={ds},ds_split={s},acc={acc:.5f}')
+                execution_time = time.time() - start_time
+                results.append( f'model={m},ds={ds},ds_split={s},acc={acc:.5f},execution_time={execution_time:.5f}')
+                print(f'model={m},ds={ds},ds_split={s},acc={acc:.5f},execution_time={execution_time:.5f}')
     save_records(records=results, is_debug=args.debug, file_name='node_class')

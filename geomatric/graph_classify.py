@@ -5,12 +5,10 @@ import platform
 import numpy as np
 import random
 
-from fontTools.misc.cython import returns
 from torch_geometric.loader import DataLoader
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, GATConv
 from torch_geometric.nn import global_mean_pool
-
 from torch_geometric.datasets import TUDataset
 
 _device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -25,10 +23,6 @@ random.seed(seed)  # 为Python的random模块设置随机种子
 import argparse
 from basics import *
 
-"""
-toluene dataset need more memory
-"""
-
 #########################################################################
 # 创建 ArgumentParser 对象
 parser = argparse.ArgumentParser(description="Process some files.")
@@ -38,7 +32,6 @@ parser = argparse.ArgumentParser(description="Process some files.")
 parser.add_argument('--name', type=str, default='mlp')
 # https://chrsmrrs.github.io/datasets/docs/datasets/
 parser.add_argument('--ds', type=str, default='MUTAG', help='IMDB-BINARY,REDDIT-BINARY,PROTEINS')
-parser.add_argument('--ds_split', type=str, default='public', help=' to see Planetoid')
 parser.add_argument('--max_acc', type=float, default=0.01)
 parser.add_argument('--ep', type=int, default=4096)
 parser.add_argument('--heads', type=int, default=4)
@@ -58,20 +51,12 @@ def load_data():
     dataset = TUDataset(root=os.path.join(data_path, 'TUDataset'), name=args.ds)
     dataset.to(device=_device)
     print()
-    print(f'Dataset: {dataset}:')
-    print('====================')
-    print(f'Number of graphs: {len(dataset)}')
-    print(f'Number of features: {dataset.num_features}')
-    print(f'Number of classes: {dataset.num_classes}')
-
+    print(
+        f'ds: {dataset},Number of graphs: {len(dataset)},Number of features: {dataset.num_features},Number of classes: {dataset.num_classes}')
     data = dataset[0]  # Get the first graph object.
-
-    print()
     print(data)
-    print('=============================================================')
-
     # Gather some statistics about the first graph.
-    print(f'Number of nodes: {data.num_nodes}')
+    print(f'Number of nodes: {data.num_nodes},')
     print(f'Number of edges: {data.num_edges}')
     print(f'Average node degree: {data.num_edges / data.num_nodes:.2f}')
     print(f'Has isolated nodes: {data.has_isolated_nodes()}')
@@ -79,9 +64,9 @@ def load_data():
     print(f'Is undirected: {data.is_undirected()}')
 
     dataset = dataset.shuffle()
-
-    train_dataset = dataset[:150]
-    test_dataset = dataset[150:]
+    len10 = len(dataset) - len(dataset) // 10
+    train_dataset = dataset[:len10]
+    test_dataset = dataset[len10:]
 
     print(f'Number of training graphs: {len(train_dataset)}')
     print(f'Number of test graphs: {len(test_dataset)}')
@@ -104,9 +89,9 @@ class GCN(torch.nn.Module):
         self.conv1 = GCNConv(dataset.num_node_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, hidden_channels)
         self.conv3 = GCNConv(hidden_channels, hidden_channels)
-        self.conv4 = GCNConv(hidden_channels, hidden_channels)
-        self.conv5 = GCNConv(hidden_channels, hidden_channels)
-        self.conv6 = GCNConv(hidden_channels, hidden_channels)
+        # self.conv4 = GCNConv(hidden_channels, hidden_channels)
+        # self.conv5 = GCNConv(hidden_channels, hidden_channels)
+        # self.conv6 = GCNConv(hidden_channels, hidden_channels)
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
@@ -116,12 +101,12 @@ class GCN(torch.nn.Module):
         x = self.conv2(x, edge_index)
         x = x.relu()
         x = self.conv3(x, edge_index)
-        x = x.relu()
-        x = self.conv4(x, edge_index)
-        x = x.relu()
-        x = self.conv5(x, edge_index)
-        x = x.relu()
-        x = self.conv6(x, edge_index)
+        # x = x.relu()
+        # x = self.conv4(x, edge_index)
+        # x = x.relu()
+        # x = self.conv5(x, edge_index)
+        # x = x.relu()
+        # x = self.conv6(x, edge_index)
 
         # 2. Readout layer
         x = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
@@ -133,9 +118,44 @@ class GCN(torch.nn.Module):
         return x
 
 
-class RestGCN(torch.nn.Module):
+class GAT(torch.nn.Module):
     def __init__(self, hidden_channels, dataset):
-        super(RestGCN, self).__init__()
+        super(GAT, self).__init__()
+        self.conv1 = GATConv(in_channels=dataset.num_node_features, out_channels=hidden_channels, heads=args.heads)
+        self.conv2 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=args.heads)
+        self.conv3 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=1)
+        # self.conv4 = GCNConv(hidden_channels, hidden_channels)
+        # self.conv5 = GCNConv(hidden_channels, hidden_channels)
+        # self.conv6 = GCNConv(hidden_channels, hidden_channels)
+        self.lin = nn.Linear(hidden_channels, dataset.num_classes)
+
+    def forward(self, x, edge_index, batch):
+        # 1. Obtain node embeddings
+        x = self.conv1(x, edge_index)
+        x = x.relu()
+        x = self.conv2(x, edge_index)
+        x = x.relu()
+        x = self.conv3(x, edge_index)
+        # x = x.relu()
+        # x = self.conv4(x, edge_index)
+        # x = x.relu()
+        # x = self.conv5(x, edge_index)
+        # x = x.relu()
+        # x = self.conv6(x, edge_index)
+
+        # 2. Readout layer
+        x = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
+
+        # 3. Apply a final classifier
+        x = F.dropout(x, p=args.drop, training=self.training)
+        x = self.lin(x)
+
+        return x
+
+
+class ResGCN(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset):
+        super(ResGCN, self).__init__()
         self.conv1 = GCNConv(dataset.num_node_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, hidden_channels)
         self.conv3 = GCNConv(hidden_channels, hidden_channels)
@@ -163,14 +183,48 @@ class RestGCN(torch.nn.Module):
         return y
 
 
+class ResGAT(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset):
+        super(ResGAT, self).__init__()
+        self.conv1 = GATConv(in_channels=dataset.num_features, out_channels=hidden_channels, heads=args.heads)
+        self.conv2 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=args.heads)
+        self.conv3 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=args.heads)
+        self.conv4 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=args.heads)
+        self.conv5 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=args.heads)
+        self.conv6 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=1)
+        self.lin = nn.Linear(hidden_channels, dataset.num_classes)
+
+    def forward(self, x, edge_index, batch):
+        # 1. Obtain node embeddings
+        x1 = F.relu(self.conv1(x, edge_index))
+        x2 = F.relu(self.conv2(x1, edge_index))
+        x3 = F.relu(self.conv3(x2 + x1, edge_index))
+        x4 = F.relu(self.conv4(x3 + x2, edge_index))
+        x5 = F.relu(self.conv5(x3 + x4, edge_index))
+        x6 = self.conv6(x4 + x5, edge_index)
+
+        # 2. Readout layer
+        x6 = global_mean_pool(x6, batch)  # [batch_size, hidden_channels]
+
+        # 3. Apply a final classifier
+        x6 = F.dropout(x6, p=args.drop, training=self.training)
+        y = self.lin(x6)
+
+        return y
+
+
 def train_model():
     train_loader, test_loader, dataset = load_data()
-    if args.name=='GCN':
+    if args.name == 'GCN':
         model = GCN(hidden_channels=args.hidden, dataset=dataset)
-    elif args.name=='RestGCN':
-        model = RestGCN(hidden_channels=args.hidden, dataset=dataset)
+    elif args.name == 'ResGCN':
+        model = ResGCN(hidden_channels=args.hidden, dataset=dataset)
+    elif args.name == 'GAT':
+        model = GAT(hidden_channels=args.hidden, dataset=dataset)
+    elif args.name == 'ResGAT':
+        model = ResGAT(hidden_channels=args.hidden, dataset=dataset)
     else:
-        print('now model name ')
+        print(f'no model name {args.name}')
         return
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     criterion = torch.nn.CrossEntropyLoss()
@@ -221,34 +275,41 @@ def train_model():
     print(max_acc)
     return max_acc
 
+
 def download_dataset():
-    for i  in ['MUTAG', 'DD', 'COIL-RAG', 'MSRC_9', 'AIDS','naphthalene', 'QM9', 'salicylic_acid','Mutagenicity']:
-        args.ds=i
+    # ['MUTAG', 'DD', 'COIL-RAG', 'MSRC_9', 'AIDS', 'Mutagenicity']
+    # ['MUTAG', 'DD', 'COIL-RAG', 'MSRC_9', 'AIDS', 'naphthalene', 'QM9', 'salicylic_acid', 'Mutagenicity']:
+    for i in ['MUTAG', 'DD', 'COIL-RAG', 'MSRC_9', 'AIDS', 'Mutagenicity']:
+        args.ds = i
         load_data()
+
 
 if __name__ == '__main__':
     """
-    name=RestGCN_ds=MUTAG_ds_split=public_max_acc=0.89474_
+    name=ResGCN_ds=MUTAG_ds_split=public_max_acc=0.89474_
     name=GCN_ds=MUTAG_ds_split=public_max_acc=0.86842_
     ds=naphthalene发生了一个异常: expected scalar type Long but found Float,
     ds=QM9发生了一个异常: The size of tensor a (64) must match the size of tensor b (19) at non-singleton dimension 1,
     ds=salicylic_acid发生了一个异常: expected scalar type Long but found Float,
+    toluene dataset need more memory
     """
-
-    models = ['GCN','RestGCN']
-    ds_list = ['MUTAG', 'DD', 'COIL-RAG','MSRC_9','AIDS','Mutagenicity']
-    results=[]
+    args.debug = True
+    args.ep = 1
+    models = ['GCN', 'ResGCN', 'GAT', 'ResGAT']
+    ds_list = ['MUTAG', 'DD', 'COIL-RAG', 'MSRC_9', 'AIDS', 'Mutagenicity']
+    ds_list = ['MUTAG']
+    results = []
 
     for ds in ds_list:
-        for hi in [16,32,64,128,256]:
+        for hi in [16, 32, 64, 128, 256]:
             for m in models:
-                    args.ds = ds
-                    args.name = m
-                    args.hidden = hi
-                    try:
-                        acc = train_model()
-                    except Exception as e:
-                        print(f"ds={ds}发生了一个异常: {str(e)},")
-                    print(f'model={m},ds={ds},hidden={hi},acc={acc:.5f}')
-                    results.append(f'model={m},ds={ds},hidden={hi},acc={acc:.5f}')
+                args.ds = ds
+                args.name = m
+                args.hidden = hi
+                try:
+                    acc = train_model()
+                except Exception as e:
+                    print(f"ds={ds},models={m}发生了一个异常: {str(e)},")
+                print(f'model={m},ds={ds},hidden={hi},acc={acc:.5f}')
+                results.append(f'model={m},ds={ds},hidden={hi},acc={acc:.5f}')
     save_records(records=results, is_debug=args.debug, file_name='graph_class')
