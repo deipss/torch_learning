@@ -10,6 +10,7 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, GATConv
 from torch_geometric.nn import global_mean_pool
 from torch_geometric.datasets import TUDataset
+import time
 
 _device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 data_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
@@ -33,7 +34,7 @@ parser.add_argument('--name', type=str, default='mlp')
 # https://chrsmrrs.github.io/datasets/docs/datasets/
 parser.add_argument('--ds', type=str, default='MUTAG', help='IMDB-BINARY,REDDIT-BINARY,PROTEINS')
 parser.add_argument('--max_acc', type=float, default=0.01)
-parser.add_argument('--ep', type=int, default=4096)
+parser.add_argument('--ep', type=int, default=2048)
 parser.add_argument('--heads', type=int, default=4)
 parser.add_argument('--lr', default=1e-2, type=float, help='Learning rate')
 parser.add_argument('--drop', type=float, default=0.7)
@@ -64,9 +65,11 @@ def load_data():
     print(f'Is undirected: {data.is_undirected()}')
 
     dataset = dataset.shuffle()
-    len10 = len(dataset) - len(dataset) // 10
-    train_dataset = dataset[:len10]
-    test_dataset = dataset[len10:]
+    all_len = len(dataset)
+    len10 = all_len // 10
+    train_dataset = dataset[:all_len - 2 * len10]
+    val_dataset = dataset[all_len - 2 * len10:all_len - len10]
+    test_dataset = dataset[all_len - len10:]
 
     print(f'Number of training graphs: {len(train_dataset)}')
     print(f'Number of test graphs: {len(test_dataset)}')
@@ -292,12 +295,13 @@ if __name__ == '__main__':
     ds=QM9发生了一个异常: The size of tensor a (64) must match the size of tensor b (19) at non-singleton dimension 1,
     ds=salicylic_acid发生了一个异常: expected scalar type Long but found Float,
     toluene dataset need more memory
+    Mutagenicity so long time
+    COIL-RAG low precision
     """
-    args.debug = True
-    args.ep = 1
+    # args.debug = True
+    # args.ep = 1
     models = ['GCN', 'ResGCN', 'GAT', 'ResGAT']
-    ds_list = ['MUTAG', 'DD', 'COIL-RAG', 'MSRC_9', 'AIDS', 'Mutagenicity']
-    ds_list = ['MUTAG']
+    ds_list = ['MUTAG', 'DD', 'MSRC_9', 'AIDS']
     results = []
 
     for ds in ds_list:
@@ -306,10 +310,12 @@ if __name__ == '__main__':
                 args.ds = ds
                 args.name = m
                 args.hidden = hi
+                start_time = time.time()
                 try:
                     acc = train_model()
                 except Exception as e:
                     print(f"ds={ds},models={m}发生了一个异常: {str(e)},")
-                print(f'model={m},ds={ds},hidden={hi},acc={acc:.5f}')
-                results.append(f'model={m},ds={ds},hidden={hi},acc={acc:.5f}')
+                execution_time = time.time() - start_time
+                print(f'model={m},ds={ds},hidden={hi},acc={acc:.5f},execution_time={execution_time:.5f}')
+                results.append(f'model={m},ds={ds},hidden={hi},acc={acc:.5f},execution_time={execution_time:.5f}')
     save_records(records=results, is_debug=args.debug, file_name='graph_class')
