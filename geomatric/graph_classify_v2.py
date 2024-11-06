@@ -35,7 +35,7 @@ parser.add_argument('--gname', type=str, default='mlp')
 # https://chrsmrrs.github.io/datasets/docs/datasets/
 parser.add_argument('--ds', type=str, default='MUTAG', help='IMDB-BINARY,REDDIT-BINARY,PROTEINS')
 parser.add_argument('--max_acc', type=float, default=0.01)
-parser.add_argument('--ep', type=int, default=1024*1.5)
+parser.add_argument('--ep', type=int, default=1024 * 1.5)
 parser.add_argument('--heads', type=int, default=4)
 parser.add_argument('--lr', default=1e-2, type=float, help='Learning rate')
 parser.add_argument('--drop', type=float, default=0.7)
@@ -148,12 +148,13 @@ class ResBlockGnn(torch.nn.Module):
 class ResGraphBlockGnn(torch.nn.Module):
     def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
         super(ResGraphBlockGnn, self).__init__()
-        self.inner_model = ResBlockGnn(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
+        self.inner_model1 = ResBlockGnn(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
+        self.inner_model2 = ResBlockGnn(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
-        _, g = self.inner_model(x, edge_index, batch)
-        y, g = self.inner_model(x, edge_index, batch, g)
+        _, g = self.inner_model1(x, edge_index, batch)
+        y, g = self.inner_model2(x, edge_index, batch, g)
         y = self.lin(g)
         return y, g
 
@@ -161,12 +162,13 @@ class ResGraphBlockGnn(torch.nn.Module):
 class GraphBlockGnn(torch.nn.Module):
     def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
         super(GraphBlockGnn, self).__init__()
-        self.inner_model = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
+        self.inner_model1 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
+        self.inner_model2 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
-        _, g = self.inner_model(x, edge_index, batch)
-        y, g = self.inner_model(x, edge_index, batch, g)
+        _, g = self.inner_model1(x, edge_index, batch)
+        y, g = self.inner_model2(x, edge_index, batch, g)
         y = self.lin(g)
         return y, g
 
@@ -266,13 +268,17 @@ def debug():
             try:
                 acc = train_model()
             except Exception as e:
-                print(
-                    f'{e}')
+                print(e)
+            execution_time = time.time() - start_time
+            print(
+                f'gm={gm},model={m},h={1},ds=MUTAG,dim={8},acc={acc:.5f},execution_time={execution_time:.5f}')
+            results.append(
+                f'gm={gm},model={m},h={1},ds=MUTAG,dim={8},acc={acc:.5f},execution_time={execution_time:.5f}')
     save_records(records=results, is_debug=args.debug, file_name='graph_class')
 
 
 if __name__ == '__main__':
-    #  debug()
+    #debug()
     args.debug = True
     args.ep = 1
     models = ['GCNConv', 'GATConv', 'TransformerConv']
