@@ -7,7 +7,7 @@ import random
 
 from torch_geometric.loader import DataLoader
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv, GATConv,TransformerConv,MixHopConv,DirGNNConv,AntiSymmetricConv
+from torch_geometric.nn import GCNConv, GATConv, TransformerConv, MixHopConv, DirGNNConv, AntiSymmetricConv
 from torch_geometric.nn import global_mean_pool
 from torch_geometric.datasets import TUDataset
 import time
@@ -40,6 +40,7 @@ parser.add_argument('--lr', default=1e-2, type=float, help='Learning rate')
 parser.add_argument('--drop', type=float, default=0.7)
 parser.add_argument('--loss', type=float, default=0.001)
 parser.add_argument('--hidden', type=int, default=64)
+parser.add_argument('--h_layer', type=int, default=3)
 parser.add_argument('--min_acc', type=int, default=0.52)
 parser.add_argument('--debug', type=bool, default=False)
 # 解析命令行参数
@@ -86,30 +87,41 @@ def load_data():
     return train_loader, test_loader, dataset
 
 
-class GCN(torch.nn.Module):
-    def __init__(self, hidden_channels, dataset):
-        super(GCN, self).__init__()
-        self.conv1 = GCNConv(dataset.num_node_features, hidden_channels)
-        self.conv2 = GCNConv(hidden_channels, hidden_channels)
-        self.conv3 = GCNConv(hidden_channels, hidden_channels)
-        # self.conv4 = GCNConv(hidden_channels, hidden_channels)
-        # self.conv5 = GCNConv(hidden_channels, hidden_channels)
-        # self.conv6 = GCNConv(hidden_channels, hidden_channels)
+def get_block_model(model_name, feature, hidden_channels):
+    # GCNConv, GATConv, TransformerConv, MixHopConv, DirGNNConv, AntiSymmetricConv
+    if model_name == 'GCNConv':
+        return GCNConv(feature, hidden_channels)
+    elif model_name == 'GATConv':
+        return GATConv(feature, hidden_channels)
+    elif model_name == 'TransformerConv':
+        return TransformerConv(feature, hidden_channels)
+    elif model_name == 'MixHopConv':
+        return MixHopConv(feature, hidden_channels)
+    elif model_name == 'DirGNNConv':
+        return DirGNNConv(feature, hidden_channels)
+    elif model_name == 'AntiSymmetricConv':
+        return AntiSymmetricConv(feature, hidden_channels)
+    else:
+        print(f'f model not found,model_name:{model_name}')
+        return None
+
+
+class BlockGNN(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
+        super(BlockGNN, self).__init__()
+        self.to_hidden = get_block_model(model_name, dataset.num_node_features, hidden_channels)
+        self.sequence = nn.Sequential()
+        hidden_layer.foreach(lambda i: self.sequence.add_module(f'{model_name}{i}',
+                                                                get_block_model(model_name, hidden_channels,
+                                                                                hidden_channels)))
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
         # 1. Obtain node embeddings
-        x = self.conv1(x, edge_index)
+        x = self.to_hidden(x, edge_index)
         x = x.relu()
-        x = self.conv2(x, edge_index)
-        x = x.relu()
-        x = self.conv3(x, edge_index)
-        # x = x.relu()
-        # x = self.conv4(x, edge_index)
-        # x = x.relu()
-        # x = self.conv5(x, edge_index)
-        # x = x.relu()
-        # x = self.conv6(x, edge_index)
+        for model in self.sequence:
+            x = F.relu(model(x, edge_index))
 
         # 2. Readout layer
         x = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
@@ -121,100 +133,98 @@ class GCN(torch.nn.Module):
         return x
 
 
-class GAT(torch.nn.Module):
-    def __init__(self, hidden_channels, dataset):
-        super(GAT, self).__init__()
-        self.conv1 = GATConv(in_channels=dataset.num_node_features, out_channels=hidden_channels, heads=args.heads)
-        self.conv2 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=args.heads)
-        self.conv3 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=1)
-        # self.conv4 = GCNConv(hidden_channels, hidden_channels)
-        # self.conv5 = GCNConv(hidden_channels, hidden_channels)
-        # self.conv6 = GCNConv(hidden_channels, hidden_channels)
+class ResBlockGnn(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
+        super(ResBlockGnn, self).__init__()
+        self.to_hidden = get_block_model(model_name, dataset.num_node_features, hidden_channels)
+        self.sequence = nn.Sequential()
+        hidden_layer.foreach(lambda i: self.sequence.add_module(f'{model_name}{i}',
+                                                                get_block_model(model_name, hidden_channels,
+                                                                                hidden_channels)))
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
         # 1. Obtain node embeddings
-        x = self.conv1(x, edge_index)
-        x = x.relu()
-        x = self.conv2(x, edge_index)
-        x = x.relu()
-        x = self.conv3(x, edge_index)
-        # x = x.relu()
-        # x = self.conv4(x, edge_index)
-        # x = x.relu()
-        # x = self.conv5(x, edge_index)
-        # x = x.relu()
-        # x = self.conv6(x, edge_index)
-
+        x_cur = F.relu(self.to_hidden(x, edge_index))
+        x_pre = torch.zeros(x_cur.shape)
+        for i, m in enumerate(self.sequence):
+            x_temp = x_cur
+            x_cur = F.relu(m(x_cur + x_pre, edge_index))
+            x_pre = x_temp
         # 2. Readout layer
-        x = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
+        y = global_mean_pool(x_cur, batch)  # [batch_size, hidden_channels]
 
         # 3. Apply a final classifier
-        x = F.dropout(x, p=args.drop, training=self.training)
-        x = self.lin(x)
-
-        return x
-
-
-class ResGCN(torch.nn.Module):
-    def __init__(self, hidden_channels, dataset):
-        super(ResGCN, self).__init__()
-        self.conv1 = GCNConv(dataset.num_node_features, hidden_channels)
-        self.conv2 = GCNConv(hidden_channels, hidden_channels)
-        self.conv3 = GCNConv(hidden_channels, hidden_channels)
-        self.conv4 = GCNConv(hidden_channels, hidden_channels)
-        self.conv5 = GCNConv(hidden_channels, hidden_channels)
-        self.conv6 = GCNConv(hidden_channels, hidden_channels)
-        self.lin = nn.Linear(hidden_channels, dataset.num_classes)
-
-    def forward(self, x, edge_index, batch):
-        # 1. Obtain node embeddings
-        x1 = F.relu(self.conv1(x, edge_index))
-        x2 = F.relu(self.conv2(x1, edge_index))
-        x3 = F.relu(self.conv3(x2 + x1, edge_index))
-        x4 = F.relu(self.conv4(x3 + x2, edge_index))
-        x5 = F.relu(self.conv5(x3 + x4, edge_index))
-        x6 = self.conv6(x4 + x5, edge_index)
-
-        # 2. Readout layer
-        x6 = global_mean_pool(x6, batch)  # [batch_size, hidden_channels]
-
-        # 3. Apply a final classifier
-        x6 = F.dropout(x6, p=args.drop, training=self.training)
-        y = self.lin(x6)
+        y = F.dropout(y, p=args.drop, training=self.training)
+        y = self.lin(y)
 
         return y
 
 
-class ResGAT(torch.nn.Module):
-    def __init__(self, hidden_channels, dataset):
-        super(ResGAT, self).__init__()
-        self.conv1 = GATConv(in_channels=dataset.num_features, out_channels=hidden_channels, heads=args.heads)
-        self.conv2 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=args.heads)
-        self.conv3 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=args.heads)
-        self.conv4 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=args.heads)
-        self.conv5 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=args.heads)
-        self.conv6 = GATConv(in_channels=hidden_channels * args.heads, out_channels=hidden_channels, heads=1)
+class ResNodeBlockGnn(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
+        super(ResNodeBlockGnn, self).__init__()
+        self.to_hidden = get_block_model(model_name, dataset.num_node_features, hidden_channels)
+        self.sequence = nn.Sequential()
+        hidden_layer.foreach(lambda i: self.sequence.add_module(f'{model_name}{i}',
+                                                                get_block_model(model_name, hidden_channels,
+                                                                                hidden_channels)))
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
-    def forward(self, x, edge_index, batch):
+    def forward(self, x, edge_index, batch, graph_hidden=None):
         # 1. Obtain node embeddings
-        x1 = F.relu(self.conv1(x, edge_index))
-        x2 = F.relu(self.conv2(x1, edge_index))
-        x3 = F.relu(self.conv3(x2 + x1, edge_index))
-        x4 = F.relu(self.conv4(x3 + x2, edge_index))
-        x5 = F.relu(self.conv5(x3 + x4, edge_index))
-        x6 = self.conv6(x4 + x5, edge_index)
-
+        x_cur = F.relu(self.to_hidden(x, edge_index))
+        if graph_hidden is None:
+            graph_hidden = torch.zeros(x_cur.shape)
+        x_pre = torch.zeros(x_cur.shape)
+        for i, m in enumerate(self.sequence):
+            x_temp = x_cur
+            x_cur = F.relu(m(x_cur + x_pre + graph_hidden, edge_index))
+            x_pre = x_temp
         # 2. Readout layer
-        x6 = global_mean_pool(x6, batch)  # [batch_size, hidden_channels]
+        global_mean = global_mean_pool(x_cur, batch)  # [batch_size, hidden_channels]
 
         # 3. Apply a final classifier
-        x6 = F.dropout(x6, p=args.drop, training=self.training)
-        y = self.lin(x6)
+        y = F.dropout(global_mean, p=args.drop, training=self.training)
+        y = self.lin(y)
 
-        return y
+        return y,global_mean
 
+
+class ResGraphBlockGnn(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
+        super(ResGraphBlockGnn, self).__init__()
+        self.to_hidden = get_block_model(model_name, dataset.num_node_features, hidden_channels)
+        self.sequence = nn.Sequential()
+        hidden_layer.foreach(lambda i: self.sequence.add_module(f'{model_name}{i}',
+                                                                get_block_model(model_name, hidden_channels,
+                                                                                hidden_channels)))
+        self.lin = nn.Linear(hidden_channels, dataset.num_classes)
+
+    def forward(self, x, edge_index, batch, graph_hidden=None):
+        # 1. Obtain node embeddings
+        x_cur = F.relu(self.to_hidden(x, edge_index))
+        if graph_hidden is not None:
+            graph_hidden = torch.zeros(x_cur.shape)
+        x_pre = torch.zeros(x_cur.shape)
+
+        if not( x_pre.shape == graph_hidden.shape):
+            print(f'error x_pre.shape != graph_hidden.shape ,{x_pre.shape} !={graph_hidden.shape}')
+        else:
+            x_pre = graph_hidden
+
+        for i, m in enumerate(self.sequence):
+            x_temp = x_cur
+            x_cur = F.relu(m(x_cur + x_pre , edge_index))
+            x_pre = x_temp
+        # 2. Readout layer
+        global_mean = global_mean_pool(x_cur+graph_hidden, batch)  # [batch_size, hidden_channels]
+
+        # 3. Apply a final classifier
+        y = F.dropout(global_mean, p=args.drop, training=self.training)
+        y = self.lin(y)
+
+        return y,global_mean
 
 def train_model():
     train_loader, test_loader, dataset = load_data()
@@ -316,6 +326,6 @@ if __name__ == '__main__':
                 except Exception as e:
                     print(f"ds={ds},models={m}发生了一个异常: {str(e)},")
                 execution_time = time.time() - start_time
-                print(f'model={m},ds={ds},hidden={hi},acc={acc:.5f},execution_time={execution_time:.5f}')
-                results.append(f'model={m},ds={ds},hidden={hi},acc={acc:.5f},execution_time={execution_time:.5f}')
+                print(f'model={m},ds={ds},dim={hi},acc={acc:.5f},execution_time={execution_time:.5f}')
+                results.append(f'model={m},ds={ds},dim={hi},acc={acc:.5f},execution_time={execution_time:.5f}')
     save_records(records=results, is_debug=args.debug, file_name='graph_class')
