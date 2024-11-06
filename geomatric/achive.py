@@ -1,4 +1,3 @@
-
 """
 双塔结构
 
@@ -42,7 +41,6 @@ class GAT_GCN(torch.nn.Module):
 
 
 """
-
 
 """
 
@@ -105,8 +103,6 @@ def train_mlp():
 
 """
 
-
-
 """
 # python -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cpu.html
 # python -m pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.3.0+cu121.html
@@ -149,12 +145,20 @@ GCN
 11-2 为此，准备2部分工作
 - 工作量：加数据集、加任务、
 - 模型：要设计时，复杂一些
+
+
+11-6
+    name=ResGCN_ds=MUTAG_ds_split=public_max_acc=0.89474_
+    name=GCN_ds=MUTAG_ds_split=public_max_acc=0.86842_
+    ds=naphthalene发生了一个异常: expected scalar type Long but found Float,
+    ds=QM9发生了一个异常: The size of tensor a (64) must match the size of tensor b (19) at non-singleton dimension 1,
+    ds=salicylic_acid发生了一个异常: expected scalar type Long but found Float,
+    toluene dataset need more memory
+    Mutagenicity so long time
+    COIL-RAG low precision
+    'MixHopConv', 'DirGNNConv', 'AntiSymmetricConv' 后面两个都需要有向图，前一个的输出形状会和power数组绑定
+    ['GCNConv', 'GATConv', 'TransformerConv', 'MixHopConv', 'DirGNNConv', 'AntiSymmetricConv']
+    ['BlockGNN' ,'ResBlockGnn','ResNodeBlockGnn','ResGraphBlockGnn','GraphBlockGnn']
 """
 
-def a():
-    a,b =1 ,3
-    return a
 
-if __name__ == '__main__':
-    a,_ = a()
-    print(a)
