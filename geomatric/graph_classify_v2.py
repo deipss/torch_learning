@@ -129,7 +129,7 @@ class ResBlockGnn(torch.nn.Module):
         # 1. Obtain node embeddings
         x_cur = F.relu(self.to_hidden(x, edge_index))
 
-        x_pre = torch.zeros(x_cur.shape)
+        x_pre = torch.zeros(x_cur.shape, device=_device)
         for i, m in enumerate(self.sequence):
             x_temp = x_cur
             x_cur = F.relu(m(x_cur + x_pre, edge_index))
@@ -278,15 +278,16 @@ def debug():
 
 
 if __name__ == '__main__':
-    #debug()
-    args.debug = True
-    args.ep = 1
+    # debug()
+    # args.debug = True
+    # args.ep = 1
     models = ['GCNConv', 'GATConv', 'TransformerConv']
-    g_models = ['BlockGNN', 'ResBlockGnn', 'ResGraphBlockGnn', 'GraphBlockGnn']
+    g_models = ['ResBlockGnn', 'BlockGNN', 'ResGraphBlockGnn', 'GraphBlockGnn']
     ds_list = ['MUTAG', 'DD', 'MSRC_9', 'AIDS']
     h_list = [1, 2, 3, 4, 5]
     acc = 0
     results = []
+    line = ''
     for ds in ds_list:
         for dim in [16, 32, 64, 128, 256]:
             for h in h_list:
@@ -301,11 +302,12 @@ if __name__ == '__main__':
                         try:
                             acc = train_model()
                         except Exception as e:
-                            print(
-                                f'错误gm={gm},model={m},h={h},ds={ds},{e}')
+                            print(f'gm={gm},model={m},h={h},ds={ds},dim={dim},e={e}')
                         execution_time = time.time() - start_time
-                        print(
-                            f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={acc:.5f},execution_time={execution_time:.5f}')
-                        results.append(
-                            f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={acc:.5f},execution_time={execution_time:.5f}')
-save_records(records=results, is_debug=args.debug, file_name='graph_class')
+                        line = f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={acc:.5f},execution_time={execution_time:.5f}'
+                        print(line)
+                        results.append(line)
+                        fp = 'graph_classify_v2_1106.txt'
+                        with open(fp, 'a') as file:
+                            file.writelines(line + '\n')
+    save_records(records=results, is_debug=args.debug, file_name='graph_class')
