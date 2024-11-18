@@ -35,7 +35,7 @@ parser.add_argument('--gname', type=str, default='mlp')
 # https://chrsmrrs.github.io/datasets/docs/datasets/
 parser.add_argument('--ds', type=str, default='MUTAG', help='IMDB-BINARY,REDDIT-BINARY,PROTEINS')
 parser.add_argument('--max_acc', type=float, default=0.01)
-parser.add_argument('--ep', type=int, default=1024 * 1.5)
+parser.add_argument('--ep', type=int, default=1000)
 parser.add_argument('--heads', type=int, default=4)
 parser.add_argument('--lr', default=1e-2, type=float, help='Learning rate')
 parser.add_argument('--drop', type=float, default=0.7)
@@ -50,17 +50,23 @@ args = parser.parse_args()
 
 #########################################################################
 
-def load_data():
+def load_data(start_index=0):
     dataset = TUDataset(root=os.path.join(data_path, 'TUDataset'), name=args.ds)
     dataset.to(device=_device)
     # Gather some statistics about the first graph.
 
     dataset = dataset.shuffle()
     all_len = len(dataset)
-    len10 = all_len // 10
-    train_dataset = dataset[:all_len - 2 * len10]
-    val_dataset = dataset[all_len - 2 * len10:all_len - len10]  # todo
-    test_dataset = dataset[all_len - len10:]
+    split_len = all_len // 5
+
+    gap_start = start_index * split_len
+    gap_end = (start_index + 1) * split_len
+
+    train_dataset = []
+    train_dataset.append(dataset[:gap_start])
+    train_dataset.append(dataset[gap_end:])
+    train_dataset = [item for sublist in train_dataset for item in sublist]
+    test_dataset = dataset[gap_start: gap_end]
 
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
@@ -173,8 +179,8 @@ class GraphBlockGnn(torch.nn.Module):
         return y, g
 
 
-def train_model():
-    train_loader, test_loader, dataset = load_data()
+def train_model(start_index):
+    train_loader, test_loader, dataset = load_data(start_index)
     if args.gname == 'BlockGNN':
         model = BlockGNN(hidden_channels=args.dim, dataset=dataset, hidden_layer=args.h_layer, model_name=args.name)
     elif args.gname == 'ResBlockGnn':
@@ -249,7 +255,6 @@ def download_dataset():
 def debug():
     """
     MixHopConv有问题，存在一个power，需要对隐藏层的输出层的形状，作调整
-
     """
     import traceback
     args.debug = True
@@ -257,6 +262,7 @@ def debug():
     results = []
     models = ['GCNConv', 'GATConv', 'TransformerConv']
     g_models = ['BlockGNN', 'ResBlockGnn', 'ResGraphBlockGnn', 'GraphBlockGnn']
+    start_index_list = [0, 1, 2, 3, 4]
     for m in models:
         for gm in g_models:
             args.ds = 'MUTAG'
@@ -265,15 +271,22 @@ def debug():
             args.h_layer = 1
             args.gname = gm
             start_time = time.time()
-            try:
-                acc = train_model()
-            except Exception as e:
-                print(e)
+            acc_list = []
+            for start_index in start_index_list:
+                try:
+                    acc = train_model(start_index)
+                    acc_list.append(acc)
+
+                except Exception as e:
+                    print(e)
             execution_time = time.time() - start_time
-            print(
-                f'gm={gm},model={m},h={1},ds=MUTAG,dim={8},acc={acc:.5f},execution_time={execution_time:.5f}')
-            results.append(
-                f'gm={gm},model={m},h={1},ds=MUTAG,dim={8},acc={acc:.5f},execution_time={execution_time:.5f}')
+            avg_acc = sum(acc_list) / len(acc_list)
+            line = f'gm={gm},model={m},h={1},ds=mutag,dim={16},acc={avg_acc:.5f},acc0={acc_list[0]:.5f},acc1={acc_list[1]:.5f},acc2={acc_list[2]:.5f},acc3={acc_list[3]:.5f},acc4={acc_list[4]:.5f},execution_time={execution_time:.5f}'
+            print(line)
+            results.append(line)
+            fp = 'graph_classify_v2_5_fold_1118_debug.txt'
+            with open(fp, 'a') as file:
+                file.writelines(line + '\n')
     save_records(records=results, is_debug=args.debug, file_name='graph_class')
 
 
@@ -284,12 +297,13 @@ if __name__ == '__main__':
     models = ['GCNConv', 'GATConv', 'TransformerConv']
     g_models = ['ResBlockGnn', 'BlockGNN', 'ResGraphBlockGnn', 'GraphBlockGnn']
     ds_list = ['MUTAG', 'DD', 'MSRC_9', 'AIDS']
-    h_list = [1, 2, 3, 4, 5]
+    h_list = [1, 2, 3, 4, 5, 6, 7]
+    start_index_list = [0, 1, 2, 3, 4]
     acc = 0
     results = []
     line = ''
     for ds in ds_list:
-        for dim in [16, 32, 64, 128, 256]:
+        for dim in [32, 64]:
             for h in h_list:
                 for m in models:
                     for gm in g_models:
@@ -299,15 +313,19 @@ if __name__ == '__main__':
                         args.gname = gm
                         args.h_layer = h
                         start_time = time.time()
-                        try:
-                            acc = train_model()
-                        except Exception as e:
-                            print(f'gm={gm},model={m},h={h},ds={ds},dim={dim},e={e}')
+                        acc_list = []
+                        for start_index in start_index_list:
+                            try:
+                                acc = train_model(start_index)
+                                acc_list.append(acc)
+                            except Exception as e:
+                                print(f'gm={gm},model={m},h={h},ds={ds},dim={dim},e={e}')
                         execution_time = time.time() - start_time
-                        line = f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={acc:.5f},execution_time={execution_time:.5f}'
+                        avg_acc = sum(acc_list) / len(acc_list)
+                        line = f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={avg_acc:.5f},acc0={acc_list[0]:.5f},acc1={acc_list[1]:.5f},acc2={acc_list[2]:.5f},acc3={acc_list[3]:.5f},acc4={acc_list[4]:.5f},execution_time={execution_time:.5f}'
                         print(line)
                         results.append(line)
-                        fp = 'graph_classify_v2_1106.txt'
+                        fp = 'graph_classify_v2_5_fold_1118.txt'
                         with open(fp, 'a') as file:
                             file.writelines(line + '\n')
     save_records(records=results, is_debug=args.debug, file_name='graph_class')

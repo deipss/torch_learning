@@ -110,26 +110,4 @@ def show_loss(file=None):
         plt.grid(True)
         plt.show()
 
-def show_acc(file=None):
-    with open(file, 'r') as file:
-        data = json.load(file)
-        records = data['records']
-        params = data['param']
-        sorted(records, key=lambda x: x['epoch'])
-        # 提取epoch和loss数据
-        epochs = [i['epoch'] for i in records]
-        losses = [i['test_acc'] for i in records]
 
-        # 使用Matplotlib绘制曲线图
-        plt.figure(figsize=(10, 6))
-        plt.plot(epochs, losses, marker='o', linestyle='-', color='b')
-        plt.title(f'{params["name"]}-{params["ds"]}-{params["hidden"]}')
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.grid(True)
-        plt.show()
-
-
-if __name__ == '__main__':
-    show_acc(
-        '/Users/deipss/workspace/ai/torch_learning/data/log/name=GAT_ds=PubMed_ds_split=public_max_acc=0.21600_ep=00002048_heads=00000004_lr=0.00100_drop=0.50000_loss=0.01000_hidden=00000064_min_acc=0.12000___20241101_183743_916.json')
