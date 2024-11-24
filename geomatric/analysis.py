@@ -4,8 +4,39 @@ import json
 from os import path
 import os
 import matplotlib.pyplot as plt
+from torch_geometric.datasets import TUDataset
+import platform
 
 
+data_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
+
+def statistic_dataset():
+    """
+    statistic_dataset()
+    """
+    ds_list = ['MUTAG', 'DD', 'MSRC_9', 'AIDS']
+    for ds in ds_list:
+        dataset = TUDataset(root=os.path.join(data_path, 'TUDataset'), name=ds)
+        print()
+        print(f'Dataset: {dataset}:')
+        print('====================')
+        print(f'Number of graphs: {len(dataset)}')
+        print(f'Number of features: {dataset.num_features}')
+        print(f'Number of classes: {dataset.num_classes}')
+
+        data = dataset[0]  # Get the first graph object.
+
+        print()
+        print(data)
+        print('=============================================================')
+
+        # Gather some statistics about the first graph.
+        print(f'Number of nodes: {data.num_nodes}')
+        print(f'Number of edges: {data.num_edges}')
+        print(f'Average node degree: {data.num_edges / data.num_nodes:.2f}')
+        print(f'Has isolated nodes: {data.has_isolated_nodes()}')
+        print(f'Has self-loops: {data.has_self_loops()}')
+        print(f'Is undirected: {data.is_undirected()}')
 def analysis_data(data_path, data_name, data_type='train'):
     """
     analysis_data('../records', 'graph_class__20241113_074727_391.json')
@@ -24,8 +55,12 @@ def analysis_data(data_path, data_name, data_type='train'):
         ds_list = ['MUTAG', 'DD', 'MSRC_9', 'AIDS']
         for i in ds_list:
             mutag = filter(lambda x: x['ds'] == i, data_list)
-            mutag = sorted(mutag, key=lambda x: (x['acc'], x['h'], x['dim']), reverse=True)
-            print(mutag)
+            mutag = sorted(mutag, key=lambda x: (float(x['acc']), x['model'], -int(x['h']), -int(x['dim'])),
+                           reverse=True)
+            print(f'ds={i}')
+            print(''.join(f'{key:<20}' for key in mutag[0].keys()))
+            for m in mutag[:70]:
+                print(''.join(f'{key:<20}' for key in m.values()))
 
 
 def show_acc(data_path, data_name, ):
@@ -53,8 +88,7 @@ def show_acc(data_path, data_name, ):
 
 def search_min_epoch(path):
     """
-        search_min_epoch('../data/logs')
-
+    search_min_epoch('../data/logs')
     max_epoch = 1535
     """
     files = os.listdir(path)
@@ -75,4 +109,4 @@ def search_min_epoch(path):
 
 
 if __name__ == '__main__':
-    search_min_epoch('../data/logs')
+    statistic_dataset()

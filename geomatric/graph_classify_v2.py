@@ -35,14 +35,14 @@ parser.add_argument('--gname', type=str, default='mlp')
 # https://chrsmrrs.github.io/datasets/docs/datasets/
 parser.add_argument('--ds', type=str, default='MUTAG', help='IMDB-BINARY,REDDIT-BINARY,PROTEINS')
 parser.add_argument('--max_acc', type=float, default=0.01)
-parser.add_argument('--ep', type=int, default=1000)
+parser.add_argument('--ep', type=int, default=1000 * 1.5)
 parser.add_argument('--heads', type=int, default=4)
 parser.add_argument('--lr', default=1e-2, type=float, help='Learning rate')
-parser.add_argument('--drop', type=float, default=0.7)
+parser.add_argument('--drop', type=float, default=0.6)
 parser.add_argument('--loss', type=float, default=0.001)
 parser.add_argument('--dim', type=int, default=64)
 parser.add_argument('--h_layer', type=int, default=2)
-parser.add_argument('--min_acc', type=int, default=0.52)
+parser.add_argument('--min_acc', type=int, default=0.1)
 parser.add_argument('--debug', type=bool, default=False)
 # 解析命令行参数
 args = parser.parse_args()
@@ -131,6 +131,7 @@ class BlockGNN(torch.nn.Module):
         # 2. deep train layer
         for model in self.sequence:
             x = F.relu(model(x, edge_index))
+            x = F.dropout(x, p=args.drop, training=self.training)
 
         # 3. Readout layer
         global_mean = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
@@ -163,6 +164,7 @@ class ResBlockGnn(torch.nn.Module):
         for i, m in enumerate(self.sequence):
             x_temp = x_cur
             x_cur = F.relu(m(x_cur + x_pre, edge_index))
+            x_cur = F.dropout(x_cur, p=args.drop, training=self.training)
             x_pre = x_temp
 
         global_mean = global_mean_pool(x_cur, batch)  # [batch_size, hidden_channels]
@@ -199,8 +201,13 @@ class CrossBlockGnn(torch.nn.Module):
         while i < len(self.sequence):
             x_temp_1 = x_cur_1
             x_temp_2 = x_cur_2
+
             x_cur_1 = F.relu(self.sequence[i](x_cur_1 + x_pre_2, edge_index))
+            x_cur_1 = F.dropout(x_cur_1, p=args.drop, training=self.training)
+
             x_cur_2 = F.relu(self.sequence[i + 1](x_cur_2 + x_pre_1, edge_index))
+            x_cur_2 = F.dropout(x_cur_2, p=args.drop, training=self.training)
+
             x_pre_1 = x_temp_1
             x_pre_2 = x_temp_2
             i += 2
@@ -261,7 +268,7 @@ def train_model(start_index):
     else:
         print(f'no model name {args.gname}')
         return
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr,weight_decay=0.01)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=0.01)
     criterion = torch.nn.CrossEntropyLoss()
     model.to(device=_device)
     criterion.to(device=_device)
@@ -280,7 +287,6 @@ def train_model(start_index):
 
     def test(loader):
         model.eval()
-
         correct = 0
         for data in loader:  # Iterate in batches over the training/test dataset.
             out, _ = model(data.x, data.edge_index, data.batch)
@@ -298,12 +304,9 @@ def train_model(start_index):
         test_acc = test(test_loader)
         if (max_acc < test_acc):
             max_acc = test_acc
-            if (max_acc > args.min_acc):
-                save_model(model=model, is_debug=args.debug, **vars(args))
-        if epoch % 5 == 0:
             print_loss(epoch=epoch, is_debug=args.debug, loss=loss.item(), test_acc=test_acc, train_acc=train_acc,
                        max_acc=max_acc)
-            records.append({'epoch': epoch, 'loss': loss.item(), 'test_acc': test_acc, 'train_acc': train_acc})
+        records.append({'epoch': epoch, 'loss': loss.item(), 'test_acc': test_acc, 'train_acc': train_acc})
         epoch += 1
     args.max_acc = max_acc
     save_json(records=records, is_debug=args.debug, **vars(args))
@@ -392,7 +395,7 @@ if __name__ == '__main__':
                         line = f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={avg_acc:.5f},acc0={acc_list[0]:.5f},acc1={acc_list[1]:.5f},acc2={acc_list[2]:.5f},acc3={acc_list[3]:.5f},acc4={acc_list[4]:.5f},execution_time={execution_time:.5f}'
                         print(line)
                         results.append(line)
-                        fp = 'graph_classify_v2_5_fold_1118.txt'
+                        fp = '../records/graph_classify_v2_5_fold_1118.txt'
                         with open(fp, 'a') as file:
                             file.writelines(line + '\n')
     save_records(records=results, is_debug=args.debug, file_name='graph_class')
