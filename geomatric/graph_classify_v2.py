@@ -127,15 +127,19 @@ class BlockGNN(torch.nn.Module):
     def forward(self, x, edge_index, batch, graph_hidden=None):
         # 1. Obtain node embeddings
         x = self.to_hidden(x, edge_index)
+
         x = x.relu()
         # 2. deep train layer
         for model in self.sequence:
+            if self.res_graph and graph_hidden is not None:
+                for i, b in enumerate(batch):
+                    x[i] = x[i] + graph_hidden[b]
             x = F.relu(model(x, edge_index))
             x = F.dropout(x, p=args.drop, training=self.training)
 
         # 3. Readout layer
         global_mean = global_mean_pool(x, batch)  # [batch_size, hidden_channels]
-        if self.res_graph and graph_hidden is not None:  # use preview train result of graph embedding
+        if graph_hidden is not None:  # use preview train result of graph embedding
             global_mean = global_mean + graph_hidden
         # 4. Apply a final classifier
         y = F.dropout(global_mean, p=args.drop, training=self.training)
@@ -163,12 +167,15 @@ class ResBlockGnn(torch.nn.Module):
         x_pre = torch.zeros(x_cur.shape, device=_device)
         for i, m in enumerate(self.sequence):
             x_temp = x_cur
+            if self.res_graph and graph_hidden is not None:
+                for i, b in enumerate(batch):
+                    x_cur[i] = x_cur[i] + graph_hidden[b]
             x_cur = F.relu(m(x_cur + x_pre, edge_index))
             x_cur = F.dropout(x_cur, p=args.drop, training=self.training)
             x_pre = x_temp
 
         global_mean = global_mean_pool(x_cur, batch)  # [batch_size, hidden_channels]
-        if self.res_graph and graph_hidden is not None:  # use preview train result of graph embedding
+        if graph_hidden is not None:  # use preview train result of graph embedding
             global_mean = global_mean + graph_hidden
         # 3. Apply a final classifier
         y = F.dropout(global_mean, p=args.drop, training=self.training)
@@ -213,7 +220,7 @@ class CrossBlockGnn(torch.nn.Module):
             i += 2
         x_cur = x_cur_1 + x_cur_2
         global_mean = global_mean_pool(x_cur, batch)  # [batch_size, hidden_channels]
-        if self.res_graph and graph_hidden is not None:  # use preview train result of graph embedding
+        if graph_hidden is not None:  # use preview train result of graph embedding
             global_mean = global_mean + graph_hidden
         # 3. Apply a final classifier
         y = F.dropout(global_mean, p=args.drop, training=self.training)
@@ -239,8 +246,8 @@ class ResGraphBlockGnn(torch.nn.Module):
 class GraphBlockGnn(torch.nn.Module):
     def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
         super(GraphBlockGnn, self).__init__()
-        self.inner_model1 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
-        self.inner_model2 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
+        self.inner_model1 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
+        self.inner_model2 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
@@ -248,6 +255,34 @@ class GraphBlockGnn(torch.nn.Module):
         y, g = self.inner_model2(x, edge_index, batch, g)
         y = self.lin(g)
         return y, g
+
+
+class CrossGraphBlockGnn(torch.nn.Module):
+    def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
+        super(CrossGraphBlockGnn, self).__init__()
+        self.sequence = nn.Sequential()
+        # todo 使用可以配套的参数
+        for i in range(4):
+            self.sequence.add_module(f'{model_name}{i}',
+                                     BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True))
+        self.lin = nn.Linear(hidden_channels, dataset.num_classes)
+
+    def forward(self, x, edge_index, batch):
+        # 1. Obtain node embeddings
+        g_1, g_2 = None, None
+        i = 0
+        while i < len(self.sequence):
+            _, global_mean_1 = self.sequence[i](x, edge_index, batch, g_1)
+            _, global_mean_2 = self.sequence[i + 1](x, edge_index, batch, g_2)
+
+            g_1 = global_mean_2
+            g_2 = global_mean_1
+            i += 2
+        global_mean = g_1 + g_2
+        y = F.dropout(global_mean, p=args.drop, training=self.training)
+        y = self.lin(y)
+
+        return y, global_mean
 
 
 def train_model(start_index):
@@ -265,6 +300,9 @@ def train_model(start_index):
     elif args.gname == 'CrossBlockGnn':
         model = CrossBlockGnn(hidden_channels=args.dim, dataset=dataset, hidden_layer=args.h_layer,
                               model_name=args.name)
+    elif args.gname == 'CrossGraphBlockGnn':
+        model = CrossGraphBlockGnn(hidden_channels=args.dim, dataset=dataset, hidden_layer=args.h_layer,
+                                   model_name=args.name)
     else:
         print(f'no model name {args.gname}')
         return
@@ -327,12 +365,13 @@ def debug():
     MixHopConv有问题，存在一个power，需要对隐藏层的输出层的形状，作调整
     """
     import traceback
+
     args.debug = True
     args.ep = 1
     results = []
     models = ['GCNConv', 'GATConv', 'TransformerConv']
-    g_models = ['BlockGNN', 'ResBlockGnn', 'ResGraphBlockGnn', 'GraphBlockGnn']
-    start_index_list = [0, 1, 2, 3, 4]
+    g_models = ['CrossBlockGnn', 'CrossGraphBlockGnn', 'BlockGNN', 'ResBlockGnn', 'ResGraphBlockGnn', 'GraphBlockGnn']
+    start_index_list = [0]
     for m in models:
         for gm in g_models:
             args.ds = 'MUTAG'
@@ -346,24 +385,17 @@ def debug():
                 try:
                     acc = train_model(start_index)
                     acc_list.append(acc)
-
                 except Exception as e:
                     print(e)
+                    traceback.print_exc()
             execution_time = time.time() - start_time
             avg_acc = sum(acc_list) / len(acc_list)
-            line = f'gm={gm},model={m},h={1},ds=mutag,dim={16},acc={avg_acc:.5f},acc0={acc_list[0]:.5f},acc1={acc_list[1]:.5f},acc2={acc_list[2]:.5f},acc3={acc_list[3]:.5f},acc4={acc_list[4]:.5f},execution_time={execution_time:.5f}'
+            line = f'gm={gm},model={m},h={1},ds=mutag,dim={16},acc={avg_acc:.5f},execution_time={execution_time:.5f}'
             print(line)
-            results.append(line)
-            fp = 'graph_classify_v2_5_fold_1118_debug.txt'
-            with open(fp, 'a') as file:
-                file.writelines(line + '\n')
-    save_records(records=results, is_debug=args.debug, file_name='graph_class')
 
 
-if __name__ == '__main__':
-    # debug()
-    # args.debug = True
-    # args.ep = 1
+def true_train():
+    global args
     models = ['GCNConv', 'GATConv', 'TransformerConv']
     g_models = ['ResBlockGnn', 'BlockGNN', 'ResGraphBlockGnn', 'GraphBlockGnn']
     ds_list = ['MUTAG', 'DD', 'MSRC_9', 'AIDS']
@@ -399,3 +431,30 @@ if __name__ == '__main__':
                         with open(fp, 'a') as file:
                             file.writelines(line + '\n')
     save_records(records=results, is_debug=args.debug, file_name='graph_class')
+
+
+def debug_one():
+    args.debug = True
+    args.ep = 1
+    results = []
+    models = ['GCNConv', 'GATConv', 'TransformerConv']
+    g_models = ['BlockGNN', 'ResBlockGnn', 'ResGraphBlockGnn', 'GraphBlockGnn']
+    start_index_list = [0, 1, 2, 3, 4]
+    args.ds = 'MUTAG'
+    args.name = 'GCNConv'
+    args.dim = 8
+    args.h_layer = 3
+    args.gname = 'GraphBlockGnn'
+    start_time = time.time()
+    acc_list = []
+    for start_index in start_index_list:
+        try:
+            acc = train_model(start_index)
+            acc_list.append(acc)
+        except Exception as e:
+            print(e)
+    print(acc_list)
+
+
+if __name__ == '__main__':
+    debug()
