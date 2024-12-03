@@ -66,6 +66,8 @@ def save_records(records=None, is_debug=False, file_name=''):
     """
     保存训练记录
     """
+    if is_debug:
+        return
     formatted_time = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
     f_name = separator.join([file_name, formatted_time])
     f_name += '.json'

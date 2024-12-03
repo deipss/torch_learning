@@ -240,7 +240,6 @@ def train_model(start_index):
         epoch += 1
     args.max_acc = max_acc
     save_json(records=records, is_debug=args.debug, **vars(args))
-    print(max_acc)
     return max_acc
 
 
@@ -276,7 +275,6 @@ def debug():
                 try:
                     acc = train_model(start_index)
                     acc_list.append(acc)
-
                 except Exception as e:
                     print(e)
             execution_time = time.time() - start_time
