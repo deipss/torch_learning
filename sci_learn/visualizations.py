@@ -4,21 +4,54 @@ from sklearn.metrics import RocCurveDisplay
 from sklearn.datasets import load_wine
 import matplotlib.pyplot as plt
 
+
+def pca_iris():
+    import matplotlib.pyplot as plt
+
+    from sklearn import datasets
+    from sklearn.decomposition import PCA
+    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+
+    iris = datasets.load_iris()
+
+    X = iris.data
+    y = iris.target
+    target_names = iris.target_names
+
+    pca = PCA(n_components=2)
+    X_r = pca.fit(X).transform(X)
+
+    lda = LinearDiscriminantAnalysis(n_components=2)
+    X_r2 = lda.fit(X, y).transform(X)
+
+    # Percentage of variance explained for each components
+    print(
+        "explained variance ratio (first two components): %s"
+        % str(pca.explained_variance_ratio_)
+    )
+
+    plt.figure()
+    colors = ["navy", "turquoise", "darkorange"]
+    lw = 2
+
+    for color, i, target_name in zip(colors, [0, 1, 2], target_names):
+        plt.scatter(
+            X_r[y == i, 0], X_r[y == i, 1], color=color, alpha=0.8, lw=lw, label=target_name
+        )
+    plt.legend(loc="best", shadow=False, scatterpoints=1)
+    plt.title("PCA of IRIS dataset")
+
+    plt.figure()
+    for color, i, target_name in zip(colors, [0, 1, 2], target_names):
+        plt.scatter(
+            X_r2[y == i, 0], X_r2[y == i, 1], alpha=0.8, color=color, label=target_name
+        )
+    plt.legend(loc="best", shadow=False, scatterpoints=1)
+    plt.title("LDA of IRIS dataset")
+
+    plt.show()
+
 if __name__ == '__main__':
 
-    X, y = load_wine(return_X_y=True)
-    y = y == 2  # make binary
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
-    svc = SVC(random_state=42)
-    svc.fit(X_train, y_train)
 
-    svc_disp = RocCurveDisplay.from_estimator(svc, X_test, y_test)
-
-    from sklearn.ensemble import RandomForestClassifier
-
-    rfc = RandomForestClassifier(n_estimators=10, random_state=42)
-    rfc.fit(X_train, y_train)
-
-    ax = plt.gca()
-    rfc_disp = RocCurveDisplay.from_estimator(rfc, X_test, y_test, ax=ax, alpha=0.8)
-    svc_disp.plot(ax=ax, alpha=0.8)
+    pca_iris()
