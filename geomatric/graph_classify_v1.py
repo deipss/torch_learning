@@ -325,7 +325,7 @@ if __name__ == '__main__':
                         line = f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={avg_acc:.5f},acc0={acc_list[0]:.5f},acc1={acc_list[1]:.5f},acc2={acc_list[2]:.5f},acc3={acc_list[3]:.5f},acc4={acc_list[4]:.5f},execution_time={execution_time:.5f}'
                         print(line)
                         results.append(line)
-                        fp = 'graph_classify_v2_5_fold_1118.txt'
+                        fp = 'graph_classify_v1_5_fold_1118.txt'
                         with open(fp, 'a') as file:
                             file.writelines(line + '\n')
     save_records(records=results, is_debug=args.debug, file_name='graph_class')
