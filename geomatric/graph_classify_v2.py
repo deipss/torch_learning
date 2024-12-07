@@ -130,12 +130,13 @@ class BlockGNN(torch.nn.Module):
         # 1. Obtain node embeddings
         x = self.to_hidden(x, edge_index)
 
-        x = x.relu()
+        # x = x.relu()
         # 2. deep train layer
         for model in self.sequence:
             if self.res_graph and graph_hidden is not None:
-                for i, b in enumerate(batch):
-                    x[i] = x[i] + graph_hidden[b]
+                with torch.no_grad():
+                    for i, b in enumerate(batch):
+                        x[i] = x[i] + graph_hidden[b]
             x = F.relu(model(x, edge_index))
             x = F.dropout(x, p=args.drop, training=self.training)
 
@@ -170,8 +171,9 @@ class ResBlockGnn(torch.nn.Module):
         for i, m in enumerate(self.sequence):
             x_temp = x_cur
             if self.res_graph and graph_hidden is not None:
-                for i, b in enumerate(batch):
-                    x_cur[i] = x_cur[i] + graph_hidden[b]
+                with torch.no_grad():
+                    for i, b in enumerate(batch):
+                        x[i] = x[i] + graph_hidden[b]
             x_cur = F.relu(m(x_cur + x_pre, edge_index))
             x_cur = F.dropout(x_cur, p=args.drop, training=self.training)
             x_pre = x_temp
@@ -243,6 +245,7 @@ class GraphBlockGnn(torch.nn.Module):
         y, g = self.inner_model2(x, edge_index, batch, g)
         y = self.lin(g)
         return y, g
+
 
 class ResGraphBlockGnn(torch.nn.Module):
     def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
@@ -364,13 +367,11 @@ def debug():
     """
     MixHopConv有问题，存在一个power，需要对隐藏层的输出层的形状，作调整
     """
-
-
     args.debug = True
     args.ep = 1
     results = []
     models = ['GCNConv', 'GATConv', 'TransformerConv']
-    g_models = ['CrossBlockGnn',  'BlockGNN', 'ResBlockGnn','GraphBlockGnn', 'ResGraphBlockGnn', 'CrossGraphBlockGnn']
+    g_models = ['CrossBlockGnn', 'CrossGraphBlockGnn', 'ResBlockGnn', 'ResGraphBlockGnn', 'BlockGNN', 'GraphBlockGnn']
     start_index_list = [0]
     for m in models:
         for gm in g_models:
@@ -399,8 +400,8 @@ def debug():
 def true_train():
     global args
     models = ['GCNConv', 'GATConv', 'TransformerConv']
-    g_models = ['ResBlockGnn', 'BlockGNN', 'ResGraphBlockGnn', 'GraphBlockGnn']
-    ds_list = ['MUTAG', 'DD', 'MSRC_9', 'AIDS']
+    g_models = ['CrossBlockGnn', 'CrossGraphBlockGnn', 'ResBlockGnn', 'ResGraphBlockGnn', 'BlockGNN', 'GraphBlockGnn']
+    ds_list = ['MUTAG', 'AIDS', 'DD', 'MSRC_9']
     h_list = [1, 2, 3, 4, 5, 6, 7]
     start_index_list = [0, 1, 2, 3, 4]
     acc = 0
@@ -429,7 +430,46 @@ def true_train():
                         line = f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={avg_acc:.5f},acc0={acc_list[0]:.5f},acc1={acc_list[1]:.5f},acc2={acc_list[2]:.5f},acc3={acc_list[3]:.5f},acc4={acc_list[4]:.5f},execution_time={execution_time:.5f}'
                         print(line)
                         results.append(line)
-                        fp = '../records/graph_classify_v2_5_fold_1118.txt'
+                        fp = '../records/graph_classify_v2_5_fold_1207.txt'
+                        with open(fp, 'a') as file:
+                            file.writelines(line + '\n')
+    save_records(records=results, is_debug=args.debug, file_name='graph_class')
+
+
+def pre_check_train():
+    global args
+    models = ['GCNConv']
+    g_models = ['CrossBlockGnn', 'CrossGraphBlockGnn', 'ResBlockGnn', 'ResGraphBlockGnn', 'BlockGNN', 'GraphBlockGnn']
+    ds_list = ['MUTAG', 'AIDS']
+    h_list = [1, 2, 3, 4, 5, 6, 7]
+    start_index_list = [0, 1, 2, 3, 4]
+    acc = 0
+    results = []
+    line = ''
+    for ds in ds_list:
+        for dim in [32]:
+            for h in h_list:
+                for m in models:
+                    for gm in g_models:
+                        args.ds = ds
+                        args.name = m
+                        args.dim = dim
+                        args.gname = gm
+                        args.h_layer = h
+                        start_time = time.time()
+                        acc_list = []
+                        for start_index in start_index_list:
+                            try:
+                                acc = train_model(start_index)
+                                acc_list.append(acc)
+                            except Exception as e:
+                                print(f'gm={gm},model={m},h={h},ds={ds},dim={dim},e={e}')
+                        execution_time = time.time() - start_time
+                        avg_acc = sum(acc_list) / len(acc_list)
+                        line = f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={avg_acc:.5f},acc0={acc_list[0]:.5f},acc1={acc_list[1]:.5f},acc2={acc_list[2]:.5f},acc3={acc_list[3]:.5f},acc4={acc_list[4]:.5f},execution_time={execution_time:.5f}'
+                        print(line)
+                        results.append(line)
+                        fp = '../records/graph_classify_v2_5_fold_1207_pre_check.txt'
                         with open(fp, 'a') as file:
                             file.writelines(line + '\n')
     save_records(records=results, is_debug=args.debug, file_name='graph_class')
@@ -446,7 +486,7 @@ def debug_one():
     args.name = 'GCNConv'
     args.dim = 8
     args.h_layer = 3
-    args.gname = 'ResGraphBlockGnn'
+    args.gname = 'CrossGraphBlockGnn'
     start_time = time.time()
     acc_list = []
     for start_index in start_index_list:
@@ -462,4 +502,4 @@ def debug_one():
 
 
 if __name__ == '__main__':
-    debug_one()
+    debug()

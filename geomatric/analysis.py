@@ -65,7 +65,7 @@ def analysis_data(data_path, data_name, data_type='train'):
 
 def analysis_fold_data(data_path, data_name, data_type='train'):
     """
-    analysis_data('../records', 'graph_class__20241113_074727_391.json')
+    analysis_fold_data('../records', 'graph_class__20241201_112212_301.json')
     """
     with open(path.join(data_path, data_name), 'r') as file:
         data = json.load(file)
@@ -77,7 +77,9 @@ def analysis_fold_data(data_path, data_name, data_type='train'):
             for e in arr:
                 pair = e.split('=')
                 m[pair[0]] = pair[1]
-            m['std']=np.std([m['acc0'],m['acc1'],m['acc2'],m['acc3'],m['acc4']])
+            del m['execution_time']
+            accs = [float(m['acc0']), float(m['acc1']), float(m['acc2']), float(m['acc3']), float(m['acc4'])]
+            m['std']=round(np.std(accs),4)
             data_list.append(m)
         ds_list = ['MUTAG', 'DD', 'MSRC_9', 'AIDS']
         for i in ds_list:
@@ -85,9 +87,9 @@ def analysis_fold_data(data_path, data_name, data_type='train'):
             mutag = sorted(mutag, key=lambda x: (float(x['acc']), x['model'], -int(x['h']), -int(x['dim'])),
                            reverse=True)
             print(f'ds={i}')
-            print(''.join(f'{key:<20}' for key in mutag[0].keys()))
+            print(''.join(f'{key:<17}' for key in mutag[0].keys()))
             for m in mutag[:70]:
-                print(''.join(f'{key:<20}' for key in m.values()))
+                print(''.join(f'{key:<17}' for key in m.values()))
 
 
 def show_acc(data_path, data_name, ):
@@ -136,4 +138,4 @@ def search_min_epoch(path):
 
 
 if __name__ == '__main__':
-    statistic_dataset()
+    analysis_fold_data('../records', 'graph_class__20241201_112212_301.json')
