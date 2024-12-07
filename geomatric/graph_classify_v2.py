@@ -21,7 +21,9 @@ torch.cuda.manual_seed(seed)  # 为当前GPU设置随机种子
 torch.cuda.manual_seed_all(seed)  # 为所有GPU设置随机种子
 np.random.seed(seed)  # 为NumPy设置随机种子
 random.seed(seed)  # 为Python的random模块设置随机种子
+torch.autograd.set_detect_anomaly(True)
 import argparse
+import traceback
 from basics import *
 
 #########################################################################
@@ -229,11 +231,11 @@ class CrossBlockGnn(torch.nn.Module):
         return y, global_mean
 
 
-class ResGraphBlockGnn(torch.nn.Module):
+class GraphBlockGnn(torch.nn.Module):
     def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
-        super(ResGraphBlockGnn, self).__init__()
-        self.inner_model1 = ResBlockGnn(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
-        self.inner_model2 = ResBlockGnn(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
+        super(GraphBlockGnn, self).__init__()
+        self.inner_model1 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
+        self.inner_model2 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
@@ -242,12 +244,11 @@ class ResGraphBlockGnn(torch.nn.Module):
         y = self.lin(g)
         return y, g
 
-
-class GraphBlockGnn(torch.nn.Module):
+class ResGraphBlockGnn(torch.nn.Module):
     def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
-        super(GraphBlockGnn, self).__init__()
-        self.inner_model1 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
-        self.inner_model2 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
+        super(ResGraphBlockGnn, self).__init__()
+        self.inner_model1 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
+        self.inner_model2 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
@@ -363,13 +364,13 @@ def debug():
     """
     MixHopConv有问题，存在一个power，需要对隐藏层的输出层的形状，作调整
     """
-    import traceback
+
 
     args.debug = True
     args.ep = 1
     results = []
     models = ['GCNConv', 'GATConv', 'TransformerConv']
-    g_models = ['CrossBlockGnn', 'CrossGraphBlockGnn', 'BlockGNN', 'ResBlockGnn', 'ResGraphBlockGnn', 'GraphBlockGnn']
+    g_models = ['CrossBlockGnn',  'BlockGNN', 'ResBlockGnn','GraphBlockGnn', 'ResGraphBlockGnn', 'CrossGraphBlockGnn']
     start_index_list = [0]
     for m in models:
         for gm in g_models:
@@ -383,9 +384,11 @@ def debug():
             for start_index in start_index_list:
                 try:
                     acc = train_model(start_index)
+                    print(f'acc={acc},gm={gm}')
                     acc_list.append(acc)
                 except Exception as e:
                     print(e)
+                    print(f'error gm ={gm}')
                     traceback.print_exc()
             execution_time = time.time() - start_time
             avg_acc = sum(acc_list) / len(acc_list)
@@ -437,23 +440,26 @@ def debug_one():
     args.ep = 1
     results = []
     models = ['GCNConv', 'GATConv', 'TransformerConv']
-    g_models = ['BlockGNN', 'ResBlockGnn', 'ResGraphBlockGnn', 'GraphBlockGnn']
-    start_index_list = [0, 1, 2, 3, 4]
+    g_models = ['ResGraphBlockGnn', 'CrossGraphBlockGnn']
+    start_index_list = [0]
     args.ds = 'MUTAG'
     args.name = 'GCNConv'
     args.dim = 8
     args.h_layer = 3
-    args.gname = 'GraphBlockGnn'
+    args.gname = 'ResGraphBlockGnn'
     start_time = time.time()
     acc_list = []
     for start_index in start_index_list:
         try:
             acc = train_model(start_index)
             acc_list.append(acc)
+            print(f'acc={acc},gm={args.gname}')
         except Exception as e:
             print(e)
+            print(f'error gm ={args.gname}')
+            traceback.print_exc()
     print(acc_list)
 
 
 if __name__ == '__main__':
-    debug()
+    debug_one()

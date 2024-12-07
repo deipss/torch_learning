@@ -63,6 +63,33 @@ def analysis_data(data_path, data_name, data_type='train'):
                 print(''.join(f'{key:<20}' for key in m.values()))
 
 
+def analysis_fold_data(data_path, data_name, data_type='train'):
+    """
+    analysis_data('../records', 'graph_class__20241113_074727_391.json')
+    """
+    with open(path.join(data_path, data_name), 'r') as file:
+        data = json.load(file)
+        records = data['records']
+        data_list = []
+        for record in records:
+            m = {}
+            arr = record.split(',')
+            for e in arr:
+                pair = e.split('=')
+                m[pair[0]] = pair[1]
+            m['std']=np.std([m['acc0'],m['acc1'],m['acc2'],m['acc3'],m['acc4']])
+            data_list.append(m)
+        ds_list = ['MUTAG', 'DD', 'MSRC_9', 'AIDS']
+        for i in ds_list:
+            mutag = filter(lambda x: x['ds'] == i, data_list)
+            mutag = sorted(mutag, key=lambda x: (float(x['acc']), x['model'], -int(x['h']), -int(x['dim'])),
+                           reverse=True)
+            print(f'ds={i}')
+            print(''.join(f'{key:<20}' for key in mutag[0].keys()))
+            for m in mutag[:70]:
+                print(''.join(f'{key:<20}' for key in m.values()))
+
+
 def show_acc(data_path, data_name, ):
     """
 
