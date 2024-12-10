@@ -7,7 +7,8 @@ import random
 
 from torch_geometric.loader import DataLoader
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv, GATConv, TransformerConv, MixHopConv, DirGNNConv, AntiSymmetricConv
+# MixHopConv, DirGNNConv, AntiSymmetricConv
+from torch_geometric.nn import GCNConv, GATConv, TransformerConv
 from torch_geometric.nn import global_mean_pool
 from torch_geometric.datasets import TUDataset
 import time
@@ -24,7 +25,10 @@ random.seed(seed)  # 为Python的random模块设置随机种子
 torch.autograd.set_detect_anomaly(True)
 import argparse
 import traceback
-from basics import *
+from datetime import datetime
+import json
+import torch
+import os
 
 #########################################################################
 # 创建 ArgumentParser 对象
@@ -48,9 +52,86 @@ parser.add_argument('--min_acc', type=int, default=0.1)
 parser.add_argument('--debug', type=bool, default=False)
 # 解析命令行参数
 args = parser.parse_args()
-
-
 #########################################################################
+
+
+separator = '__'
+
+
+def print_loss(epoch=0, is_debug=False, **param):
+    """
+    输出loss
+    param = {'loss':'111',acc:'3333'}
+    """
+    if is_debug:
+        return
+    # 将时间格式化为字符串
+    formatted_time = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+    logs = ""
+    for k, v in param.items():
+        if isinstance(v, float):
+            logs += "{0}={1:.5f}\t".format(k, v)
+        elif isinstance(v, int):
+            logs += "{0}={1:04d}\t".format(k, v)
+        else:
+            logs += "{0}={1}\t".format(k, v)
+    print(f'{formatted_time}\t epoch={epoch}\t{logs}')  # 输出格式：2023-10-21 22:30:45
+
+
+def save_json(records=None, is_debug=False, **param):
+    """
+    保存训练记录
+    """
+    if is_debug:
+        return
+    formatted_time = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+    logs = ""
+    for k, v in param.items():
+        if isinstance(v, float):
+            logs += "{0}={1:.5f}_".format(k, v)
+        elif isinstance(v, int):
+            logs += "{0}={1:04d}_".format(k, v)
+        else:
+            logs += "{0}={1}_".format(k, v)
+    f_name = separator.join([logs, formatted_time])
+    f_name += '.json'
+    fpath = os.path.join(data_path, 'logs', f_name)
+    _ = {'records': records, 'param': param}
+    with open(fpath, 'w') as file:
+        json.dump(_, file)
+    return f_name
+
+
+def save_records(records=None, is_debug=False, file_name=''):
+    """
+    保存训练记录
+    """
+    if is_debug:
+        return
+    formatted_time = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+    f_name = separator.join([file_name, formatted_time])
+    f_name += '.json'
+    fpath = os.path.join(data_path, 'records', f_name)
+    _ = {'records': records}
+    with open(fpath, 'w') as file:
+        json.dump(_, file)
+    print(f_name + " are saved on " + fpath)
+
+
+def save_model(model=None, is_debug=False, **model_param):
+    """
+    保存模型
+    """
+    if is_debug:
+        return
+    formatted_time = datetime.now().strftime("%Y%m%d_%H")
+    dict_format = separator.join(["{0}={1}_".format(k, v) for k, v in model_param.items()])
+    f_name = separator.join([dict_format, formatted_time])
+    f_name += '.pkl'
+    fpath = os.path.join(data_path, 'pkls', f_name)
+    torch.save(model.state_dict, fpath)
+    print(f_name + ' model saved on ' + fpath)
+
 
 def statistic_dataset(ds):
     dataset = TUDataset(root=os.path.join(data_path, 'TUDataset'), name=ds)
@@ -250,8 +331,8 @@ class GraphBlockGnn(torch.nn.Module):
 class ResGraphBlockGnn(torch.nn.Module):
     def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
         super(ResGraphBlockGnn, self).__init__()
-        self.inner_model1 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
-        self.inner_model2 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
+        self.inner_model1 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
+        self.inner_model2 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
@@ -268,7 +349,7 @@ class CrossGraphBlockGnn(torch.nn.Module):
         # todo 使用可以配套的参数
         for i in range(4):
             self.sequence.add_module(f'{model_name}{i}',
-                                     BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True))
+                                     BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False))
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
@@ -351,14 +432,14 @@ def train_model(start_index):
         records.append({'epoch': epoch, 'loss': loss.item(), 'test_acc': test_acc, 'train_acc': train_acc})
         epoch += 1
     args.max_acc = max_acc
-    save_json(records=records, is_debug=args.debug, **vars(args))
-    return max_acc
+    f_name = save_json(records=records, is_debug=args.debug, **vars(args))
+    return max_acc, f_name
 
 
 def download_dataset():
     # ['MUTAG', 'DD', 'COIL-RAG', 'MSRC_9', 'AIDS', 'Mutagenicity']
     # ['MUTAG', 'DD', 'COIL-RAG', 'MSRC_9', 'AIDS', 'naphthalene', 'QM9', 'salicylic_acid', 'Mutagenicity']:
-    for i in ['MUTAG', 'DD', 'COIL-RAG', 'MSRC_9', 'AIDS', 'Mutagenicity']:
+    for i in ['MUTAG', 'DD', 'MSRC_9', 'AIDS']:
         args.ds = i
         load_data()
 
@@ -367,7 +448,7 @@ def debug():
     """
     MixHopConv有问题，存在一个power，需要对隐藏层的输出层的形状，作调整
     """
-    args.debug = True
+    args.debug = False
     args.ep = 1
     results = []
     models = ['GCNConv', 'GATConv', 'TransformerConv']
@@ -384,7 +465,7 @@ def debug():
             acc_list = []
             for start_index in start_index_list:
                 try:
-                    acc = train_model(start_index)
+                    acc, f_name = train_model(start_index)
                     print(f'acc={acc},gm={gm}')
                     acc_list.append(acc)
                 except Exception as e:
@@ -419,18 +500,22 @@ def true_train():
                         args.h_layer = h
                         start_time = time.time()
                         acc_list = []
+                        f_name = None
                         for start_index in start_index_list:
                             try:
-                                acc = train_model(start_index)
+                                acc, f_name = train_model(start_index)
                                 acc_list.append(acc)
                             except Exception as e:
                                 print(f'gm={gm},model={m},h={h},ds={ds},dim={dim},e={e}')
                         execution_time = time.time() - start_time
                         avg_acc = sum(acc_list) / len(acc_list)
-                        line = f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={avg_acc:.5f},acc0={acc_list[0]:.5f},acc1={acc_list[1]:.5f},acc2={acc_list[2]:.5f},acc3={acc_list[3]:.5f},acc4={acc_list[4]:.5f},execution_time={execution_time:.5f}'
+                        line = (
+                            f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={avg_acc:.5f},acc0={acc_list[0]:.5f},acc1={acc_list[1]:.5f}'
+                            f',acc2={acc_list[2]:.5f},acc3={acc_list[3]:.5f},acc4={acc_list[4]:.5f},execution_time={execution_time:.3f}'
+                            f',f_name={f_name}')
                         print(line)
                         results.append(line)
-                        fp = '../records/graph_classify_v2_5_fold_1207.txt'
+                        fp = '../records/graph_classify_v2_5_fold_1210.txt'
                         with open(fp, 'a') as file:
                             file.writelines(line + '\n')
     save_records(records=results, is_debug=args.debug, file_name='graph_class')
@@ -458,15 +543,19 @@ def pre_check_train():
                         args.h_layer = h
                         start_time = time.time()
                         acc_list = []
+                        f_name = None
                         for start_index in start_index_list:
                             try:
-                                acc = train_model(start_index)
+                                acc, f_name = train_model(start_index)
                                 acc_list.append(acc)
                             except Exception as e:
                                 print(f'gm={gm},model={m},h={h},ds={ds},dim={dim},e={e}')
                         execution_time = time.time() - start_time
                         avg_acc = sum(acc_list) / len(acc_list)
-                        line = f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={avg_acc:.5f},acc0={acc_list[0]:.5f},acc1={acc_list[1]:.5f},acc2={acc_list[2]:.5f},acc3={acc_list[3]:.5f},acc4={acc_list[4]:.5f},execution_time={execution_time:.5f}'
+                        line = (
+                            f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={avg_acc:.5f},acc0={acc_list[0]:.5f},acc1={acc_list[1]:.5f}'
+                            f',acc2={acc_list[2]:.5f},acc3={acc_list[3]:.5f},acc4={acc_list[4]:.5f},execution_time={execution_time:.3f}'
+                            f',f_name={f_name}')
                         print(line)
                         results.append(line)
                         fp = '../records/graph_classify_v2_5_fold_1207_pre_check.txt'
@@ -491,7 +580,7 @@ def debug_one():
     acc_list = []
     for start_index in start_index_list:
         try:
-            acc = train_model(start_index)
+            acc, f_name = train_model(start_index)
             acc_list.append(acc)
             print(f'acc={acc},gm={args.gname}')
         except Exception as e:
