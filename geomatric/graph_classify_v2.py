@@ -502,4 +502,4 @@ def debug_one():
 
 
 if __name__ == '__main__':
-    debug()
+    pre_check_train()
