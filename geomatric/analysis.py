@@ -137,5 +137,25 @@ def search_min_epoch(path):
     print(max_epoch)
 
 
+def show_loss(file=None):
+    with open(file, 'r') as file:
+        data = json.load(file)
+        records = data['records']
+        params = data['param']
+        sorted(records, key=lambda x: x['epoch'])
+        # 提取epoch和loss数据
+        epochs = [i['epoch'] for i in records]
+        losses = [i['loss'] for i in records]
+
+        # 使用Matplotlib绘制曲线图
+        plt.figure(figsize=(10, 6))
+        plt.plot(epochs, losses, marker='o', linestyle='-', color='b')
+        plt.title(f'{params["name"]}-{params["ds"]}-{params["hidden"]}')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.grid(True)
+        plt.show()
+
+
 if __name__ == '__main__':
     analysis_fold_data('../records', 'graph_class__20241201_112212_301.json')
