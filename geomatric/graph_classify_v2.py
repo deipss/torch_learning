@@ -14,7 +14,7 @@ from torch_geometric.datasets import TUDataset
 import time
 
 _device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-data_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
+data_path = '/root/autodl-tmp' if platform.system() == 'Linux' else '../data'
 seed = 1024
 torch.manual_seed(seed)
 torch.manual_seed(seed)  # 为当前CPU设置随机种子
@@ -175,8 +175,8 @@ def load_data(start_index=0):
     train_dataset = [item for sublist in train_dataset for item in sublist]
     test_dataset = dataset[gap_start: gap_end]
 
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False)
 
     return train_loader, test_loader, dataset
 
@@ -591,4 +591,5 @@ def debug_one():
 
 
 if __name__ == '__main__':
-    debug()
+    # nohup python graph_classify_v2.py > graph_classify_v2_1211.log 2>&1 &
+    pre_check_train()
