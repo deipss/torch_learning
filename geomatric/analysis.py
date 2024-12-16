@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 import json
 from os import path
@@ -7,8 +6,8 @@ import matplotlib.pyplot as plt
 from torch_geometric.datasets import TUDataset
 import platform
 
-
 data_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
+
 
 def statistic_dataset():
     """
@@ -37,6 +36,8 @@ def statistic_dataset():
         print(f'Has isolated nodes: {data.has_isolated_nodes()}')
         print(f'Has self-loops: {data.has_self_loops()}')
         print(f'Is undirected: {data.is_undirected()}')
+
+
 def analysis_data(data_path, data_name, data_type='train'):
     """
     analysis_data('../records', 'graph_class__20241113_074727_391.json')
@@ -76,20 +77,24 @@ def analysis_fold_data(data_path, data_name, data_type='train'):
             arr = record.split(',')
             for e in arr:
                 pair = e.split('=')
+                if pair[0] in ['execution_time', 'f_name']:
+                    continue
                 m[pair[0]] = pair[1]
-            del m['execution_time']
             accs = [float(m['acc0']), float(m['acc1']), float(m['acc2']), float(m['acc3']), float(m['acc4'])]
-            m['std']=round(np.std(accs),4)
+            m['std'] = round(np.std(accs), 4)
             data_list.append(m)
         ds_list = ['MUTAG', 'DD', 'MSRC_9', 'AIDS']
         for i in ds_list:
             mutag = filter(lambda x: x['ds'] == i, data_list)
+
             mutag = sorted(mutag, key=lambda x: (float(x['acc']), x['model'], -int(x['h']), -int(x['dim'])),
                            reverse=True)
+            if len(mutag) < 1:
+                continue
             print(f'ds={i}')
-            print(''.join(f'{key:<17}' for key in mutag[0].keys()))
+            print(''.join(f'{key:<15}' for key in mutag[0].keys()))
             for m in mutag[:70]:
-                print(''.join(f'{key:<17}' for key in m.values()))
+                print(''.join(f'{key:<15}' for key in m.values()))
 
 
 def show_acc(data_path, data_name, ):
@@ -158,4 +163,4 @@ def show_loss(file=None):
 
 
 if __name__ == '__main__':
-    analysis_fold_data('../records', 'graph_class__20241201_112212_301.json')
+    analysis_fold_data('../records', 'graph_class__20241213_192005_415.json')

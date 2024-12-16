@@ -483,7 +483,7 @@ def true_train():
     models = ['GCNConv', 'GATConv', 'TransformerConv']
     g_models = ['CrossBlockGnn', 'CrossGraphBlockGnn', 'ResBlockGnn', 'ResGraphBlockGnn', 'BlockGNN', 'GraphBlockGnn']
     ds_list = ['MUTAG', 'AIDS', 'DD', 'MSRC_9']
-    h_list = [1, 2, 3, 4, 5, 6, 7]
+    h_list = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     start_index_list = [0, 1, 2, 3, 4]
     acc = 0
     results = []
