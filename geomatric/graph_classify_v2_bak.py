@@ -14,7 +14,7 @@ from torch_geometric.datasets import TUDataset
 import time
 
 _device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-data_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
+data_path = '/root/autodl-tmp' if platform.system() == 'Linux' else '../data'
 seed = 1024
 torch.manual_seed(seed)
 torch.manual_seed(seed)  # 为当前CPU设置随机种子
@@ -42,6 +42,7 @@ parser.add_argument('--gname', type=str, default='mlp')
 parser.add_argument('--ds', type=str, default='MUTAG', help='IMDB-BINARY,REDDIT-BINARY,PROTEINS')
 parser.add_argument('--max_acc', type=float, default=0.01)
 parser.add_argument('--ep', type=int, default=1000 * 1.5)
+parser.add_argument('--heads', type=int,nargs='+', default=[1,2,3,4,5,6,7,8,9])
 parser.add_argument('--lr', default=1e-2, type=float, help='Learning rate')
 parser.add_argument('--drop', type=float, default=0.6)
 parser.add_argument('--loss', type=float, default=0.001)
@@ -65,13 +66,13 @@ def print_loss(epoch=0, is_debug=False, **param):
     if is_debug:
         return
     # 将时间格式化为字符串
-    formatted_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+    formatted_time = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
     logs = ""
     for k, v in param.items():
         if isinstance(v, float):
-            logs += "{0}={1:.4f}\t".format(k, v)
+            logs += "{0}={1:.5f}\t".format(k, v)
         elif isinstance(v, int):
-            logs += "{0}={1:03d}\t".format(k, v)
+            logs += "{0}={1:04d}\t".format(k, v)
         else:
             logs += "{0}={1}\t".format(k, v)
     print(f'{formatted_time}\t epoch={epoch}\t{logs}')  # 输出格式：2023-10-21 22:30:45
@@ -81,21 +82,20 @@ def save_json(records=None, is_debug=False, **param):
     """
     保存训练记录
     """
+    if is_debug:
+        return
     formatted_time = datetime.now().strftime("%Y%m%d_%H%M%S")
     logs = ""
     for k, v in param.items():
         if isinstance(v, float):
-            logs += "{0}={1:.4f}_".format(k, v)
+            logs += "{0}={1:.5f}_".format(k, v)
         elif isinstance(v, int):
-            logs += "{0}={1:03d}_".format(k, v)
+            logs += "{0}={1:04d}_".format(k, v)
         else:
             logs += "{0}={1}_".format(k, v)
     f_name = separator.join([logs, formatted_time])
     f_name += '.json'
     fpath = os.path.join(data_path, 'logs', f_name)
-    if is_debug:
-        print("save_json f_name" + f_name)
-        return f_name
     _ = {'records': records, 'param': param}
     with open(fpath, 'w') as file:
         json.dump(_, file)
@@ -106,17 +106,16 @@ def save_records(records=None, is_debug=False, file_name=''):
     """
     保存训练记录
     """
-    formatted_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+    if is_debug:
+        return
+    formatted_time = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
     f_name = separator.join([file_name, formatted_time])
     f_name += '.json'
     fpath = os.path.join(data_path, 'records', f_name)
     _ = {'records': records}
-    if is_debug:
-        print("save_records fpath=" + fpath)
-        return
     with open(fpath, 'w') as file:
         json.dump(_, file)
-    print(f_name + " are saved")
+    print(f_name + " are saved on " + fpath)
 
 
 def save_model(model=None, is_debug=False, **model_param):
@@ -176,8 +175,8 @@ def load_data(start_index=0):
     train_dataset = [item for sublist in train_dataset for item in sublist]
     test_dataset = dataset[gap_start: gap_end]
 
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False)
 
     return train_loader, test_loader, dataset
 
@@ -428,8 +427,8 @@ def train_model(start_index):
         test_acc = test(test_loader)
         if (max_acc < test_acc):
             max_acc = test_acc
-            # print_loss(epoch=epoch, is_debug=args.debug, loss=loss.item(), test_acc=test_acc, train_acc=train_acc,
-            #            max_acc=max_acc)
+            print_loss(epoch=epoch, is_debug=args.debug, loss=loss.item(), test_acc=test_acc, train_acc=train_acc,
+                       max_acc=max_acc)
         records.append({'epoch': epoch, 'loss': loss.item(), 'test_acc': test_acc, 'train_acc': train_acc})
         epoch += 1
     args.max_acc = max_acc
@@ -452,7 +451,7 @@ def print_gpu_memory_usage():
 
 
 def debug():
-    """ python graph_classify_v2.py --dim 64 --name GCNConv --ds AIDS --ep 1 --debug Ture
+    """
     MixHopConv有问题，存在一个power，需要对隐藏层的输出层的形状，作调整
     """
     args.debug = False
@@ -485,51 +484,57 @@ def debug():
             print(line)
 
 
-def true_train():
+def true_train(ds=None, h_list=None):
     global args
-    # models = ['GCNConv', 'GATConv', 'TransformerConv']
+    models = ['GCNConv', 'GATConv', 'TransformerConv']
     g_models = ['CrossBlockGnn', 'CrossGraphBlockGnn', 'ResBlockGnn', 'ResGraphBlockGnn', 'BlockGNN', 'GraphBlockGnn']
-    # ds_list = ['MUTAG', 'AIDS', 'DD', 'MSRC_9']
+    ds_list = ['MUTAG', 'AIDS', 'DD', 'MSRC_9']
+    h_list = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     start_index_list = [0, 1, 2, 3, 4]
     results = []
-    for h in [1, 2, 3, 4, 5]:
-        for gm in g_models:
-            args.gname = gm
-            args.h_layer = h
-            start_time = time.time()
-            accuracies = []
-            files = []
-            for start_index in start_index_list:
-                try:
-                    acc, f_name = train_model(start_index)
-                    accuracies.append(acc)
-                    files.append(f_name)
-                except Exception as e:
-                    print(f'gm={gm},model={args.name},h={h},ds={args.ds},dim={args.dim},e={e}')
-            execution_time = time.time() - start_time
-            avg_acc = sum(accuracies) / len(accuracies)
-            line = (
-                f'gm={gm},model={args.name},h={h},ds={args.ds},dim={args.dim},'
-                f'acc={avg_acc:.5f}'
-                f',acc0={accuracies[0]:.5f}'
-                f',acc1={accuracies[1]:.5f}'
-                f',acc2={accuracies[2]:.5f}'
-                f',acc3={accuracies[3]:.5f}'
-                f',acc4={accuracies[4]:.5f}'
-                f',f0={files[0]}'
-                f',f1={files[1]}'
-                f',f2={files[2]}'
-                f',f3={files[3]}'
-                f',f4={files[4]}'
-                f',execution_time={execution_time:.3f}'
-            )
-            print(line)
-            results.append(line)
-            filename = "graph_classify_v2_5_fold_0107_" + "_".join([args.ds, args.name, str(args.dim)])
-            fp = '../records/' + filename
-            with open(fp, 'a') as file:
-                file.writelines(line + '\n')
-            save_records(records=results, is_debug=args.debug, file_name=filename)
+    for ds in ds_list:
+        for dim in [32, 64]:
+            for h in h_list:
+                for m in models:
+                    for gm in g_models:
+                        args.ds = ds
+                        args.name = m
+                        args.dim = dim
+                        args.gname = gm
+                        args.h_layer = h
+                        start_time = time.time()
+                        accuracies = []
+                        files = []
+                        for start_index in start_index_list:
+                            try:
+                                acc, f_name = train_model(start_index)
+                                accuracies.append(acc)
+                                files.append(f_name)
+                            except Exception as e:
+                                print(f'gm={gm},model={m},h={h},ds={ds},dim={dim},e={e}')
+                        execution_time = time.time() - start_time
+                        avg_acc = sum(accuracies) / len(accuracies)
+                        line = (
+                            f'gm={gm},model={m},h={h},ds={ds},dim={dim},'
+                            f'acc={avg_acc:.5f}'
+                            f',acc0={accuracies[0]:.5f}'
+                            f',acc1={accuracies[1]:.5f}'
+                            f',acc2={accuracies[2]:.5f}'
+                            f',acc3={accuracies[3]:.5f}'
+                            f',acc4={accuracies[4]:.5f}'
+                            f',f0={files[0]}'
+                            f',f1={files[1]}'
+                            f',f2={files[2]}'
+                            f',f3={files[3]}'
+                            f',f4={files[4]}'
+                            f',execution_time={execution_time:.3f}'
+                        )
+                        print(line)
+                        results.append(line)
+                        fp = '../records/graph_classify_v2_5_fold_0107.txt'
+                        with open(fp, 'a') as file:
+                            file.writelines(line + '\n')
+    save_records(records=results, is_debug=args.debug, file_name='graph_class')
 
 
 def pre_check_train():
@@ -601,15 +606,5 @@ def debug_one():
     print(acc_list)
 
 
-def tools():
-    shell = 'nohup python graph_classify_v2.py --dim {dim} --name {m} --ds {ds} > graph_classify_v3_{dim}_{m}_{ds}.log 2>&1 &'
-    models = ['GCNConv', 'GATConv', 'TransformerConv']
-    ds_list = ['MUTAG', 'AIDS', 'DD', 'MSRC_9']
-    for ds in ds_list:
-        for dim in [32, 64]:
-                for m in models:
-                    print(shell.format(dim=dim, m=m, ds=ds))
-
-
 if __name__ == '__main__':
-    true_train()
+    pass

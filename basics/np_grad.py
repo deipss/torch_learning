@@ -14,9 +14,11 @@ def arr():
     print(d)
     e = np.full((480, 120, 3), 4, np.uint8)
     print(e)
+    # print matrix E
     f = np.identity(7)
     print(f)
-    g = np.eye(3, k=1)
+    #建5x4的矩阵，主对角线以下的第 2 个对角线上的元素为1
+    g = np.eye(3, k=-2)
     print(g)
 
 
@@ -56,4 +58,4 @@ def grad_loss():
 
 
 if __name__ == '__main__':
-    grad_loss()
+    arr()
