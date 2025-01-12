@@ -525,7 +525,7 @@ def true_train():
             )
             print(line)
             results.append(line)
-            filename = "graph_classify_v2_5_fold_0107_" + "_".join([args.ds, args.name, str(args.dim)])
+            filename = "graph_classify_v3_5_fold_0107_" + "_".join([args.ds, args.name, str(args.dim)])
             fp = '../records/' + filename
             with open(fp, 'a') as file:
                 file.writelines(line + '\n')
