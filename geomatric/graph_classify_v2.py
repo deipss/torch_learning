@@ -175,8 +175,8 @@ def load_data(start_index=0):
     train_dataset = [item for sublist in train_dataset for item in sublist]
     test_dataset = dataset[gap_start: gap_end]
 
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
     return train_loader, test_loader, dataset
 
@@ -483,7 +483,7 @@ def true_train():
     models = ['GCNConv', 'GATConv', 'TransformerConv']
     g_models = ['CrossBlockGnn', 'CrossGraphBlockGnn', 'ResBlockGnn', 'ResGraphBlockGnn', 'BlockGNN', 'GraphBlockGnn']
     ds_list = ['MUTAG', 'AIDS', 'DD', 'MSRC_9']
-    h_list = [1, 2, 3, 4, 5, 6, 7]
+    h_list = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     start_index_list = [0, 1, 2, 3, 4]
     acc = 0
     results = []
@@ -591,4 +591,4 @@ def debug_one():
 
 
 if __name__ == '__main__':
-    pre_check_train()
+    true_train()

@@ -1,0 +1,24 @@
+nohup: ignoring input
+20241217_092301_074	 epoch=0	loss=0.61673	test_acc=0.62162	train_acc=0.67550	max_acc=0.62162	
+gm=CrossBlockGnn,model=GCNConv,h=1,ds=MUTAG,dim=32,e=[Errno 2] No such file or directory: '/data/ai_data/logs/name=GCNConv_gname=CrossBlockGnn_ds=MUTAG_max_acc=0.62162_ep=1500.00000_heads=0004_lr=0.01000_drop=0.60000_loss=0.00100_dim=0032_h_layer=0001_min_acc=0.10000_debug=0000___20241217_092551_028.json'
+20241217_092551_169	 epoch=0	loss=0.63850	test_acc=0.64865	train_acc=0.66887	max_acc=0.64865	
+gm=CrossBlockGnn,model=GCNConv,h=1,ds=MUTAG,dim=32,e=[Errno 2] No such file or directory: '/data/ai_data/logs/name=GCNConv_gname=CrossBlockGnn_ds=MUTAG_max_acc=0.64865_ep=1500.00000_heads=0004_lr=0.01000_drop=0.60000_loss=0.00100_dim=0032_h_layer=0001_min_acc=0.10000_debug=0000___20241217_092840_857.json'
+20241217_092840_995	 epoch=0	loss=0.62241	test_acc=0.64865	train_acc=0.66887	max_acc=0.64865	
+20241217_092851_371	 epoch=92	loss=0.51108	test_acc=0.67568	train_acc=0.66887	max_acc=0.67568	
+20241217_092938_414	 epoch=507	loss=0.51992	test_acc=0.70270	train_acc=0.70199	max_acc=0.70270	
+20241217_092939_090	 epoch=513	loss=0.54230	test_acc=0.78378	train_acc=0.70199	max_acc=0.78378	
+20241217_092952_912	 epoch=635	loss=0.48760	test_acc=0.81081	train_acc=0.68874	max_acc=0.81081	
+gm=CrossBlockGnn,model=GCNConv,h=1,ds=MUTAG,dim=32,e=[Errno 2] No such file or directory: '/data/ai_data/logs/name=GCNConv_gname=CrossBlockGnn_ds=MUTAG_max_acc=0.81081_ep=1500.00000_heads=0004_lr=0.01000_drop=0.60000_loss=0.00100_dim=0032_h_layer=0001_min_acc=0.10000_debug=0000___20241217_093130_742.json'
+20241217_093130_880	 epoch=0	loss=0.61244	test_acc=0.72973	train_acc=0.64901	max_acc=0.72973	
+20241217_093142_282	 epoch=101	loss=0.53056	test_acc=0.75676	train_acc=0.66887	max_acc=0.75676	
+20241217_093244_484	 epoch=651	loss=0.57800	test_acc=0.78378	train_acc=0.70199	max_acc=0.78378	
+gm=CrossBlockGnn,model=GCNConv,h=1,ds=MUTAG,dim=32,e=[Errno 2] No such file or directory: '/data/ai_data/logs/name=GCNConv_gname=CrossBlockGnn_ds=MUTAG_max_acc=0.78378_ep=1500.00000_heads=0004_lr=0.01000_drop=0.60000_loss=0.00100_dim=0032_h_layer=0001_min_acc=0.10000_debug=0000___20241217_093420_370.json'
+20241217_093420_509	 epoch=0	loss=0.52419	test_acc=0.56757	train_acc=0.68874	max_acc=0.56757	
+20241217_093559_944	 epoch=879	loss=0.45965	test_acc=0.59459	train_acc=0.71523	max_acc=0.59459	
+gm=CrossBlockGnn,model=GCNConv,h=1,ds=MUTAG,dim=32,e=[Errno 2] No such file or directory: '/data/ai_data/logs/name=GCNConv_gname=CrossBlockGnn_ds=MUTAG_max_acc=0.59459_ep=1500.00000_heads=0004_lr=0.01000_drop=0.60000_loss=0.00100_dim=0032_h_layer=0001_min_acc=0.10000_debug=0000___20241217_093710_065.json'
+Traceback (most recent call last):
+  File "/data/workspace/torch_learning/geomatric/graph_classify_v2.py", line 594, in <module>
+    true_train()
+  File "/data/workspace/torch_learning/geomatric/graph_classify_v2.py", line 511, in true_train
+    avg_acc = sum(acc_list) / len(acc_list)
+ZeroDivisionError: division by zero
