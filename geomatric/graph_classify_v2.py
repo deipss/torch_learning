@@ -517,8 +517,8 @@ def true_train():
             args.h_layer = h
             if count < exist_row:
                 print(f'{count} < {exist_row} ,continue')
+                count += 1
                 continue
-            count+=1
             start_time = time.time()
             accuracies = []
             files = []
