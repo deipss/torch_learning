@@ -492,10 +492,20 @@ def true_train():
     # ds_list = ['MUTAG', 'AIDS', 'DD', 'MSRC_9']
     start_index_list = [0, 1, 2, 3, 4]
     results = []
+    count = 1
+    filename = "graph_classify_v3_5_fold_0107_" + "_".join([args.ds, args.name, str(args.dim)])
+    fp = '../records/' + filename
+    exist_row = 0
+    with open(fp, 'a+') as file:
+        exist_row = sum(1 for _ in file)
     for h in [1, 2, 3, 4, 5]:
         for gm in g_models:
             args.gname = gm
             args.h_layer = h
+            if count < exist_row:
+                print(f'{count} < {exist_row} ,continue')
+                continue
+            count+=1
             start_time = time.time()
             accuracies = []
             files = []
@@ -525,8 +535,6 @@ def true_train():
             )
             print(line)
             results.append(line)
-            filename = "graph_classify_v3_5_fold_0107_" + "_".join([args.ds, args.name, str(args.dim)])
-            fp = '../records/' + filename
             with open(fp, 'a') as file:
                 file.writelines(line + '\n')
             save_records(records=results, is_debug=args.debug, file_name=filename)
