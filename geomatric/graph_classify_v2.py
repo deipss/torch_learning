@@ -451,6 +451,20 @@ def print_gpu_memory_usage():
     return allocated, reserved
 
 
+def count_lines(file_path):
+    # 检查文件是否存在
+    if os.path.exists(file_path):
+        print(f"文件 {file_path} 存在。")
+
+        # 计算文件中的行数
+        with open(file_path, 'r', encoding='utf-8') as file:
+            line_count = sum(1 for line in file)
+        print(f"文件共有 {line_count} 行。")
+        return line_count
+    else:
+        print(f"文件 {file_path} 不存在。")
+        return 0
+
 def debug():
     """ python graph_classify_v2.py --dim 64 --name GCNConv --ds AIDS --ep 1 --debug Ture
     MixHopConv有问题，存在一个power，需要对隐藏层的输出层的形状，作调整
@@ -495,9 +509,8 @@ def true_train():
     count = 1
     filename = "graph_classify_v3_5_fold_0107_" + "_".join([args.ds, args.name, str(args.dim)])
     fp = '../records/' + filename
-    exist_row = 0
-    with open(fp, 'a+') as file:
-        exist_row = sum(1 for _ in file)
+    print(f'file name ={fp}')
+    exist_row = count_lines(fp)
     for h in [1, 2, 3, 4, 5]:
         for gm in g_models:
             args.gname = gm
