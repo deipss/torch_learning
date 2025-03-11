@@ -1,0 +1,1744 @@
+侧摆振动=swaying(vibration)
+侧滚振动=rolling(vibration)
+超大货物限界=clearance/limit  for out-of-gauge loading(OGL)
+超大货物限界=limit  for out-of-gauge loading(OGL)
+车网关系 train-0CS interaction  车线关系 train-track interaction 沉 降 settlement
+and Operation System 粗料石 scabbled  stone  措施 measure
+大秦线 Datong-Qinhuangdao railway(line)
+点头振动 pitching(vibration);nodding (vibration)
+(EMC)
+改建铁路 reconstructed railway(rehabilitation)
+高速铁路 High-Speed  Railway(HSR)
+供暖系统 Heating Ventilation and Air Conditioning(HVAC)
+构造速度 construction speed;design speed 股份制改造(国铁)/国有企业改制
+concession 挂钩 hook
+freight-only track 机车 locomotive
+机车综合无线通信设备 Cab Integrated Radio(CIR)
+contact system 接头 joint
+列车运行图 Train Working Diagram(TWD)
+四纵四横4 north-south and 4 east-west lines
+铁路条例 railway  code(rule)
+摇头振动 yawing(vibration);hunting (vibration)
+重载铁路 heavy  haul  railway(line)
+2/4线音频接口2/4 wire voice frequency interface
+扳道电话 switchman's   telephone
+(WDM)
+Centre(OMC) 层 layer
+(network)
+传输控制协议 Transmission  Control  Protocol (TCP)
+垂直布线 vertical    cabling;vertical distribution    cabling(wire)
+大楼综合定时供给系统 Building Integrated Timing  Supply  system(BITS)
+Compatibility(EMC) 电杆 pole
+(CEF)
+signaling purpose telephone 电信 telecommunication
+and control system of power supply 调车电话 telephone for shunting
+调车手持台 Operational Purpose Handset for Shunting(OPS)
+调度电话 traffic controller's telephone
+调度电话分机 traffic controller's telephone subset;traffic   controller's   Ext.;traffic
+多点控制设备(单元) Multipoint Control Unit(MCU)
+for multiple-operated locomotive units 多径传播 multipath propagation
+多协议标签交换 Multi-Protocol Label Switching(MPLS)
+防雷区 Lightning   Protection   Zone(LPZ)
+(CBN)
+(HLR)
+机车综合无线通信设备 Cab   Integrated Radio(CIR)
+静电放电 Electrostatic   Discharge(ESD)
+静电放电敏感器件 Electrostatic  Discharge Sensitive Device(ESDS)
+开放系统互连 Open System Interconnection (OSI)
+开放最短路径优先协议 Open Shortest Path First(OSPF)
+抗浪涌干扰能力 Surge Withstand Capability (SWC)
+passenger station 空腔 cavity
+浪涌保护器 Surge Protective Device(SPD)
+wireless(radio)transmission system for train number check information
+脉冲编码调制 Pulse Code Modulation (PCM)
+n进制数字信号 n-ary digital signal
+内部边界网关协议 Internal  Border  Gateway Protocol(IBGP)
+(IGP)
+清扫电话 cleaningman's   telephone 区段 district
+全球定位系统  Global Positioning System (GPS)
+(CGI)
+设备标识寄存器 Equipment Identity Register(EIR)
+数据(通信)业务   data(communication)
+数据通信网(系统) data communication network(system)
+数据终端设备 Data Terminal Equipment (DTE)
+铁路电报(网) railway telegraph;railway telegram(network)
+铁路会议电话(系统) railway voice conference(system)
+铁路会议电视(系统) railway video conference(system)
+(system)
+铁路数据通信网(系统) railway  data communications network(system)
+铁路数字移动通信系统 GSM for Railways (GSM-R)
+铁路应急通信(系统)  railway emergency communication(system)
+integrated video monitoring system 铁塔 tower
+通信枢纽 communication   hub/center/
+同步数字体系 Synchronous Digital Hierarchy (SDH)
+外部网关协议 Exterior Gateway Protocol (EGP)
+芯(包层表面)不圆度 non-circularity  of core (cladding)
+information  feed-back  repetition 信噪比 signal-noise    ratio;S/N
+循环冗余检验 Cyclic  Redundancy  Check (CRC)
+业务管理接入点 Service   Management Access   Point(SMAP)
+Environment   Point(SCEP) 业务信道 traffic   channel
+业务与运营支撑(子)系统 business   & operation   support(sub)system
+移动交换中心 Mobile  Switching  Center (MSC)
+移动网增强逻辑的用户化应用 Customized Applications  for  Mobile  Network  Enhanced Logic(CAMEL)
+simplex radio communication 译码器 decoder
+用户到用户信令 User-to-User Signalling (UUS)
+用户识别模块/用户身份模块 Subscriber Identity Module(SIM)
+用户数据包协议 user datagram protocol 用户引入线 subscriber's    lead-in
+远程认证拔号用户服务器 Remote  Authentication Dial-In User Server (RADIUS)
+云台操控/云台全方位移动及镜头变倍变焦 控制 Pan Tilt and Zoom Lens(PTZ)
+暂时过电压 Temporary Over-Voltage (TOV)
+增强多级优先和强占 Enhanced Multi-Level Precedence and Pre-emption(EMLPP/
+智能网 Intelligent  Network(IN)
+System-to-Intermediate System(IS-IS) 终端杆 terminal pole
+on request equipment;ARQ equipment 自动应答 automatic answering
+自治域 Autonomous System(AS)
+作业手持台 Operational Purpose Handset (OPH)
+座席电路 operator's   circuit
+4毫米锁闭 check 4 mm opening of a switch point
+DMI显示单元 display unit  of DMI
+GSM-R无线传输单元 radio   transmission unit of GSM-R
+U形 卡 U-shaped   card
+yard system    绑 扎colligation
+type track circuit 闭塞 blocking
+semi-automatic block system 单线图 single-track   drawing
+single  direction  running   单项试验 single-item   test
+switch lying in receiving-departure track 道岔 switch
+circuit;filament  burn-out  alarm  circuit 灯丝转换 filament   transfer
+departure;first  departure  section 第一连接杆 head rod
+(EMC)
+machine;electropneumatic   switch  machine 电 缆 cable
+machine;electrohydraulic switch machine 电源波动试验 power fluctuation test
+调度监督 traffic controller's supervision 调度命令 command;traffic order
+permissive signal marker 反 装 left-handed   machine 返还系数 release   factor
+分时分组转换道岔 time-sharing    &grouping
+钢轨绝缘(机械绝缘)  rail  insulation (mechanical   insulation)
+block with track circuit 轨道电位 rail  potential  轨道继电器 track  relay
+receiving-departure 接杆 pipe jaw
+section;sectional  release  of a  locked  route 进路继电式电气集中联锁 route  type  all-
+of digital signal  开口销 cotter  pin 开 裂 cracking
+控制显示设备 control   &display   equipment
+departure  section 离 线 off-line
+联络线 connecting    line;liaison    line(track)
+train operation dispatching command system 列车跟踪 train   tracking
+列控中心 Train Control Center(TCC)
+临时限速 Temporary Speed Restriction (TSR)
+临时限速服务器 Temporary Speed Restriction Server(TSRS)
+零层端子 terminals of layer 0 of relay racks 溜放进路自动控制 automatic switching
+control of humping yard by routes 溜放速度 (free)rolling    speed
+speed control 流程 flow
+interlocking for flat shunting area 平行进路 parallel route
+人机界面 Driver Machine Interface(DMI)
+locks with color light-signals 色灯信号机 color-light signal
+semi-automatic block system 双线图 double-track drawing
+司法记录装置/司法记录单元 Juridical Recording  Unit(JRU)
+调谐匹配单元盒 tuning &matching unit box 调谐区标志牌 sign board for a tuning zone    调谐区模糊区段 fuzzy district of tuning
+无线闭塞中心 Radio    Block    Center(RBC)
+information feed-back repetition 信息格式 data  format
+signal;monoindication distant signal 预留 reserve
+中国列车运行控制系统 Chinese  Train Control System(CTCS)
+中国列车运行控制系统0级 Chinese Train Control System level 0(CTCS-0)
+自动化编组站 automatic  marshalling  station 自动化驼峰 automatic    hump(yard)
+ABD阀  ABD brake valve AB制动机 AB   brake
+AC阀 AC brake valve
+闭路电视(CCTV)Closed   Circuit   TV (CCTV)
+voltage variable frequency)speed control 变频器 frequency converter
+on multi unit operation  抽样试验 sampling  test
+industrial frequency AC electric locomotive 单相工频交流制 single-phase   industrial
+(电)动车组 Electric   Multiple  Unit(EMU)
+Controlled   Pneumatic(ECP)brake
+ECP  车间电缆连接器 ECP  inter-car  cable connector
+ECP 列车电缆通信控制器 ECP    Trainline
+放 飏 unwanted rolling  away(for  long distance)
+transfer switch for shed supply 辅助发电机 auxiliary generator
+group;secondary key switch set 副连杆 auxiliary connecting rod
+phosphorus cast iron brake shoe    高摩闸瓦 high friction brake  shoe 高速动车组 high-speed EMU
+Compensation  device(PFC) 构架 frame
+windscreen wiper 管卡 pipe  clamp
+机车万吨公里能耗 energy  consumption  per 10,000 t-km of locomotive
+emergency brake valve   紧急阀 quick action valve
+Bipolar   Transistor(IGBT) 均衡梁 equalizing  beam
+列车控制监测系统 Train Control and Monitoring System(TCMS)
+列车自动运行系统 Automatic Train Operation(ATO)
+列控装置 Automatic Train Control(ATC)
+门极可关断晶闸管(GTO)Gate   Turn-Off thyristor(GTO)
+内燃动车组 Diesel  Multiple  Unit(DMU)
+thermodynamiquede  traction 牵引试验 traction  test
+changeover switch    牵引装置 draw  gear
+司机室 driver's    cab
+percentage of harmonic current  谐振电抗器 resonance   reactor    谐振电容器 resonance  capacitor 心 盘 center   plate
+有篷货车 goods  van(with  tarpaulin)
+有线分布式动力控制 Wireline Distributed Power(WDP)
+centers;bogie pivot pitch 转向角 deflection angle
+facilities  转 轴 shaft 转 子 rotor
+自 动 停 车  automatic   stopping;Automatic Train Stop(ATS)
+structure bolster 侧滚振动 rolling  侧架 side  frame
+middle door of gondola car   超精磨 super fine grinding    超限货物 out-of-gauge cargo
+车长阀(守车)  caboose     valve;conductor's
+valve;guard's  valve 车窗框 window sash
+for coupler two connecting rod mechanism 车钩防跳插销 coupler  anti-creep  pin
+for coupler three connecting rod mechanism 车钩三态作用 three states of coupler
+车辆滚动轴承故障轨边声学诊断系统(TADS)
+车辆运行品质轨边动态监测系统(TPDS) Truck Dynamics Performance Detection    System(TPDS)
+for axle;magnaflux inspection for axle 车轴发电机 axle   generator
+fluorescent magnetic particle test 衬套 bushing
+anti-atmosphere corrosion steel welding wire  高速货车转向架 high speed freight car bogie 高碳铬轴承钢 bearing high carbon chromium
+sill;cushioning   underframe 活动座椅 self-folding  seat   活接口 union  swivel
+货车故障地面图像检测系统(TFDS)
+center of gravity of cargo 货运列车 freight train
+erection machine 间壁 partition
+开锁位(车钩) uncoupling  position (of  coupler)
+during  train  buckling   抗菱刚度 warp  stiffness
+L/V 比 值 L/V   ratio
+box positioning device 拉铆钉 lockbolt
+列车系统动力学 train dynamics 列车员室 attendant's   room
+hopper door operating device 滤波频率 filter frequency
+between backs of wheel flange 轮对适配器 wheelset  adapter
+S 形辐板 S-shaped wheel plate;S-plate 撒砂阀 sanding valve
+手制动轴制止器 hand brake shaft stopper   手制动装置拉索 hand brake pull rod chain 守车 caboose;brake   van;guard's   van
+curve  negotiated 通气口 vent
+rotary container locking system 退 卸 dismantling
+U形 接 头 U  joint  外顶板 roof sheet
+refrigeration compressor 维修车 maintenance car 尾灯 tail  lamp
+spinning sealed brake cylinder 压装 pressing
+control water pressure test rig 制动时间 braking time
+boss;pedestal journal roof 轴箱挡 axle box guide
+spinning sealed brake cylinder 铸铁闸瓦 cast iron brake  shoe 铸造人孔 cast  manhole
+转向架侧架 truck   side   frame;truck(bogie)
+car before loading or after unloading 锥斗 taper  funnel
+AT 供电方式 auto-transformer feeding system AT供电线/AT正馈线 AT feeder
+BT 供电方式 booster transformer  feeding system
+BT 区 段 booster transformer section 扒 杆 derrick  mast
+保护系统/保护装置 protective system 保护线 Protective     Wire(PW)
+杵环杆 ball-socket  bar;ball  end/eye  end fitting(rod)
+operator interface 垂度/弛度 sag
+industrial frequency AC electric locomotive 单相工频交流电力牵引制 single phase
+traction motor 底 圈 mud  ring
+电源切换装置 Automatic Transfer Switching Equipment(ATSE)
+调度电话 traffic  controller's  telephone 调度所 traffic control office
+energised  overhead  contact  line 断开容量 breaking  capacity
+断路器 Circuit    Breaker(CB)
+transfer switch for shed supply  辅助发电机 auxiliary  generator
+G型双压管底座 double  clevis-base  bracket G-type
+杆塔组立/支柱安装 erection of poles 感应电动势 induced e.m.f.
+刚性悬挂 rigid  suspension(system)
+刮雨器 windshield wiper;windscreen wiper 挂板 clevis  &tongue
+机电系统 electrical   &mechanical   system 机电张力补偿装置 electromechanical
+concentrated  series  capacitance 挤 压 squeeze
+(CAD)
+calculation   继电器 relay
+overhead contact line tensioning device 架空接触网自动检测装置 automatic
+overhead contact line testing device   架空接触网自动同步装置 automatic
+overhead contact line synchronizing device 架空接触线路/网 overhead contact line
+交一直流传动 AC-DC drive 交直流屏 AC&DC   panel    角放电器火花源 horn gap    角式保险器 horn  fuse
+swivelling platform  接触线 contact  wire
+静态无功补偿装置 Static   Var   Compensator (SVC)
+馈(电)线/供电线 feeder(line)
+理想空载直流电压 ideal  no-load  direct voltage(Ua)
+commissioning 联 动 linkage
+六氟化硫断路器 SF₆circuit     breaker
+PVC绝缘辅助电缆 PVC insulated auxiliary cable
+component 配线 wiring
+偏压电阻/偏流电阻 bias  resistance   偏压继电器/极化继电器/偏极继电器
+(GPS)
+radiation component 热腐蚀 hot corrosion 热负荷 thermal  load
+三角架型腕臂 triangle frame type cantilever 三角一 曲折形接法/三角 — 曲折形接线
+三相(YN,dll)    接线牵引变压器   traction      transformer with vector of three-phase(YN, dll)
+三相(YN,dll,dl)   十字交叉接线牵引变压器  traction  transformer  with  vector  of  three phase(YN,dll   dl)
+oil-minimum breaker 蛇形管 coiled pipe
+视频监视/监控 video   supervision/
+数字表值的转换 Digital  Meter  Value Transfer(DMVT)
+Switching   Equipment(ATSE)  双断开关 double-break   switch
+双极隔离开关 double-pole    disconnector/
+with outer ramification  双母线 double  bus  bar
+瞬时电动势 instantaneous    e.m.f. 瞬时电流 instantaneous  current
+voltage across open contact 相控调压 phase  control
+(斜接近段的)等效距离 equivalent distance (of the oblique exposure)
+percentage of harmonic current 谐波发生器 harmonic generator 谐波功率 harmonic power
+Y 形双压管底座 double clevis-base bracket Y-type
+应急电源装置 Emergency Power Supply (EPS)
+用时间衡量的参数 time-weighted parameter 用时间衡量的等效连续负荷曲线
+直流电力牵引制 DC electric traction system 直流电流 Direct   Current(DC)
+自冷式变压器 self-cooled  transformer 自耦变压器 Auto-Transformer(AT)
+自耦变压器所 AT     Post(ATP)
+peak pressure;maximum firing pressure 最高长期过电压 maximum long-term
+A、B组填料 group A and B filler 矮型信号机 dwarf signal
+keel;hang ceiling with concealed keel 暗挖法 subsurface excavation method  暗挖隧道 mining tunnel
+unconfined compression strength 保持阀 retaining valve
+reactive power compensation equipment 并联运行 parallel running
+gantry for juxtaposing boxed beams 拨出器 extractor
+剥离 shelling;stripping  泊松比 Poisson's   ratio
+不间断电源 Uninterruptible Power Supply (UPS)
+不均匀系数(Cu)asymmetry coefficient; nonuniformity coefficient(Cu)
+C 组细粒土填料  group C fine-grained soil
+材料仓库(非燃材料) store(noncombustible stuff)
+grained soil fill   粗 砂 coarse  sand
+粗砂夹碎(卵)石 coarse  sand  with  crushed stone(cobble)
+quenched  switch  rail 存车场 storage  yard   存 梁 storing  beam
+大 便 器 toilet     bowl;W.C.pan;lavatory     pan;
+large space active fire sprinkler system 大口井 dug  well;open  well
+span  bridge    大理石 marble
+for road maintenance machinery 大型站房 large  station  building  大 修 overhaul;heavy    repair
+receiving-departure  track 道 岔 turnout;switch
+道岔清扫房 turnout cleaner's cabin
+graphic logs of strata;drill log of stratum 地道 platform tunnel
+prospecting/exploration 地热 geothermy
+(GPR)
+source fire safety evacuation sign 电焊工 welding  operator
+subgrade in cavern zone 斗车 bucket  loader
+elastic replacement of pier top 墩台顶帽 coping stone
+多路监测 multiplex inspection 多年冻土 permafrost(soil)
+发光二极管 Light-Emitting  Diode(LED)
+swelling berm 返 工 rework
+蜂窝状裂纹(斑点) Belgrospi's
+扶手 handrail;armrest    服务员室 crew's room 氟化物 fluoride
+slab;curtain  wall 干管 main  pipe
+concrete cover to reinforcement   钢筋吊杆 steel  boom;steel  rod     钢筋调直机 bar    straightener;bar
+speed and low-speed trains 高墩 high pier
+cast manganese steel frog 高密度 high-density
+voltage gas insulated switchgear(GIS) equipment room
+without cover;arch gallery 拱形隧道 arched  tunnel
+measuring instrument 光圆钢筋 plain  bar
+of track;track  depression 轨道扭曲 twist of track
+car;evaluation  by  track  inspection  car 轨节 rail link
+轨头轮廓打磨小车 reprofiling trolley 轨头轮廓修复(打磨圆弧核侧面)
+transportation machine 轨腰 rail web
+extinguishing system    贵宾候车室 VIP room 滚 刀 disc    cutter
+launching nose for passing spans 过孔作业 through-hole   operation  过梁 lintel;cross    piece
+H 形 钢 梁   H-shaped   steel   beam;H-section
+quenched  alloy  steel  rail 合金(钢)轨 alloy  rail
+transverse type  district  station 横桥方向 cross   direction
+候车区(室) waiting  area(room)
+span construction using form traveler 活动桥 movable  bridge
+火灾报警系统(FAS)Fire   Alarm   System (FAS)
+exchange;agiotage 货场 freight  yard
+formation top layer;surface layer of subgrade 基床病害 defects on subgrade
+挤压混凝土衬砌 Extruded Concrete Lining (ECL)
+entrance check-in office 检算 check computation  检算跨 check  span
+requirements for repair and inspection   检修孔 manway;inspection   hole;access
+buildings;fire prevention design of buildings 建筑高度 building height
+建筑设备自动化系统 Building Automation System(BAS)
+建筑屋面 building roofing 建筑物 building(structure)
+金属导管 metal conduit   金属管 metal   tube(pipe)
+进站集散厅  entry  collecting  &distributing
+accurate traverse survey 精确度 precision
+static pressure pile  drawing machine 静液压马达 static  hydraulic  motor
+卷材防水屋面 waterproof membrane roofing 卷帘 rolling    screen(blind/shutters)
+and grading machine 开合桥 draw  bridge    开 间 bay
+passenger and freight transportation 客货共线 passenger-freight   lines
+workshop(shed)for   three   machines    of   air-
+库房(储藏室) stockroom(storage); warehouse(storage)
+库伦理论 Mohr-Coulomb's  theory 跨度 span
+expanded preliminary design 扩大基础 spread foundation
+buttress wall for intercepting falling rocks 栏杆 railing;handrail;hand   railing
+朗 格 尔 式 桥  Langer   bridge(flexible    arch bridge with rigid tie)
+protection network for side slope 立柱 stand  column
+邻线 adjacent     track(line)
+evaluation of subgrade deformation 路基病害 subgrade defect
+protection works of geotechnical engineering 路基主体工程 principal part of earth
+路肩高程 Formation    Level(FL)
+type tunnel without cover;cut type gallery 路网规划 railway network planning
+sprinkling  绿篱 hedge
+洛 泽 式 桥 Lohse    bridge(rigid    arch    bridge with rigid tie  and vertical  suspenders)
+between switch point and stock rail   密植 close planting;compact planting 面积比 area  ratio
+coated glass fiber mesh cloth 耐久性 durability
+sinking caisson 泥龄 sludge age
+扭振 torsional vibration   农田灌溉 field irrigation 女儿墙 parapet(wall)
+combined materials  喷淋头 spray header
+zone;subgrade in expansive soil region 膨胀性围岩 swelling rock
+bridge and tunnel structure 桥塔 bridge tower
+全断面掘进机 Tunnel Boring Machine (TBM)
+全球定位系统 Global Positioning System (GPS)
+热电冷联供 Combined Cooling Heat and Power(CCHP)
+passengers originated per day 日照标准 sunlight   standard
+S形缓和曲线 S-shaped transition curve 撒布机 spreader
+budgetary estimate of design 设计高程 design elevation
+设计开挖线 pay  line(B  line)
+extension of the bridge;expansion force 伸缩区 breathing zone in CWR
+use;production water supply 生化池 biochemical pool
+survey;construction  repetition   survey   施工工艺流程 construction  technology
+process;construction   process 施工荷载 construction  load
+figurative progress of construction work 施工验收 delivery-receiving   acceptance 施工营地 construction  camps
+水力停留时间 Hydraulic Retention Time (HRT)
+mortar surface course(topping) 水泥输送泵 cement pump
+directional drilling 水平度 levelness
+司机室内高 interior height of cabin 司机制动阀 driver's  brake  valve
+follow-up acceptance 碎冰机 ice  crusher
+ventilation layer    碎石桩 gravel pile 隧 道 tunnel
+隧道掘进机 Tunnel   Boring   Machine(TBM)
+compensation of gradient in tunnel 隧道群 tunnel   group
+tunnel injector type ventilation 隧道施工 tunneling
+tunnel;operation  ventilation  of  tunnel 隧道照明 tunnel   lighting
+T 形刚构桥 T-shaped rigid frame bridge
+T 形角焊 T-shaped angle welding T 形 梁 T-beam;T-shaped  beam    塌方 collapse
+biofilter   踏 面 tread
+太阳辐射 solar  radiation;sun's  radiation 太阳能 solar energy
+弹性支承块(式)无砟轨道 Low Vibration Track(LVT)
+unsymmetrical thick-web rail 特种活载 special  live  load
+铁路给水厂(所) railway water supply workshop(shed)
+engineering 涂装 coating
+土压平衡盾构 Earth Pressure Balanced Shield(EPBS)
+托盘(或浮板)下管法 tube  placement  by tray(or floating board)
+deceleration strip equipment room 驼峰峰顶 hump top
+U形桥台 U-shaped abutment
+V 形金属橡胶弹簧 V-shaped metal-rubber spring
+V形桥墩 V-shaped pier 挖方 cutting
+万向联轴节 Hooke's   coupling 万向轴 cardan  shaft
+index(D)of  envelop  enclosure 围栏 fence
+(station)
+污水排放口 sewage discharge outlet 污水盆(池)  sewage basin(pool)
+equipment;var  compensation  device 无轨运输 trackless   transport
+rich organic  silicon perchlorethylene 无机混凝剂 inorganic   coagulant
+无障碍候车区(室) non-obstacle  waiting area(room)
+五日生化需氧量 five-day BOD(Biochemical Oxygen Demand)
+insulation compound structure 吸热玻璃 heat absorbing glass  吸 声 sound absorption
+下锚段衬砌 anchor-section lining(for OCS) 下锚区段 anchor section(for OCS)
+platform in the same direction along the track 线间距 distance between centres of tracks
+between tracks 线路 track
+station building under the railway 限高标志 sign of height limit
+warning portal 限界 clearance
+协调渐变 harmonious transition 斜板(管) inclined    plate(tube)
+卸污站(点) waste discharge station(spot)
+新奥法 New Austrian Tunneling Method (NATM)
+management and service information system 行包通道 passage for luggage and postbag   行车交叉 traffic  intersection
+conditioning system 絮粒 floc  particles  絮粒体 flocs
+planting container 雪 崩 avalanche
+subgrade in talus zone 岩浆岩 magmatic rock
+养 路 表 报   maintenance-of-way  report  & forms;track work forms
+养路管理计算机系统 computer-aided  track maintenance &management system
+有(无)旁通阀过滤器 filter     with(without)
+chine;bolt  fiting  machine 鱼形板 fish board
+station  area   站 台 platform
+subway leading to platforms 站台高度 platform height
+真空座便器 vacuum  toilet(bowl)
+surfacing;ballast trimming 整平机 grader
+pipeline without compensation 直裙 straight  skirt
+轴向柱塞马达(斜轴式) axle plunger motor (slanting  axle)
+between main girder 主桥 main bridge
+柱板式声屏障 pillar-paneled sound barrier 柱塞(阀) plunger(valve)
+repair according to track condition 追踪间隔 headway of trains
+(MEB)
+3-4小时列车运行计划 train working plan in three or four hours
+planning   车 票 ticket
+单向混合式编组站(场) unidirectional  	combined  type  marshalling  station/yard 单向纵列式编组站(场) unidirectional
+longitudinal  type  marshalling  station/yard  单一指挥 command of an  assigned person
+调度所 traffic  controller's  office 定 额 norm;rate
+delivery plan  at  demarcation 分路道岔 branch  turnout
+换算闸瓦压力 converted   brake   shoe(block)
+unloading 灰尘 dust
+time of wagons for goods operation at station 货车计划 wagon loading plan
+locomotives required per one pair of trains    机车沿线走行公里 locomotive kilometers on
+trains  dispatching  in  succession 列车流 train  flow
+列车运行图 Train  Working  Diagram(TWD)
+临时运营运输 traffic of temporary operation 零担 less-than-carload(wagon     load)
+平面标准箱位(箱位) planar slot of standard (container  slot)
+起车附加时分 additional time  for  starting (acceleration)
+三 定 列 车 3 -specified-terms  train   三角形枢纽 triangle-type   terminal 散装货物 bulk    freight(goods)
+铁路车站 railway station   铁路法 railway    law(act)
+organization of train operation;operation rules 铁路运输 railway transportation
+停车附加时分 additional time for stopping (deceleration)
+选 闸 select hand brakes 巡检 patrol inspection    旬计划 ten     days'plan
+throat turnout/points
+wagons to be delivered at border station 遗漏 omission
+制动员室 brakeman's   cabin 质量控制 quality control
+electricity 潮汐 tide
+microprocessor 单位 unit
+喷 射 混 凝 土 sprayed   concrete;shotereting: shotcrete;spray concrete
+millisecond blasting 微程序 microprogram 微电机 micromotor
+interference;radio disturbance 无线遥控 radio remote control 物探 geophysical prospecting
+metal welding  译码器 decoder
+gage;strainometer 应力 stress
+	附件1常用缩写 Abbreviation 续上表
+	 附件1  常用缩写 Abbreviation
+2/4线音频接口2/4 wire voice frequency interface
+4毫米锁闭 check 4 mm opening of a switchpoint
+A、B组填料 group A and B filler
+ABD阀  ABD brake valve AB制动机 AB  brake
+AT供电方式 auto-transformer feeding system AT供电线/AT正馈线 AT feeder
+安全监护(人员) safety monitoring (personnel)
+center double deck automobile flat car 凹陷 indentation
+BT供电方式 booster transformer feeding system
+BT区 段 booster transformer section    八字形桥台 flare wing wall abutment 扒杆 derrick  mast
+安全电子支付协议 SEPP(secure electronicpayment protocol)
+安全警惕手柄 dead  man's  handle  安全控制装置 safety control device 安全离合器 safety coupling
+安 全 线catch            [safety,security]siding[track]
+安全限界点 clearance[fouling]point 安 全 性 safety,security
+A.R.I.)
+按速度分类的线路 trackage classified by speed 按需分配带宽 BOD(bandwidth on demand)
+凹形断面，凹形纵断面 concave[sag]cross       section
+ABC库 存 分 类 管 理 法 ABC management method of stock classify
+Animated图 形 交 换 格 式 Animated     GIF(animated
+ATM适配层 ATM  adaptation  layer A编 码 律 A-encoding      law
+A声 级 A sound level α 射 线 alpha  ray
+拔起高度，克服高度 lifting   height,height  of  lifting [elevation]
+白 点 flake  crack[shatter  crack,small  nucleus  fissure]
+百万条指令/秒 MIPS(million  instructions  per   sec- ond)
+摆 卡 oscillation    pin[rockerkeeper] 摆式车辆 pendulum car
+摆式悬挂 pendulum suspension 扳 道 房 switchman's    cabin
+半分开式扣件  semi-separated   rail    fastening[mixed holding  fastening,hybrid  fastenings]
+半分开式扣件(混合式扣件) mixed fastenings[hy- brid fastenings]
+半自动闭塞，联锁闭塞  semiautomatic [interlocked,
+保 护 层 protective    coat[protection   layer   protection course]
+报文处理系统 message handling system(MHS) 报文传送代理 message  transfer  agent(MTA)    报文传送时间 message transfer time(MTT)
+报文传送系统 message transfer system(MTS)
+备用侧线，备用线 reserve[stand-by]siding
+备用车 reserved  car;stored  car   [stand-by   car]
+备用轨，应急轨 emergency  rail  [spare  rail] 备用货车 reserved cars,available wagon
+被盗事故 robbery  accident(burglary  accident)
+本地接入和传送地区 local access and transport area (LATA)
+maintenance locomotive moving kilometre 本站作业车 local  car
+比特每秒(比特/秒) bps(bits per second,bit/s) 比特误码率 bit  error  rate(BER)
+避难线 refuge[runaway     catch,trap]siding      [track]    臂板电锁器联锁 interlocking  by  electric  lockswith
+便 道 pathway  [side  path] 便 线 temporary line
+变频损耗 frequency conversion loss 变 坡 change   in   [of]gradient
+标 号 number[grade] 标签架 label  rack
+标准轨距，准轨  standard        [international,normal]
+标准轨距铁路，准轨铁路  standard-gauge       [full
+标准真空，额定真空度 normal vacuum 表处理语言 list  processing(LISP)
+并行数据处理 PDP(parallel  data  processing)
+拨道撬棍 lining  bar  [claw  bar]
+玻璃固化 vitrification  [glass solidification] 玻璃纤维绝缘体 fibreglass insulator
+泊 松 比 Poisson's   ratio
+补机坡度 pusher           [helper,assisting]grade,booster
+不对称三开道岔 unsymmetrical   three-way   turnout [unsymmetrical three throw turnout]
+不 分 开 式 扣 件 nonseparated    rail    fastening[direct
+不间断电源 uninterrupted power supply(UPS)
+不均匀下沉 differential   settlement   [unequal   setle- ment  ]
+arriving at station not at the same time 不透水层 impervious  layer
+BOT模 式 build-operate-transfer       model
+BP 机  beeper
+B声 级 B  sound level β射线 beta  ray
+财务费用 financial  overhead[expenses]    财务费用表 financial expenses statement 财务费用审计 financial expenses audit    财务分析 financial  analysis
+餐 车 buffet  car[coach]dining  car,restaurant  car 残废军人票 disabled armyman ticket
+仓库线 house[warehouse]track 操纵杆 driving rod
+槽形梁 channel  beam[through  girder] 槽形台座 U-shaped     bed
+槽型钢板桩 grooved  steel  plate  pile[arch-web  pile] 草 测 sketch  survey
+册页[客]票，联票 coupon  ticket 册页票本 coupon ticket ste
+侧方交会 lateral  intersection   [side  intersection] 侧 沟 side   ditch
+侧面磨擦块 side friction block 侧 磨 lateral wear  [side  wear  ]  侧墙 side wall
+侧倾石渣车 side  dump  ballast  car,[wagon]
+侧线，股道 siding    track,siding    [station]track 侧向过岔速度 speed through turnout branch     侧向荷载桩 lateral loaded pile
+测 站 observation station [surveying station] 测 重 weight sensing
+岔线，侧线 diverging         tracks,branchline,branch[di- verted,spur,deviated]track,siding,fork,draw-
+岔线延展长度 extended length of siding 岔 枕 turnout  sleeper[switch  tie]
+差分脉冲编码调制(差分脉冲码调制) differential pulse code modulation(DPCM)
+差分四相移键控 differential quadrature phase shift keying(DQPSK)
+差分相移键控 differential phase shift keying(DPSK)
+拆 卸 disconnecting  [dismantling] 拆卸场 dismantling pit
+柴油(发动、内燃)机 dieselengine[motor] 柴油机化油器 carburettor engine
+长大坡道 long   steep   [heavy]grade   长大上坡道 long   steep  up-gradient
+长大下坡道 long(heavy)down-grade            [gradient],
+长定子带铁心直线电机 long-stator linear motor (iron      core-)
+长轨节[长轨条] rail  string 长轨条 long rail string
+authenticity and legality audit 长石 feldspar
+超长或超重列车 excess length or weight train 超长货物 exceptional  length  freight,(goods)
+超长指令字 very long instruction word(VLIW)
+超大规模集成电路 very-large   scale   integrated   cir- cuit(VLSI)
+超高标记 super elevation marker  [tag]
+超铀元素 transuranic  elements   [transuranium,TRU]
+车挡，止车挡 humper      [block],humping      [buffer] block,buffer    [car]stop,humping    post[美]
+车 钩 coupler(inter-car            -)
+车辆单位基本阻力 specify basic resistance of vehicle 车辆单位阻力 specific      vehicle[car]resistance
+车辆换算长度 converted car length    车辆积压 accumulation of wagon flow 车辆基本阻力 basicresistance   of  car 车辆加速器 car   accelerator[retarder] 车辆减速器 car  retarder
+车辆检修线 car   inspection    [repair]track
+车辆停留线 holding track 车辆脱钩 detach(to-)
+车辆总阻力 total resistance of wagon 车辆阻力 car     [vehicle]resistance
+ferring the train stock 车流 car  flow
+economic efficiency audit of station system 车站线路 station  lines
+of cost and expenditure 成本分析 cost  analysis
+成 本 - 效 益 分 析 cost    -benefit    analysis    [evalu-
+acceptance of conveyance 承载车轮 carrying wheel   承载缆索 carrying  cable
+城市铁路，有轨电车线路 street   railway    [track],
+城域网 metropolitan area network(MAN)
+垂车人数通知单 notice of the mumber of passengers on train [notice of passenger number on train]
+controlled switching system 程 序 program
+齿轨铁路 cog      railway      [railroad],rackrail[railway,
+充填式沥青道床 penetrated asphalt ballast 冲 沟 coombe[gully]
+冲 击 角 angleof attack  [angle  of  impact]
+冲 刷 scour   [erode,washing]  冲刷防护 scouring protection 冲刷系数 scouring factor
+臭氧层破坏 ozone layer destroy [destruction of ozone layer]
+初步设计 preliminary  design   [plan]
+除 草 机 weed cutter [weed cutting machine]
+传号交替反转信号 alternate  mark  inversion  signal (AMIS)
+传输控制协议/网际协议 TCP/IP(transmission  con- trol protocol/internet protocol)
+传输中断 reverse  break,transmission  interuption 传送带 conveying   belt(mobile    -)
+(CTSS)
+传统施工法 conventionalexcavation 传 真 FAX(facsimile)
+串行线路互联网协议 SLIP(serial  line  internet  pro- tocol)
+垂线偏差  deviation   of  plumb-line   [verical   devia-
+垂直压力 vertical  pressure    磁[悬]浮 magnetic levitation 磁饱和 magnetic saturation    磁 北 magnetic north
+speed transportation system    磁浮试验线 maglev test line
+磁浮铁路，磁悬浮铁路 maglev  [magnetic  levitation, magnet-cushion]railway
+磁浮系统 maglev  [magnetic  levitation]system 磁 间 隙magnetic  gap
+磁悬浮列车提升导向系统  combined levitation/
+次 声 infrasound  [infrasonic  sound] 次要路由 secondary routes
+从轴上拆下车轮 remove the wheels from an axle(to -)
+粗加工平面 rough-plane(to         -)
+interlocking for a hump yard 存储系统 memory system
+CCITT X系列建议 CCITT X seriesrecommendation
+CCITT标 准 CCITT  standard
+CCITT六号信令系统 CCITT signalling system No.6 CCITT 七号信令系统 CCITT signalling system No.7
+CM承发包 construction management contracting CPU生产工艺技术 CPU production technique
+CPU外 频 CPU external frequency CPU  主 频 CPU primary frequency  C 声 级 C  sound  level
+达西定律 Darey's  law
+打 磨 grinding[rail      grinding]
+大半径曲线 large   [long]radius   curve 大暴雨 heavy  shower
+大地测量卫星 geodetic   satelite   [geodesic   satelite] 大地测量学 geodesy
+track  panels   大理岩 marble
+大陆桥运输 landbridge transportation  [transport]
+大气扩散 atmospheric diffusion  [atmospheric disper- sion]
+大气污染 air  pollution;[atmospheric  pollution] 大气污染物 air pollutant
+大修支出自主权 decision right of main repair cost 大运量交通系统 mass   transit(system)
+大站电气集中联锁 all relay interlocking for terminal 大宗货物 mass freight  [goods]
+带 式 轨 strap  rail   [iron] 带式制动 band   brake
+单 方 向 运 行 ( 复 线 ) single directional working(on double track line)
+单轨铁路，独轨铁路，单轨 monorail,monorail     [sin-
+单 轨 线 路monorail[single]track
+单轨小车 hand     cart     [rail     dolly],rail[track]dolly,
+单开道岔 single[standard,simple,lateral]turnout
+单式不对称道岔[不对称双开道岔] unsymmetrical
+double curve turnout [unequilateral turnout] 单式道岔 single points
+单式交分道岔 single   slip  points[switches]
+单位阻力 unit      [specific]resistance 单 线 single  line   [track]
+单线区段 single-track       [single-line]district       [sec-
+单线铁路 single-line[single-track]railway             [line]
+单向二级三场混合式编组站 two-stage-three- 	yard unidirectional combined marshalling station  单向二级四场混合式编组站 two-stage-four-  yard unidirectional combined marshalling station
+-yard unidirectional longitudinal marshalling station 单向斜桩 piles battered in same direction
+yard unidirectional transversal marshalling station 单向运行线路 uni-directional     line
+tensions)  单 音 tone
+弹簧的拉伸 tension of a spring 弹簧箍 spring   band[buckle]
+导(向)轮 guide   roller[wheel]
+导 轨 closure  rail   [lead  rail],guideway 导轨压力 pressure on the guideway
+导流堤 dykes for guiding current[guide wall],training dike
+导线点 traverse point  [polygonal point  ]
+导向线 leading   [alignment   guiding]line 导向运输系统 guided transport system    导向轴 axle    guide
+捣 固 packing  [tamping],tamping  [ballast  temping  ] 到岸价 cost,insurance and freight
+到达线，接车线receiving             [arrival,coming-in]
+到 发 线 receiving-departure            [arrival-departure,re-
+道 碴 板 结 cemented  ballast[incrusted  ballast] 道碴槽 ballast   trough
+道碴夯实机械 ballast consolidating machine  [ballast
+consolidator,ballast   compactor] 道碴级配 ballast grading
+道碴整形机 ballast regulating machine  [ballast regu- lator]
+道 岔 turnout  [switches and crossing]
+道岔标 switch  target  [indicator] 道岔标志 switchindicator
+道岔侧线 branch line of turnout[branch track of turn- out,turnout    branch]
+道岔封锁 switch  closed up 道岔工班[队] switch gang 道岔号数 turnout  number
+道岔控制电源 power source for switch control 道岔拉杆 switch  rod  [stretcher  bar]
+道岔清扫房 switch  cleaner's  cabin 道岔区段 switch  section
+道 岔 主 线 main  line of turnout[main track  of turnout, turnout main]
+道床碴肩 shoulder of ballast bed [ballast shoulder] 道床承载力 bearing strength of ballast bed
+道 床 清 筛 机 ballast   cleaning   machine   [mechanical
+道钉锤 spike  hammer[maul]
+道 口 crossing,road        [grading]crossing
+道口接近区段 approach section of a highway crossing 道 口 看 守 房gatekeeper's       hut        [box,cabin],gate-
+道口看守员，道口看守工 crossing watchman [keep- er,flagman,watcher],gatekeeper,gateman,grade
+道 口 铺 面 grade crossing pavement[surface of grade crosing]
+meteringfor highway crossing 道口引坡 crossing  approach
+ed)sound      level[Lq]
+等值线isometric   line,isarithmic    line   [isopleth] 镫 筋 stirrup
+低接头 depressed joint  [battered joint of rail]
+低桩承台 low capped pile foundation 滴管夹 clamp(dropper        -)
+底 板 base   slab[baseplate   bedplate],floor
+底碴层[垫层] sub-ballast layer 底 架 underframe
+底栖生物 benthos   [benthon] 抵 押 mortgage
+地 方 铁 路 local             [regional,district,short]railway,
+地方铁路运价 taiff of regional railway  地方性编组站 local marshalling station 地 核 earth's     core
+地 壳 the   earth's   crust
+地 貌 general   configuration   of   the   earth's   surface [landforms]
+地名学 toponomy[toponymy  ]
+地球曲率影响 effect of earth's curvature 地球椭球 earth  spheroid
+地铁线路 metro      [subway,underground]line
+face    infrastructure,subterraneari   地下连续墙 diaphragm slurry wall 地下室 basement
+underground(railway),tube(railway)[railroad]
+地下铁道网 metro   [subway]network 地下停车场 underground parking lot  地下通道 pedestrian   tunnel
+地心经度 geocentric longitude 地心纬度 geocentric  latitude   地 形 topography  [terrain  ]
+地形符号 cartographic  symbol[map  symbol] 地形改正 topographic  correction
+地中电缆盒 underground cable terminal box 地 轴 earth's    axis
+第二破裂面 second failure surface 第二系悬挂 secondary suspension  第 二 线 second  track  [line]
+第三轨，接触轨，导电轨  third [power,conductor,
+第三轨轨距，第三轨距离 third rail gauge 第三人责任 the thirdparty responsibility    第三线 third  track  [line]
+with electric semaphore    电 动 车 electric power car
+电动螺旋千斤顶 electromotive spiral hoisting jack 电 动 势 electromotive    force(e.m.f)
+电气化铁路，电力铁道，电气化铁道 electrified [electric]railway      [railroad]
+电气化线路英里里程 electrified     [track]mileage 电气集中联锁 electricinterlocking
+电气与电子工程师学会 IEEE(Institute of Electrical and  ElectronicsEngineers)
+电 渗 法 electro-osmosis   method 电 渗 透 法 electro-0smosis
+电 信 管 理 网 络 telecommunication management net- work(TMN)
+吊 铉 夹 clamp(hanger-)
+调车机车整备线 switcher's servicing track 调车进路 shunting route
+调 车 设 备 marshaling   facilities(classification   facili- ties)
+调车线 classification[marshalling]track       [siding]
+调度集中 centralized dispatching control  [centralized traffic control]
+调度所 traffic  controller's  office,dispatcher's  office
+调度台 control     panel[controlconsole] 调度员 traffic  controller  [dispatcher]
+调 零 adjust the null point  [adjust to  zero],zero adjus 调平机 levelling  machine
+调整[均匀]轨缝 evenly distributed joint gaps
+调制解调器连接访问协议 LAPM(link  access  pro- cedure for modems)
+定测 location    [final   location]survey,alignment 定长编码 block  coding
+checked days outstanding 定 额 票 quota  ticket
+specified train paths and number and types of wagons 定向注射、直接喷射 direct  injection
+丢失呼叫保留 lost  call  held(LCH)
+动 态 分 配 多 址demand  assignment  multiple  access (DAMA)
+动态随机存取存储器 DRAM(dynamic  random  ac- cess memory)
+动态主机配置协议 dynamic host configurationproto- col(DHCP)
+冻害垫板 frost heave board[track skim for frost heav-
+ing roadbed,frost  skim] 冻害垫板 frost  shim
+陡 坡  heavy            [steep,abrupt,bad]grade           [gradient,
+陡 坡 段 heavy         [steep]gradientsection
+独 立 磁 盘 冗 余 阵 列 RAID(redundant    array     of    inde- pendent   disk)
+model  block  triangulation 独 立 制 动 brake   isolated   堵 缝  caulkng
+短寿命的放射性货物 short  life  radioactive  goods 短 枕 block   tie[short   tie]
+段 管 线 line   used   by    sections,depot[shop]track
+断 高  broken      leveling[height]
+对 … … 施 行 制 动 apply      the      brake(to-)
+钝角辙叉 obtuse angle crossing [obtuse frog]
+coding(MPLPC)    多 媒 体 multimedia
+多线区段 multi-line           [multi-track]section
+多线铁路 multi-line                   [multi-track,multiple-
+多用途因特网邮件扩展 MIME(multipurpose inter- net mail extensions)
+惰行坡度，惰行坡道 coasting [idling]grade (大)梁，桁架，撑杆 girder
+D通 道 D   channel
+儿童游戏车 coach with children's play area 耳 机 earphone
+二阶段设计，两阶段设计 two-step   [two-phase]
+二进制同步通信 binary synchronous communications 二进制位 binary   digit(bit)
+二进制文件传输 BFT(binary file transfer)
+E 声 级 E  sound  level
+发病率 morbidity rate  [incidence  rate] 发 车 dispatching of train
+发车线，出发线departure         [dispatch,forwarding,
+outgoing]track       [line,siding] 发电车 generator van
+发电机电动机转换器 Leonard  converter 发电设备，发电机 generating   set[unit]    发 电 所 power plant
+阀的紧固螺栓 valve buckle 阀 杆 valve  rod  [spindle]
+法国高速列车 Tres Grande Vitesse(cruise)(TGV)
+繁忙干线 busy   main[trunk]line,dense   traffic    line, heavy-duty      main-line
+繁忙线路，繁忙运输线路 busy [busy traffic,busy
+worked]line,line  carrying  heavy  traffic 反铲挖掘机 backhoe shovel
+negative superelevation] 反电动势 back emf
+反方向运行线路 wrong  line  [track]
+反复荷载 repeating load[recurring load] 反拱度 inverted camber
+反极性工作值 reverse working value    反馈控制系统 feedbackcontrol  system 反立体 inverted  stereo  [reverse  stereo]  反滤层 inverse  filter layer
+反向坡度，反坡 adverse[reverse]grade         [gradient,
+反向曲线 reverse[counter]curve,curve of opposite
+方案比选，方案比较 scheme   comparison,route   al-  ternative,comparison       of       alternative        projects [schemes]
+方正轨枕 sleeper respacing[tie respacing,squaring  of tie,tie   aligning]
+防寒运输 cold prevention transport防寒运输
+防 暑 prevent  heatstroke  [sunstroke]
+防雪林 snow-control         [snow-break]forest
+防雪棚  snow   [avalanche]shed,snow    fence   [barrier] 防摇动装置 rotation  stabiliser
+放散温度应力  stress          liberation[distressing,de-
+放 线 setting-out    [lay   out]of   route 放 样 lay  out
+飞 檐 upturned  eaves[projection] 非安全电路 non-vital     circuit   非饱和土 unsaturated   soil
+非对称数字用户线路 ADSL(asymmetric digital sub- scriber  line)
+非封闭通道客车 coach with open gangway 非归零码 nonreturn to zero code(NRZ)
+非胶接绝缘接头 non-glued   insulated   joint(s)
+非紧坡地段，缓坡地段，自由导线地段 section of insufficient grade [gradient]
+废 弃 线 路 abandoned    line    [track],disused    railway
+沸水(反应)堆 boiling  water  reactor[BWR] 费 率 rate
+费用中心 expenditure  center 分 贝 dB(decibel)
+分布式通信体系 distributed communication architec- ture(DCA)
+excavating process 分叉 crossing
+pushing in one time   分割区段 cut   section
+hierarchical object cost management 分解车辆 disconnected vehicle
+分解货车detach wagons(to -)
+分开式扣件 separated  rail   fastening[indirect  holding fastening]
+分流线路 traffic-dividing[diversion]line 分 路 shunt
+分 坡 平 段 level    grade     [stretch]between    opposite
+分歧线路 branching-off      [diverging]line 分歧线路所 branching block post
+cost and fee plan in terms of cost items 分支电缆 branch  cable
+分组交换数据网 packet  switched  data  network(PS DN)
+风速报警 wind  speed   [velocity]alam
+风 向 标 vane      [wind-cock]
+封闭的线路，封锁的线路，闭塞的线路 blocked line  [track],line  closed  down
+封闭线路作业时间[开天窗作业时间] works oc-
+cupation time[working time of closed section] 封存的固定资产 blocked  fixed  assets
+封山育林 afforested mountains closed off for protection 封锁轨道 removing  track(from  service)
+峰顶调车员室 shunter's cabin at hump crest 峰 顶 平 台platform of hump crest
+蜂窝电话技术 cellular telephone technolog)
+符合水准器 coincidence  level  [contact  level]
+辅助构件 member(associated       -)
+辅助接触电缆 auxiliary  contact cable 辅助缆索 catenary(auxiliary      -)
+辅助所 auxiliary block post[block station,block house] 辅助铁鞋 auxiliary brake  shoe
+附加阻力 additional    [auxiliary]resistance
+附属结构物 accessories [accessory structure]
+复测经纬仪 repeater theodolite [repetition theodolite] 复代理 turning agency
+复轨器 re-railer(rerailing       device)
+复曲线连接点 point  of compound  curve(PCC)
+改 线 change  of  line,line  revision   [relocation]
+干线，干线铁路 trunk           [main,principal,through]
+干线铁路 trunk        [main        line,arterial,main-line,
+感觉噪声级 perceived  noise  level[LPN] 感染性物品 infective   articles
+钢轨(轨枕)挠曲 deflectionof    rail[sleeper]
+钢轨擦伤 engine  burn[wheel burm]
+钢轨残余应力[固有应力]residual  rail   stress 钢轨长度 rail  length
+钢轨打标记 branding &stamping of rails 钢轨打磨 railgrinding
+钢轨打磨列车 rail  grinding train[rail  grinding  car] 钢轨弹性模量 Young's modulus of rail
+钢轨低接头 battered   joint[depressedjoint,low   joint]
+钢轨工作边 working surface of rail 钢轨工作边[轨距线] gage  line
+钢轨核伤 rail  flaw  [nucleus  flaw,oval  flaw]
+钢轨接头马鞍形磨损 rail end batter [saddle wear of rail  end]
+钢轨接头上下错牙 difference  of  rail  at  joint   [un- evenness in height at joint ]
+钢 轨 钳 rail  clip[rail  tongs]
+钢轨倾翻 rail    tilting[overturning] 钢轨热焊 thermite rail welding
+钢轨润滑[涂油] raillubrication 钢轨伤损 raildefects  and   failure  钢轨寿命 raillife
+钢 轨 推 凸 机rail  weld  seam   shearing  machine   [rail shear]
+钢轨应力放散 rail       destressing[de-stress] 钢轨运行表面 rail running  surface
+钢轨折断 brittle fractures of rail  [sudden rupture of rail]
+钢 轨 组 合 辙 叉 bolted   rigid   frog   [assembled   frog
+钢 架 保 护 层 cover  over  reinforcing   steel[protective layer]
+钢筋网 reinforcement  mesh   [fabricreinforcement] 钢筋网混凝土 steel  fibre  reinforcedconcrete
+with metal panels 钢盆 steel  basin    钢 桥 steel   bridge
+钢 塔 steel  tower[supporting  trestle] 钢塔架 steel     tower[steelderrick]     钢箱梁桥 steel box beam bridge
+港口铁路 harbor  railway   [railroad],port  railway 港口站 port  station
+港口站，港湾站 water-front [harbor,port]station 港湾编组站 harbor marshalling station
+高差 altitude  difference    高 程 altimetry   [altitude] 高程标 elevation post
+高级数据链路控制规程 high-level   data   link   con- trol   prcedure(HDLC)
+高架桥 high level bridge[viaduct grade crossing]
+高架铁路，架空铁道，高架铁道 elevated     [aerial,
+高架线路 elevated[overhead]line 高架线路段 elevatedsection
+高锰钢整铸辙叉 solid   [cast],manganese    steel   frog
+高速客运线路  high-speed    passenger     [passenger-
+高速旅客列车 high   speed  pasenger  train,advanced passenger   train(APT)
+高速铁路，高速线路 high  speed  railway  [rail]
+高速铁路网 high-speed   railway    [rail]network
+高速铁路线路养护 maintenance  of  hi-speed  track 高速线路 high-speed    line    [track]
+高线路 elevated          [high,high-level]track
+戈瑞 gray   [Gy] 搁脚板 foot-rest  格式化 format
+个人计算机 PC(personal    computer)
+个人通信网 personal communication network(PCN)   个人通信系统 personal communication system(PCS)
+工厂专用铁路 factory   [works]railway
+工厂专用线 factory    [works]siding,shop   track 工程保险费 construction insurance premium
+工程承发包审计 engineering contraction audit 工程处 construction[engineering]department
+工程量计算的审计 work load calculation audit 工程量清单 bill  of quantity(BOQ)
+工程列车 construction      [work,engineering]train
+工程组织 organization of work 工地临时铁路 field railway    工地小轨道[美] baby  track   工 法 construction method
+工务处 maintenance    ofwaydepartment,track    [engi- neering,permanent   way,way   and   structure]depart- ment
+工 务 段  maintenance  of way  division,track  division [track  district,track  maintenance   division]
+economic efficiency audit ofengineeringsystem 工务总段长 district   engineer
+工业控制微机 IPC(industrial  personal  computer)
+工业专用铁路，工业铁路 industry  railway  [track]
+公共对象请求中介结构体系 CORBA(common  ob- jectrequest    brokerarchitecture)
+公共分组交换网 public packet switched network     公共密钥基础结构 PKI(public  key  infrastructure) 公共信息模型 CIM(common information model)
+公开招标 open  tendering,public  bidding 公里标 kilometer  post   [stone,sign]
+公用电话交换网 public switched telephone network (PSTN)
+公用交换网 public switched network(PSN)
+公用数据网 public data network(PDN),common data 'network
+拱 顶 arch  crown[soffit  ofarch] 拱顶铰 top hinge of arch
+共用线路 party  line,joint  trackage,associated   [com- munity]line
+构造轨缝 structural  joint  gap  [maximum  joint  gap structurally  obtanable]
+股道长度 siding    [track]length,track    span
+股道间距 distance  between  tracks,clear  distance  be- tween    tracks,siding    [track]spacing
+股 道 有 效 长 effetive       [useful]length       of(station)
+固 定 区 non-breathing    zone[fixed    zone,deformation
+故 障 树 分 析 analysis(fault               tree-)
+挂 离 合 器 engage   a   clutch(to-)
+enterprises   拐 肘 crank
+管 界 标  section     post     [sign] 管 口 盖 凸 缘 blind     flange    管 理 ， 控 制 control
+管 理 人 员 专 用 铁 道 车 辆 director's        railcar
+ministrated     district 管内烟灰 fuedust
+光解作用 photolysis[photo-decomposition] 光 缆 optical  fiber  cable,optical  cable
+光碾压路机 smooth  roller 光耦合器 opticalcoupler    光 盘 CD(compact  disk)
+广域网 wide area network(WAN)
+广域信息服务器 WAIS(wide area information serv- ers)
+规，量规，仪表，传感器，样板，轨距，标尺，限界 (架),铆钉行距，墨线斗，测量，校准，调整
+轨道暗坑 loose   tie[blind   sag]
+轨道变形 track  deformation[track  disorder,track  dis- tortion]
+轨道不平顺[轨道变形] track irregularity 轨道部件 track  components
+轨道翻浆冒泥 mud-pumping  of  track   [pumping]
+轨道工程师 engineer of tracks    轨道鼓出[跑道] track  buckling
+轨 道 衡 线 track    scale     track,weighbridge[weighing
+轨道结构 track  structure  [track  assembly] 轨道空间 track clear
+轨道框架刚度 rigid of track panel  [track stiffness]    轨 道 类 型 classification   of  tracks   [track   standard],
+轨道前后高低 longitudinal level of rail[track profile] 轨道三轮车 track  velocipede
+轨 道 永 久 ( 残 余 ) 变 形 track  residual  deformation [track permanent deformation]
+轨道直线电机(无钢部件) long-stator   linear  motor (steel-free-)
+轨道质量指数 track   quality   index(TQI)
+轨道中心线 track  center  line,track  centers  [center  to center]
+轨道走行机械 on-track      equipment[OTE] 轨道作业计划图 schedugraph
+轨 底 rail   base[rail   bottom,rail   foot]
+轨底崩裂 burst  of  rail  base[burst  ofrail  bottom,bro- ken rail base]
+轨 底 坡 rail  cant  [rail  inclination] 轨端淬火 end  hardening
+轨缝调整器 rail   gapadjuster[rail   puller,rail    stretch- er,rail     jointexpander]
+轨 钢 的 线 膨 胀 系 数 linear  expansion  coefficient  of rail steel [coefficient of expansion]
+轨检车 track  inspection  car  [track  recordingcar]
+轨距，铁路轨距 gauge(of      track),track       [rail,rail-
+轨距尺[道尺] track  gage
+轨 距 弹 性 挤 开  gage  elastically  widened   [elastic
+轨距垫板 gage  plate[bridle  plate]
+轨距改变，过轨  gauge conversion [changing]
+轨距加宽 amplification     [slacking]of     gauge,gauge
+轨距拉杆 gage rod  [gage tie bar] 轨距量仪 metre-gauge     track
+轨 排 track  panel  [track  skeleton] 轨束梁 packed rail beam
+轨头波形磨损 wave-type  deformation  of rail head  轨头侧面磨损 side   wearof  railhead   [lateralwear] 轨头垂直磨损 vertical wear of rail head
+轨头肥边 flow of rail head[lipping of rail head] 轨头轨腰分裂 head-web    separation
+轨头压溃 crushing  of  rail  head[crushed  head  ]
+轨下基础  sub-rail    foundation[sub-rail     track    bed
+轨下胶垫 rail   pad(s)
+轨腰裂纹 cracked rail web  [split rail web] 轨枕 tie[cross tie,sleper]
+贵宾候车室 distinguished  guests'waiting  room 辊道传动 roller  drive
+国际标准化组织 ISO(international standards organi- zation)
+国 际 承 包 商 联 合 会 confederation   of   international contractors associations(CICA)
+国际电工委员会 IEC(international electrotechnical commission)
+国 际 电 信 联 盟 TTU(international telecommunication union)
+国际减轻灾害十年 IDNDR(intermational decade for natural disaster reduction)
+国际商用机器公司 IBM(International  Business  Ma- chines)
+国际铁路协会 IRCA(international  railway  congress association)
+国际通信卫星组织 INTELSAT(international commu- nicationsatellite consortium)
+国际无线电咨询委员会 CCIR(international   radio consultative)
+国 家 环 境 保 护 局 National Environmental Protection Agency  [NEPA]
+国家所有者权益 owner's  equity  of  state
+国家铁路，国有铁路 national [government,state, state-owned,public]railway
+国 家 信 息 基 础 结 构 NII(national information in- frastructure)
+过 岔 速 度  speed  through  turnout  [turnout  through
+过超高，过平衡超高 overbalanced superelevation, excess  elevation  [cant],cant  excess
+another directly 过 程 process
+过陡坡度，过陡坡道 excessive grade  [gradient]
+过载断路器 circuit-breaker(overload        -)
+(钢轨)扣件 fastenings  [fastener,rail  fastenings]
+(钢轨)死弯 kink[permanent   kink] (钢轨)塑性弯曲 plastic  rail  bent   (钢轨)锁定型式 anchor  pattern
+(轨道)横向移动 lateral movement[lateral shift]
+(轨头)淬火轨 head  hardened  rail  [surface  hardened rail]
+(轨头)核伤 nucleus flaw[oval flaw]
+GSM业 务 区GSM  service area
+海岸线 sea  board  line  [coastal  line] 海道测量 nautical surveying
+焊 缝 welding   seam,weld(s)
+焊接长钢轨 long welded rail 焊接工班[队]welding   gang  焊接接头 welded joint
+合资铁路 joint  investment   [owned]railway 合作经营 cooperative business operation
+河谷线，河谷铁路 valley  line   [railway] 河流阶地 river  terrace
+桁架高度 truss  depth[truss  height] 桁架梁 lattice   beam[girder]
+cross-section method for location of line 横隔板 cross  slab
+横向加固转向架 cross-anchored    bogie 横向加速度 acceleration(lateral-)
+洪水位 flood level[peak of flood] 洪水淹没 inundated
+后张法混凝土 post stressed concrete[post tensioned concrete]
+互 同 步 网 mutually synchronized network   户内光缆 indoor wiring optical fiber cable 护 岸 bank protection[revetment]
+护 轨 check  rail   [guard  rail] 护轨螺栓 guard rail bolt
+滑床板 slide  plate[switch  plate]
+化学吸附 chemisorption  [chemical  adsorption]
+环境音效扩展 EAX(environmental audio extensions)
+环线，环行线 track       loop,belt       line[circular,loop]
+line,circular       [loop]track   环线发车 circular  departure 环线接车 circular receiving  环行道 loop  track
+环 行 铁 路 circle                [belt,circuit,girdle,loop,ring]
+缓冲弹簧连接杆 draw-spring  connecting  rod 缓冲轨[调节轨] buffer rail
+缓 冲 区 buffer zone [transition zone] 缓冲区长度 buffer length
+缓和坡度 slight         [lat,easy]grade
+缓和曲线 transition     [spiral     transition,easement,ad- justment,connecting    junction]curve
+缓和曲线变更率 rate  of easement  curvature  [transi- tion  curve]
+缓流井 shaft for retarding the flow[stilling basins] 缓凝混凝土 retarded concrete
+缓坡地段，非紧坡地段，缓坡段section of easy [gentle]grade    [slope],easy     [flat]gradient    section
+缓行器，减速器 car    retarder    [retarder,squeezer]
+缓行器缓解状态 releasing state of retarder 缓行器制动状态 braking state of retarder    缓 圆 点 spiral   to   curve(SC)
+缓 直 点 spiral   to   tangent(ST)
+换轨工班[队] tie   gang
+换算坡度，当量坡度 converted     [equivalent,conver-
+簧下质量[簧下重量] unsprung mass
+汇水面积 drainage area  [water collection area] 汇总会计报表 summary of statements
+会让线 siding[pass-by]track,loop            siding,passing
+会 让 站 passing   siding    [track],crossing   loop    [sta-
+tion],meeting  station,passing  station 会 议 conference
+混凝土枕 concrete   sleeper   [tie]
+活动支座 movable bearing[expansion end bearing]
+活塞十字头 cross-head(piston           -)
+活性生物滤池 activated biofilter [ABF] 活性炭 activated   carbon
+火箱，燃烧室，(机车锅炉)炉膛 firebox(inner -)
+火箱门，燃烧室的门 firebox door 火箱清洗 clean     a     firebox(to-)
+货币资金审计 money capital audit 货 场 freight  yard(goods  yard)
+货车管理信息系统 CMIS(cargo truck management information system)
+in one complete turnround of wagon 货车日 wagon day
+货物列车 freighttrain(goods     train)
+货运收入 freight      [goods](traffic)revenue
+货 运 铁 路 freight    railway    [railroad],goods    traffic
+货运线，货运线路  freight      [freight     -traffic]line,
+机车车辆运输成本 transport cost of rolling stock 机车车辆运用计划 rolling stock utilization plan   机车车辆运用指标 rolling stock utilization index 机车出库线 out   [outbound]engine   lead
+机车调度 locomotive dispatching [motive power con- trol]
+机车计算速度 calculated   [computed]velocity  of  lo- comotive
+机车检修率 percentageof locomotive under repair 机车交路 locomotive  routing   [runs],engine  runs  机车接近通知 approach announcing in cab
+per     10000-gross     weight-ton-kilometre 机车排障器 cow-catcher
+power)consumption of locomotive
+机车燃料(电力)消耗定额  fuel(electric    power)
+机 车 整 备 线 engine     [locomotive]service     [serving]
+机 待 线 locomotive  waiting  track,locomotive  holding track  [holdtrack]
+economic efficiency audit of maintenance system 机械闭锁工作间 mechanical interlocking cabin
+机械传动 mechanical drive[mechanical transmission] 机械传动内燃机车 diesel-mechanical   locomotive
+基 本 建 筑 限 界 fundamental   construction   [structure clearance[gauge]
+基本输入输出系统 BIOS(basic input/output system 基本速率接口 BRI(basic rate interface)
+frequency coded track cireuit 极坐标 polar  coordinate
+急弯曲线 sharp        [abrupt,steep]curve
+集成电路 integrated   circuit(IC)
+集结时间 car  detentiontime  under  accumulation 集结线 assembly  track  [siding]
+集 中 式 话 务 员 服 务 centralized   attendant    service (CAS)
+集装化运输 containerizedtraffic[transport    ] 集 装 箱 freight  container
+(continuous)perceived      noise       level[LWECPN       ]
+计 算 机 辅 助 工 程 CAE(computer       aided       engineering 计 算 机 辅 助 教 学 CAI(computer aided instruction)
+计 算 牵 引 力 calculated       [computed]tractive       effort
+计 算 速 度 calculated         [computed]speed         [velocity
+技 术 改 造  technical        reform        [reconstruction,improve-
+既有铁路，既有线，旧线 existing railway [railroad] 既 有 铁 路 网 existing   railway   network
+既 有 线 existing      line      [track],old     line
+hancing      [strengthening](on      existing     line)
+加力牵引坡度 assisting [pusher]grade 加煤 coal trimming
+加密保护 encipherment  protection    加密程序 PGP(pretty good privacy)
+加速坡 acceleration       [accelerating]grade[slope]
+加算坡度 conversion   [compensation]grade
+架空索道，缆车道  aerial   cableway   [ropeway,tram-
+way],cableway,(cable)tramway,ropeway
+尖 轨 switch    rail[tongue    rail,blade]
+间 隔 铁 spacer block  [filler block]
+减振器 dashpot  [vibration  deadener]
+检修机车修竣台数 number of repaired locomotive 检修线 repair[maintenance]siding[track]
+简单网络管理协议 SNMP(simple network manage- ment protocol)
+简单邮件传输协议 SMTP(simple mail transfer pro- tocol)
+建设工程勘察设计合同 project   surveying   &design contract
+ic investment efficiency ofconstructionprojec   建设项目经济评价 project economic appraisal 建设项目竣工决算 last account of project
+建筑安装工程费 construction  &installation  costs
+建筑工程一切险 contractors'all    risks    insurance(C.
+A.R.)
+建筑限界，铁路建筑限界 structure gauge [clear- ance](for    railway),railway    construction     clearance [gauge]
+交叉接触线 contact    wires(crossed    -)
+交分道岔 slip  turnout  [switch]
+交 换 车 停 留 线 exchange          [interchange,transfer] track,siding  forexchange  wagon
+交流(电力)机车 a.c.locomotive
+交流电动机 a.c.commutator   motor    交流电力牵引 a.c.electric traction 交流电信令 a.c.signaling
+交流轨道电路 alternating-current  track   circuit 交流弧焊机 a.c.are   welding   machine
+交流计数电码轨道电路 a.c.counting code track circuit
+counting code track circuits 交流继电器 a.c.relay
+交流继电器 altermating-current relay 交流逆变器 a.c.inverter
+交流受电弓 a.c.pantograph 交流转换器 a.c.converter
+交向摄影 split photography [split-vertical photogra- phy ]
+交直流转换机车 locomotive    with    a.c./d.c.motor
+郊区快速交通系统 suburban rapid transit system 胶接接头 glued joint(s)
+胶接绝缘接头 glued insulated joint(s)
+胶结轴(空心轴) axle  attached by  gluing(light  -)
+角支撑，角柱 cormerpost[support] 角柱，角墩 corner pillar
+接口信息处理机 IMP(interface message processor)
+接头扣件 joint    fastening(s)
+接头联结零件 rail joint  accessories[rail  joint  fasten- ings]
+接头螺栓，夹板螺栓  fishbolt    [track    bolt,joint
+尽头线，尽头轨道 stub(ended)[end]track,blind
+[dead]siding,terminal            [dead-end]line 尽头信号机 signal  for  stub-end  track
+line   to   outlying   terminus,dead    [dead-end]siding 近 地 点 point of perigee
+进场线路，进站线路 access        [leading-in]line
+locking for a hump yard 进路锁闭 route locking
+进 人 孔 man  hole[entrance  hole] 进入区间 entering into section
+进入异线 entering  into  wrong   [unexpected]track 进入占用线 entering into occupied track
+进站线路  apprach       [entrance,entry,station      track
+leading-in]line        [track] 进站信号机 home signal
+禁止呼入incoming  call  barring   经 常 调 查 routing is.investigation
+晶粒定向的(定子用钢即硅钢) stator steel(grain -oriented       -)
+精简指令系统计算机 RISC(reduced instruction set computer)
+警冲标 fouling(point)post       [indicaor] 警冲标内方 inside of a fouling point
+警 冲 标 外 方 outside of a fouling point 警告标 warning post [sign]
+净空高度 head  room[clear  height]
+静态不平顺 static  track  iregularity[iregularity  with- out  load]
+局 界 站 divisional station of railway administration 局 域 网 local  area  network(LAN)
+锯 轨 机 rail     cutting[sawing]machine 聚丁胶板 butadiene  rubber plate
+军人候车室 soldiers'waiting    room
+Java开发工具 JDK(Java    developmentkit) JM-12   型 锚 具 JM-12   anchorage  device
+开放的最短路径优先路由协议 OSPF(open  shortest path  first)
+开放互连系统参考模型 OSIRM(open system inter- connection reference model)
+开放数据库链接性 ODBC(open database connectivi- ty)
+开合桥 draw  bridge[leaf bridge]
+开普勒定理 Kepler's   laws
+开普勒方程 Kepler's   equation
+开启桥 draw  bridge  [balance  bridge
+颗 粒 尺 寸 级 配 particle   size   distribution    [ballast
+grading] 壳  shell
+可 动 心 轨 辙 叉 movable-point            frog[swing-nose
+可吸入微粒 inhalable    particles[IP] 可卸连接 discharging connection
+客户信息控制系统 CICS(customer information con- trol system)
+统 ) braking         system(goods-passenger-)
+客货车可转换的制动机 brake(goods-passenger change   over   -)
+gitudinal arrangement 客 流 passenger flow
+空陆水联运集装箱 air/surface container(air/inter- modal container)
+空气动力噪声 aerodynamically induced noise 空气发动机 air  engine[motor]
+空闲线路 clear     [empty,unoccupied]line     [track]
+ters in one complete tururound ofwagon 空转，空走 idle  running
+控 制 区 间 control           [controlling]section
+控 制 信 道 controlchannel(CCH)
+扣 除 系 数 coefficient    of    deduction 扣 件 [ 中 间 扣 件 ] rail       fastening    扣 件 附 属 配 件 auxiliaryfastenings
+扣 件 扣 压 力  toe    load    of   fastening[clamping    force] 扣 件 阻 力 fastenings      resistance
+扣 压 力 clamping    force   [toe   load   of   fastening] 扣押，查封 attachment
+枯 水 位  minimum    water    level[droughty    water    level 库 存 现 金 审 计 cash    holdings    audi
+库 仑 土 压 力 理 论 Coulomb's    soil    pressure     theory
+跨 线 桥 ( 立 交 桥 ) flyover      bridge[grade      separation]
+mono-railway,straddle             monorail    块 差 错 率 检 验 block   error   rate    test 块 传 输 block      transmission
+块 检 验 序 列 block     check     sequence(BCS)  块 检 验 字 符 block     check     character(BCC) 块 结 束 符 end    of    block(EOB)
+快 速 交 通 系 统 rapid          transit(system)
+快 速 试 验 环 线 ( 美 国 ) facility for accelerated service testing(FAST)
+快 运 线 路 express      line,express      track[ 美 ]
+宽轨，宽轨距 broad         [wide]gauge
+宽 轨 铁 路 ， 宽 轨 线 路 broad-gauge         railway         [line,
+矿 山 铁 路 ， 矿 石 运 输 铁 路 mine             [ore-carrying]
+亏 损 线 路 uneconomic        [unprofitable]line 馈 电 电 压 feeding   voltage
+馈 电 线 端 子 clamp(feeder-)
+扩 充 内 存 EMS(expanded   memory   specification)
+垃 圾 焚 烧 refuse  burning   [incineration  of  refuse] 垃 圾 破 碎 crushing  of  refuse
+拉 杆 draw    bar,tension   bar[tension   member] 拉 杆 低 位 安 装 low-mounted     draw     bar
+拉 丝 机 弹 簧 板 drawgear   spring   plate 拉 索 hauling     [towing]
+扩 大 初 步 设 计 enlarged      [expanded]preliminary      de-
+阔 大 货 物 exceptional   dimension   goods   [freight] 阔 叶 林 broad-leaf       forest
+K 型 桁 架 K-truss
+K型 扣 件 K   fastening
+缆 车 道 aerial       cableway        [ropeway,tramway],funicu-
+缆 索 桥 rope   bridge[cable   bridge]
+缆索铁路，缆车道 cable      railway       [railroad],funicu- lar          [rope,telpher]railway,funicular          railroad[rail- way]
+朗肯土压力理论 Rankine's theory 劳 动 定 额 labor   norm   ,labour   quota
+乐器数字接口 MIDI(musical  instrument  digital  inter- face)
+冷却货物 cooledgoods   [freight]
+里程标 distance[mile]post [stone] 里 程 表 kilometric  scale
+里 轨 inner  rail  [low  rail]
+连 续 单 音 控 制 静 噪 制 continuous  tone   controlled squelch  system(CTCSS)
+连续陡坡 continuous  heavy   [steep]grade   [gradient
+deltamodulation(CVSD) 连 续 梁 continuous beam
+连续相位频移键控 continuous phase frequency shift keying(CPFSK)
+联合国环境规划署 United Nations Environment Pro- gramme[UNEP]
+联合国开发计划署 United Nations Development Pro- gram[UNDP]
+联 合 图 像 专 家 组 JPEG(joint   photograph    expert group)
+联 络 铁 路 junction        [connecting]railway,switching
+廉价冗余磁盘阵列 redundant arrays of inexpensive disks(RAID)
+链路接入规程 link   acces  procedure(LAP) 链路控制规程 link   controlprocedure(LCP)
+两千年问题 Y2K problem
+列车编组顺序表 trainconsist list(train list)
+列 车 计 长 number of standard wagons(at a length of kilometers each)
+列车技术速度 train's   technical  speed 列车加开 running of extra train
+and marshalling stations 列车进路 train  route
+列 车 空 隙 作 业 时 间 working time between trains [works  occupation time,working time  of closed  sec-  tion]
+列车牵引运行 train pulled forward by locomotive  列车倾覆 train    overturmed     [capsized,up-turned] 列车去向 train  destination
+列车容许最小时间间隔 headway(minimum-)
+列车洗刷线，列车清洗线 train  clearing  [washing] siding
+列车消毒线 train disinfecting  siding  [track] 列车验收 acceptance of a train
+列车运行图 train working diagram(or graph)
+列车重量 train   load   [weight,tonnage
+邻 线 adjacent[neighboring]track
+临时旅客列车 extra   pasenger   train(additional   pas senger  train)
+零 担 货 物 less-than-carload      freight      transshipmen station(part-load   transshipment   station)
+零担货物调度员 collective  freight  [goods]controller 零担货物运输 transport  of part-load  goods
+溜放调车 fly-shunting(coasting)(jerking)
+溜放线 group     lead     track,falling[fly-shunting,lead]
+硫磺锚固 sulphur cement mortar anchorage[anchor] 六 分 仪 sextant
+六 六 六 benzenehexachloride    [BHC] 龙门架 portal bridge gallows
+漏 斗 doline   [funnel]
+路内人员伤亡 casualty of railway man(on-duty ca- sualty)
+路外人员伤亡 casualty  of  non-railway  man(not  on -duty    casualty)
+路外装卸费 outside of railway loading'and unloading charge
+路由选择信息协议 RIP(routing   information   proto col)
+suddenly caught sick or died by acciden    旅客发送量 volume of sending passengers
+(number of passengers originated)
+旅客列车到发线 pasengertrain   siding    [track]
+旅客列车开行间隔 time  interval  between passenger trains'despatching
+旅客旅行总时间 total time of passenger's travelling
+of displacement [travel] 旅游列车 tourist  train    旅游票价 excursionfare
+铝热焊 thermit welding [alumino thermit welding] 履带式起重机 track  crane
+轮 轨 接 触 应 力 rail-wheel contact stress [contact stress]
+轮 轨 游 间 flangeway  clearance  [clearance  between wheel flange &gauge line ]
+尖轨与基本轨密贴 between switch rail and stock rail [closed switch rail]
+轮缘槽 flange  groove,flange-way  [flange  clearance] 轮缘槽宽度 flangeway width
+螺纹钢筋 deformed  reinforcement[screwed  reinforce- ment   bar]
+落道 under cutting of track[lowing of track] 落道，落低路基 lowering of roadbed
+落水洞 sink  hole  [ponor]
+码分多址个人通信网 CDMA PCN(CDMA Personal Communication network)
+码头线 quay   [wharf]siding,dock    line,harbor   track 码字 code  word
+买 方 市 场 buyer's   market 买方信贷 buyer's    credit
+脉冲编码调制(脉码调制) pulse code modulation (PCM)
+脉码调制复用设备 PCM multiplex equipment 脉位调制 pulse position modulation(PPM)
+慢行牌 yellow board[speed indicator] 慢行牌，黄牌 yellow   [slow]board
+毛截面积 total area of cross section[gross section ar- ea]
+锚 墩 anchor  pier   [anchoragepier] 锚 杆 dowel,bolt
+锚 索 anchor(contact    wire    mid-point     -)
+每秒字符数 CPS(characters  per  second)
+每万换算吨公里占用固定资产原价 perten    thou-  	sand converted ton kilometre employed fixed asset cost 每万流动资金完成的换算吨公里 per ten thousand
+每万总重吨公里成本 cost  per   10000-gross  weight -ton-kilometre
+美国高级研究项目机构 Advanced Research Projects Agency(ARPA)
+美国国家标准学会 American National Standards In- stitute(ANSI)
+美国铁路工程学会 American Railway Engineering Association(AREA)
+美国土木工程师学会 American Society ofCivil En- gineering(ASCE)
+美国信息交换国家标准码 American National Stan- dard Code for Information Interchange(ASCII)
+美国移动卫星公司 American Mobile Satellite Corpo- ration(AMSC)
+美 国 在 线 America  Online(AO)
+美洲总包商联合会 Associated General Contractors of America(AGC)
+米轨线路 meter-gauge   line   [track]
+面向对象程序设计 OOP(object  oriented  program ming)
+面向商业的通用语言 COBOL(commonbusiness ori- ented  language)
+民营岔线，私有岔线，私营线，专用线 private sid- ing[track]
+民营铁路，私营铁路 private    [privately     -owned
+鸣汽笛 board(whistle       -)
+模 板 moulding plate[stripping form work shuttering] 模 板工 程 form project
+conversion,A/D and D/A conversion 模型连接 model connection
+磨 光 dress(to        -)
+磨耗型车轮踏面 wom wheel profile 磨 合 burnish(to-)
+木 桥 timber bridge  [wooden trestle bridge] 木 桥 枕 wooden bridge sleeper
+木 枕 wooden  sleeper  [timber sleeper] 木枕防腐 preservation of wooden tie
+木枕防腐处理 creosoting(conserving)timber sleeper 木枕刻痕 notching[incising of wooden tie]
+木 枕 预 钻 孔 preboring  of  wooden  tie[preboring  of
+(木枕)防裂设备 anti-spliting      devices Mckay扣 件 Mckay  fastening(s)
+MPEG格 式 文 件MPEG(motion     picture      experts
+MRP 库 存 管 理 制 度 management system of MRP stock
+难行线 hard    [poor]rolling    [running]track 挠曲附加力 additional  flexural  force[load] 挠曲曲线半径 deflexion curve radius
+内轨，内轨线 inner       [low,inside]track
+逆变器 inverter      ,converter(frequency-)
+逆地址解析协议 RARP(reverse  address  resolution protocol)
+碾压速度 rolling  speed 啮 合 mesh(to-)
+纽马克图 Nemark's   chart 农药 pesticide
+欧铁联盟(UIC) 研究所  Office of Research &Experi-
+欧洲国际承包商协会 European International Cont- ractors(EIC)
+OS/2操作系统 OS/2(operating system)
+跑道[轨道鼓出] buckled  track 赔偿金 reimbursable expenses
+配合比 mixture ratio[mix ratio mix proportion]propor- tional ratio
+喷洒除草机 weedkilling  machine  [weed  killer] 喷 砂 sand   blasting[sand   spraying,sand  jetting]  喷砂除锈 cleaning rust by sand blasting
+膨胀水泥 expansive cement[expanded cement] 膨胀土 bentonite  ,swelling  soil
+劈裂实验 cleavage  spliting  test[split  test] 皮传送带 belt   line
+皮尔逊Ⅲ型分布曲线 Pearson's type IⅢ distribution
+皮尔逊分布 Pearson's   distribution 皮 重 tare weight
+疲 劳 fatigue  [tiredness  weariness] 疲劳极限 fatigue  strength
+疲劳裂缝 fatigue  crack[fatigue  cracking]
+疲劳强度 fatigue  strength[endurance  strength] 疲劳试验 fatigue test[fatigue testing]
+片 石 ragstone[rubble]
+片石混凝土 ragstone  concrete[rubble  concrete] 片石铺砌 slab paving
+偏 心 荷 载eccentricload[non-axial       load       non-cen-
+偏心率 eccentricity  [eccentricity  ratio] 偏心曲柄 eccentric  crank
+漂白粉 bleaching powder [chlorinated lime] 漂流物 drifter
+consignments of goods in one container 拼 装 splice
+贫混凝土 lean  concrete[poor  concrete]
+频道定义格式 CDF(channel definition format)
+频分多路复用 frequency division multiplexing(FDM)
+频率调制 frequency modulation(FM)
+平衡超高度 balanced    [equilibrium]superelevation 平衡电路 balanced  circuit
+平衡速度 balanced  speed  [equilibrium  speed] 平衡网络 balancing network
+平缓坡道，平缓坡度，平缓坡 easy       [favorable,flat,
+平缓曲线 easy     [flat]curve
+平货位堆货场 level  storage yard 平交道口 level[grade]crossing
+平交道口防护，道口防护 crossing protection,grade [level]crossing   protection
+平均水位 average water level[mean water level]  平均速度 average speed ,mean speed [velocity] 平均温度 average temperature
+平面交叉，平交、铁路平面交叉 level        [at-grade,
+平转桥 swivel  bridge[swing  bridge] 评估资本 appraisal  capital
+屏蔽双绞线 STP(shielded  twisted  pair)
+坡道附加阻力，坡道阻力 additional  resistance   for gradient,gradient            [ascent,grade,inclination]resis-
+坡道阻力 grade[ascent,gradient,inclination]resis- tance
+坡度，线路坡度，坡道 grade      [gradient,slope] 坡度百分率 percentage of grade
+坡度标 grade     [gradient]post     [indicator,sign],slope
+坡度折减，坡度减缓reduction       [compensation]of gradient,gradient     [grade]compensation
+破冰墩 ice  breaking  pier[sharpened  pier]  破底清挖道碴机械 undercutting  machine 破 封 break  a  seal
+破坏荷载 rupture  load[breaking  load]
+葡氏击实试验 proctor compaction test 普 拉 塞 - 陶 依 尔 Plasser   &Theurer
+普 通 老 式 电 话 业 务 plain old telephone service (POTS)
+(品类别，去向别)装车计划 car   loading   plan(by class or directions)
+PC机内存卡国际协会 PCMCIA(Personal Computer
+Memory Card International Association) PC卡 PC  card
+PC网 络 personal computer network
+PFI模 式 Private Finance Initiative model pH值  pHvalue
+Power PC微处理器 Power PC P 波，压缩波 P-wave
+启止同步 start-stop    synchronization   起步力，起动牵引力 breakaway force 起 道 raising  of track[track  lifting]
+起道机 track  jack[rail  jack]
+起动坡度 grade  for  starting,starting  grade   起动牵引力 starting tractive effort [power]
+气压高程测量 atmospheric  pressure  level    气压焊 oxyacetylene  gas[pressure  welding] 弃土堆 dump
+sion        [lead,pull-out        lead,tail,turnout]track 牵出线调车 shunting on shunting neck
+牵引电机架承式悬挂 motor(lateral    suspension    -) 牵引定数，牵引质量 tonnage rating[of traction]
+牵 引 力 tractive    effort    [power,force],motive    power
+牵引质量 load      hauled,hauled      [trailing]load,trail-
+牵引种类 kind     [category,type,form]of    traction
+牵引总重 gross   load    [weight]hauled,gross    trailing
+hammer compaction    强耦合 close coupling
+桥栏杆 bridge  railing[bridge  handrail] 桥 梁 bridge
+桥梁标 bridge  post  [sign]
+桥梁厂 bridge  plant[bridge  works]
+桥 面 bridge  deck[floor  platform 桥 面 板 flooring
+桥隧领工区 sub-division  for bridge  and tunnel 桥 塔 bridge head[pylon bridge tower]
+桥 台 abutment  [bank  pier
+桥 头 堡 tower portal of bridge[bridge head] 桥头检查梯 inspection ladder of abutment
+桥头引线 approach embankment [bridge approach] 桥头引线定线 approach alignment
+桥下净空 headroomof  bridge[under  clearance   clear
+桥 枕 bridge  sleeper[tie] 桥 址 bridge site
+侵蚀基面 erosion basis [base level of erosion] 勤务信道 servicechannel
+轻便铁路  portable [light]railway,portable track 轻浮货物 light  and  bulk  freigh
+轻轨交通，轻便城市轨道交通 light  rail  transit (LRT)
+轻 轨 交 通 系 统 light   rail   transit   system,light   rail transit(LRT)
+轻轨铁路，轻便铁路，轻轨 lightrailway [rail] 轻轨线路 light rail line
+轻金属客车 lightweight-metal     coach   轻水反应堆 light water reactor[LWR]  轻型车辆结构 lightweight construction
+轻型导向电车线路 guided light tramway(GLT)
+guideway transit system   轻型发动机 light engine
+轻轴(空心轴) axle(light        -)
+倾覆力矩 overturning  moment[tilting]
+倾斜喷砂 blasting withangular grit 清除发送 CTS(clear to send)
+清除油泥 de-sludge(to-)
+球形万向联轴节 ball-and-socket     joint 球状矩阵排列 BGA(ball  grid  array)
+detaching of wagon within the district 区 段 票 district  pasenger   ticke
+carrying capacity of a section 区间信号 wayside  signaling   区间占用 sectionoccupied
+section in the pairs of trains or number of trains 区域标识码 regional identity code
+曲线半径 curve     radius,radius    曲线标 curve   post   [stone,sign]
+曲线测设 layout  of curve[arrangement  of  curve] 曲 线 长 度 curve  length
+曲线超高 super  elevation  [cant,elevation  of  curve]
+曲线交叉 curve     [curved]crossing,curved     intersec-
+曲线涂油器 curve  lubricator[rail  lubricator]
+全面质量管理 total quality control(TQC)
+全球定位系统 global  positioning  system(GPS)
+全球移动通信系统 global system for mobile commu- nication(GSM)
+全速运转 race(to-)
+(汽、气)缸套 cylinder   jacket[sleeve]
+绕行地段 detouring    [round]section 绕行线，便线 detour
+热舒适指标 thermal comfort index 热 套 装 shrink    on(to    -)
+人机交互界面 MMI(man-machine     interface)
+人行桥 foot bridge[pedestrian bridge]
+日 本 铁 道 工 程 学 会 Japanese Railway Engineering Association(JREA)
+溶解氧 dissolved   oxygen[DO] 熔 断 器 fuse
+锐角辙叉 acute angle crossing  [acute frog,end frog]
+三角网 triangulation network 三角线 wye  track  [triangles] 三 角 线 tri-angle track
+三阶段设计 three-step           [three-phase]design
+三开道岔 three-way  turnout   [three  throw  turmout] 三室箱形截面 three-box     section
+三显示自动闭塞 three-aspect   automatic  block 三线铁路，三线 three-track [three track]line 三向应力 three-dimensional    stress
+森林生态系统 forest ecosystem     森林铁路 forest   [logging]railway 森林遥感 forest remote sensing
+山 崩 land    slide[rock    fall]
+山 顶 summit  of  a  mountain   [hill  top]
+山 前 区 河 段 water way in front of mountain 山 区 mountain   region   [hilly   aera]
+扇 形 拱 segmental    arch[ribbed    arch]
+上 承 式 公 路 桥 top    -road    bridge     [deck     highway
+上 电 自 检 POST(power on self test)
+上 煤 线 coaling    track    [road],coal    track[ 美 ]
+上坡，上坡道 ascending                 [rising,up,uphill]grade
+上 坡 方 向 up[up-train]direction 上 坡 运 行 upgrade    run
+上 弦 top   chord[top   flange],first   quarter 上弦节 top  chord  panel
+上 行 线 up[up         track]line
+舍 入 误 差 rounding    error    [round-off    error]
+设计洪水位 design-flood    level  设计阶段 design phase [stage] 设计开挖线 pay  line,B  line
+设计能力 design      [designed,engineering]capacity 设计年度 design year
+设计 一 施工分离式承包  design &construction di-
+摄影经纬仪 theodolite camera [photo theodolite]
+伸 臂 overhang   [cantilever
+伸臂长度 boom out [boom reach cantilever length] 伸臂梁桥 cantilever  bridge
+伸缩附加力 additional  temperature  force[load]
+伸 缩 接 头 expansion[sliding]rail      joint(s)[rail      ex-
+伸缩区[呼吸区]长度 breathing  length
+甚 低 频 very low frequency(VLF)   甚 高 频 very high frequeney(VHF)
+渗 水 量 seepage[leakage]
+生化需氧量 biochemical oxygen demand[BOD] 生活车，起居车 living van
+生物膜 biological     film[bio-membrane] 生物膜法 biological membrane method
+声音恢复系统 SRS(sound  retrieval  system)
+牲畜给水栓 livestock hydrant   牲畜护栏 stock      [cattle]guard 牲畜通道 stock  pass
+施工天窗 construction"interval",possessive     interval
+施工图，施工图设计 working-drawing[construction detail]design
+施工总分包 general &sub contracting of construction 施工总进度计划 overall  construction  plan
+施行制动机的阶段制动 make a graduated applica- tion   of   the   brake(to-)
+十八点统计 eighteen-o'clock       statistics
+石拱桥 masonry arch bridge[rock arch bridge]
+时 间 - 距 离 曲 线 time-distance            [time-path,time
+使 … … 达到均衡 counterbalance(to      -)
+onment and development 世界时 universal time
+市 郊 铁 路 suburban   [commuter]railway   [line] 市郊线路 suburban  track,commuter  line
+视频图形适配器  VGA(video graphics array)
+视在功率 apparent  power  视 准 轴 axis  of collimaion 试 块 briquette  [test  cube] 试验车 laboratory   coach
+试验线 experimental    [test]line    [track]
+守 车 guard's   van
+授 时 time  service  [issue  theofficial  calendar] 书面联络法 written liaison method
+输入呼叫识别 incoming call identification(ICI)
+输 送 能 力 transport            [conveying,traffic-carrying
+竖 曲 线 vertical       [rounding-off]curve
+数据电路交换系统 data circuit switching system 数 据 电 路 设 备 data  circuit  equipment(DCE)
+数据服务单元/信道服务单元 DSU/CSU(data   ser- vice  units/channel  service  unit)
+数据集标号 DSL(data  set  label)
+development method 数据库 database
+数据链路连接标识 DLCI(data link connection iden- tifier)
+数据通信设备 data  communication  equipment(DCE)
+数据终端就绪 DTR(data  terminal  ready)
+数据终端设备 data  terminal  equipment(DTE)
+数字地面模型 DTM [digital terrain models] 数字地球 digital globe
+数字视盘 digital  video  disc(DVD)
+数 字 网 络 体 系 结 构 digital   network   architecture (DNA)
+栓 钉 bolt    [pin]
+双层桁架桥 two-storied truss bridge[double deck bridge]
+双方向运行(单线) double  directional  working(on single-track     line)
+双轨距车辆 vehicle  with  dual-gauge  wheelsets 双轨距铁路 three-rail    [dual    gauge]railway
+双 轨 距 线 路 dual       [double]gauge       line,three-rail
+双机(牵引) double heading[locomotive]
+双交叉 double      crossing[crossover,junction] 双绞线 twisted-pair     cable
+双块混凝土轨枕[组合式混凝土轨枕]  twin-
+block  concrete  sleeper[duel  block  tie 双励磁线性电机 DELSYM
+双列直插式封装 dual-in-line        package(DIP)
+双 曲 拱 桥  double curved arch bridge [hyperbolic
+双头轨 bullhead    [double   head]rail
+双线区段 double-line    [double    track]section 双线区间，双线区段 double-tracked   section
+双线铁路，复线铁路 double-line     [double     line
+yard bidirectional longitudinal marshalling station 双向锁定 boxed   anchor[two-way   anchor]
+双音多频 dual   tone   multi-frequeney(DTMF)
+shoe brake   双 占 用 glare
+charging type mixer    双 缀 条 double  lacing 双作用 double-acting
+水泥注浆 cement  injection 水 平 level[cross    level]
+水位观测 water level survey [observation of stage ]
+水文站 hydrometric station [hydrologic station] 水污染 water pollution
+水准器  level  [level  gauge  ] 水准椭球 level spheroid
+司机安全装置 driver's   safety   device(DSD) 司机操作台，驾驶台 driver's desk
+司 机 的 自 动 制 动 阀 engineman's automatic brake valve
+司机室 driver's    cab
+司机室自动监控按钮 automatic monitor button 司机制动阀 engineman's[driver's]brake      valve 司机助手，副司机 driver's    assistan
+司机自动制动阀(大闸)driver's automatic brake valve
+司闸员守车brakeman'scaboose 私人数据_private  data
+私有通信技术协议 private communication technology protocol(PCT)
+四毫米锁闭 check 4mm opening
+四线铁路，四线 four-track     [quadruple]line     [rail-
+四相差分相移键控 quadraturedifferential phase shift keying(QDPSK)
+速度自动控制 speed        control(automatic-)
+速 凝 quick  setting[quick  hardening] 速凝剂 accelerator
+宿营车 boarding  car,camp  car  [bunk  car,oufit  car] 宿 主 host
+塑性变形 plastic deformation[plastie yielding]
+塑性破坏 plastic failure[ductile fracture] 塑性区法 plastic zone method
+随机误差 random  eror  [accidental  eror] 随 机 噪 声 random  noise
+随着里程递远递减的运价 tapering(mileage       scale)
+隧 道 标 tunnel  post  [sign]  隧 道 测 量 tunnel  surveying 隧道长度 tunnel  length
+隧道附加阻力，隧道空气附加阻力 additional(air) resistance  for  [due  to]tunnel
+隧道建筑限界 tunnel  construction  clearance  [gauge] 隧道净断面 tunnel   clearance;
+隧道坡度折减，隧道坡度减缓  compensation(of)
+缩短渡线 curtailed crossover[shortened crossover]
+缩短渡线 shortened  crossover  [curtailed  crossover]     缩 短 轨 standardshortened        [curtailed]rail(fabricated
+tailed ladders 缩 放 zoom
+所有者权益核算  owner's equity accounting 所有者权益审计 owner's  equity  audit
+索 道 cable way[rope way]  索赔时效 indemnity period 索 引 index
+锁定轨温 fastening-down  temperature   of  rail  [stress -free   temperature]
+锁相环 phase locked loop(PLL)
+套管式伸缩器 sleeve type compensator  套轨线路 interlaced     [overlapped]lines
+套筒联轴节 coupling muff[sleeve]
+特别工班、队 extra[special]gang 特别旅客快车 express  train
+特等站(1,2,3,4,5等站) superclass station(class one,two,three,four        station)
+特 种 断 面 尖 轨  spcial   heavy   section   switch   rai  [tongue  rail  made  of  special   section  rail,full-web section switch rail]
+提速，高速化 speedup 替 代 displace(to-)
+天 文 年 历 astronomical yearbook [astronomical alma nac]
+跳 车 injury accident of passenger jumping from train 跳 频 frequency  hopping(FH)
+铁道，铁路 railway,railroad  [美]
+铁路、海路联运运价 through   rail-ocean   rates 铁路“绿色通道”railway"green   passage"
+accounting management information system 铁路财务决策 railway financial decision
+铁路侧线，铁路岔线 railroad     [rail]siding
+铁 路 道 口 railway        [railway       grade,rail,railroad]
+铁路等级，线路等级 railway        [line]classification,
+classification ofrailway  铁路地产 railway    estate
+application of railway statistical surveys 铁路给水厂 water plant of railway
+铁路更新改造项目 railway renewing &transforming project
+铁路公路交叉 rail-road     intersection    铁路公司 railway company(corporation)
+铁路技术改造 technicalreform [renovation]of rail- way,betterment and improvement ofrailway
+铁路局资金周转额 railway bureau turnover 铁路勘测 railway  reconnaissance[survey]
+铁路轮渡 railway   [rail,railway   train]ferry
+铁路区段 railway district  [division]
+铁路设施 railway         [rail,railroad]infrastructure,rail-
+铁路网，路网 railway           [railroad,rail]network,net- work of railway  [railroad],railway system
+铁路物资流通企业 intranet:railway  material  circula- tion enterprise intranet
+铁路线，线路，铁路线路 railway        [railroad,rail]
+length of tracks,equivalent track kilometers 铁路限界 railway     [railroad]clearance
+铁路延展里程 extended length of railway 铁路英里里程 tack       [rail]mileage
+铁路用地，路界土地，沿线 rallway [rail]right of
+way,right  of  way,railway  land 铁路与铁路交叉 track crossing
+铁路运输成本费用控制 railroad transportation ex- penses control[cost and expense control]
+铁路运输收入 railway   traffic[transportation]revenue 铁路运输收入会计 accounting of railway transpor
+铁路运营管理信息系统 RMIS(railage management information system)
+铁路在上交叉，下跨桥，地道 elevated  track  cros₈-
+铁路在下交叉，跨线桥 bridge overgrade,undergrade [depresed         track]crosing,crossing         below,fly-  over,flyover     bridge,overpass,railroad     underbridge under-line      bridge,underpass
+铁路终点 end   [termination]of  railway   [track]
+铁路主要标准 main technical standard  [requirement] of railway
+port plan  铁 鞋 skate
+停 车 线 stabling     [standing]siding 停车信号 stop  signal
+通道门，检修门，人孔盖 access door   通道折棚 gangway bellows[diaphragm] 通道折棚盖 gangway-bellows   cover    通风 ventilation
+通 过 能 力 capacity   of   track,caryjing    [throughput]
+通 过 曲 线 negotiating     [running     through,through, passing  through]curve,curve  negotiation   [passage]
+通过铁路，过境铁路 transfer    [transit]railway
+equipment depreciation expenses 通 信 业 务 communication service
+通 信 应 用 程 序 接 口 MAPI(messaging   application programming interface)
+通用串行总线 USB(universal serial bus)
+通用分组无线业务 GPRS(general  packet  radio  ser vice)
+通用横墨卡托投影 UTM [universal transverse Mer- cator,project]
+通用数据话音多路复用 universal data voice multi- plexing(UDVM)
+通用资源指示程序 URI(uniform  resourceindicator)
+同 步 时 分 多 路 复 用 器 synchronous time  division multiplexor(STDM)
+同步数据链路控制规程 synchronous data link con- trol(SDLC)
+同向曲线 same-sense [adjacent]curve(in one di- rection),curves  of  same  sense
+铜缆分布式数据接口 CDDI(copper  distributed  data interface)
+统计声级 statistical  sound  level[LN] 统 计 室 statistics room
+vestment result coefficient and payback period 投资效益率 investment  andeffect  rate
+图根控制 mapping  control  [topographiccontrol]
+土木工程师学会 institute  of  civil  engineers(ICE)
+Civil Engineering Construction 土壤 soil
+土壤顶极 edaphic  climax  [pedoclimax]
+土压平衡盾构 EPB(earth pressure balance shield)
+托盘运输 pallet  traffic[transport] 托 运 tendering for conveyance
+拖 拉 施 工 dragging   construction   [erection   by   drag ging]
+脱 模 removal of form work[drawing of patterns] 脱 碳 decarbonization
+驼峰解体能力 break-up  capacity  of hump   驼峰连结员室 couper's  cabin  at  hump  cres 驼峰溜车方向 rolling direction of hump
+驼峰溜放坡    gravity    incline,hump    lead    [track],
+外存储器 externalmemory 外 轨 outer  rail  [high  rail]
+外线拨号自动识别 automatic identification of out- ward dialing(AIOD)
+晚点发车 train    left   behind   scheduled(or   booked)
+TOT模 式 Transfer-Operate-Transfer     model     traffic
+limitation(traffic   restriction) T 坝  T-dam
+T 型桥台 T-shaped     section  U型 桥 台 U-shaped     section V形发动机 vee  engine
+网络接口卡 networkinterface card(NIC) 网络控制器 networkcontrol   unit(NCU)
+未被平衡的离心加速度 unbalanced centrifugal ac- celeration   [non-compensated   acceleration]
+温 度 力 temperature   forces[temperature   load,thermal forces]
+温度应力 temperature  stress  [thermal  stress] 温度应力峰 temperature stress peak
+温克尔理论 Winkler's  method
+文件传送协议 FTP(file transfer protocol)
+文件分配表 FAT(file allocation table)
+无侧限变形模量 unconfined deformation modulus 无侧限抗压强度 unconfined compression strength 无碴轨道 ballastless track  [unballasted track]
+无碴桥面 open bridge floor [unballasted floor] 无碴无枕梁 girder without ballast and sleeper
+无 缝 道 岔  continuous   welded   switches[continuous
+无缝线路 continuous   welded   rail(CWR)track[joint- less  track,gapless  track]
+无 栏 木 道 口 ungated  level  crossing,unbarred  [ungat- ed]road   crossing
+无连接协议 connectionless protocol 无梁板 beamless  slab  [flat  slab]     无螺栓孔钢轨 blind  rail
+tracks,intermediate train distance point without siding 无票运输 traffic without shipping documents
+无人看守道口 non-guarded [open,unattended lev-
+el,unmanned,unstaffed       level]crossing  无绳电话系统 cordless telephone system 无损检测试验 non-destructive    test
+(WTX)
+morning when departing in the evening 吸持磁铁，保持磁铁 holding magne    吸 附 absorption
+吸收剂量 absorbed  dose[uptake  dose]
+ing  siding  [track] 系杆 tie
+系统网络体系结构 SNA(system network architec ture)
+下坡，下坡道 descending     [down,down     hill,down-
+下 弦 last quarter ,lower flange[bottom chord]
+下行方向 down direction   下 行 线 down  line  [track] 下行咽喉 down throat
+先 进 计 算 环 境 ACE(advanced  computing  environ- ment)
+先进配置和电源管理界面 ACPI(advanced  configu- ration and power interface)
+鲜活货物 fresh and live goods [freight] 闲置线路 dead   line
+险性事故 bad   accident(dangerous   accident)
+现场(工地)焊接 on-site    welding[field    welding] 现场管理费 site administration expenses
+线间距，线间距离，股道间距 distance between cen- tersof  lines   [tracks],midway   between   tracks,inter- track  space,track  center  distance
+线路标志 track    post,roadway     [road,track,wayside] sign,(wayside)marker
+线 路 大 修 major  repair  of  track[overhaul  of  track, trackrenewal]
+线路等级，股道分类 line    [track]classification
+线路封锁，线路关闭 blocking   up   of   track,line [track]closure
+线路交叉 crossing   of   lines   [tracks],track   intersec-
+线路平面及纵断面 line plan and profile 线路平面图 line    [track]plan
+线 路 所  block     house     [office,post,signal     box,sta-
+线路所值班员  block   operator   [post   keeper,signal- man,station   operator]
+线路通过能力 carying  capacity  of  track,line   cary- ing[throughput]capacity,track       capacity
+线路维修 maintenance of track [maintenance of way 线路协议 line protocol
+线路总延长 road     [route]miles
+线路纵断面 line        [track]profile,profile
+线路纵断面图 line    [track]profile 线路走向 trend of railway line
+线路阻塞 obstruction  of track 线 旁 trackside   [wayside]
+限界，铁路限界 clearance         [gauge](limit),confine-
+限 上 、 限 下 项 目upper    &lower    investment    limit
+限时人工解锁 manual  time release 限 速 speed restriction  [slow order]
+限速运行，限速 speed   limit    [limitation,restriction] 限位开关 limitswitch
+限制坡度，最大持续坡度 ruling[limiting]grade [gradient]
+限制区间，限速区段 limiting [critical,speed re- strictive]section
+限 制 速 度  limited            [resticted,restrictive,limiting]
+相错式接头，对接接头  altermate joints [staggered joints,brokenjoints]
+相关控制服务元素 ACSE(association control service element)
+相连曲线点，圆圆点 curve   to   curve(CC)
+相位调制 phase modulation(PM)
+相移键控 phase shift keying(PSK)
+响 度 级 loudnesslevel    [LN]
+消声器 baffle     ,muffler[silencer]
+小 半 径 曲 线 short-radius               [sharp-radius,sharp,
+小三角测量 minor triangulation 小时呼 call   hour(CH)
+小型计算机系统接口 SCSI(small computer system interface)
+斜轴投影 skewed  projection  [oblique  projection] 斜 桩 batter  pile
+卸 车 数 car unloadings [number of wagon unloaded, wagon unloadings]
+卸 轮 removal of a wheel  心 轨 point  rail  [nose  rail]
+新 线 new  line  [track]
+信道双工通信 double channel duplex 信道速率 channel  speeds[efficiency]  信道占用 channel busy
+信息管理系统 information management system 信息技术 information technology(IT)
+信 源 information source,message source 信噪比 signal to noise ratio(SNR)
+星型网络 stelliform  network 新 月 crescent  [new  moon]
+行车(列车)调度 train control [train dispatching]
+行李保价费 luggage and parcel securing value charge 行李车 baggage    [car,van,wagon]
+行 李 房 luggage office(baggage office)
+行李票 luggage  ticket(baggage  ticket)
+虚拟存储存取方法 VSAM(visual  store access meth od)
+虚拟远程通信存取方法 VTAM(virual telecommu- nications access method)
+徐 变 gradual change  [slow  change]
+悬臂架设 erection by protrusion[cantilever erection] 悬臂梁 overhanging beam
+悬接接头，悬接式钢轨接头 suspended joint 悬链线 catenary  line[curve  ]
+choosing supplement stock 选择呼叫 selective  calling
+雪崩报警 snow slide alarm  雪 害 snow  drifting  [damage] 寻呼接收机 paging receiver  寻 呼 区 paging zone
+巡 道 工 patrolman,track   inspector    [walker] 巡 道 员 patrol  man
+巡 回 区 patrolling section 旬 计 划 ten     days'plan
+旬间装车计划 ten-days'wagon   loading   plan    旬要车计划表 ten  days'wagon  requisition  plan 询 问 query
+循环冗余校验 CRC(cyclic redundancy  check)
+循 环 冗 余 校 验 码 CRC(cyclic   redundancy   check code)
+X-25   标 准 X-25standard
+XM型 锚 具 XM  anchorage device  X-Y   绘 图 仪 X-Y  type  recorder X 射 线 X-ray[X-radiation]
+压力密封车 car(pressure-sealed-)
+压水(反应)堆 pressurized-water   reactor   [PWR] 压水试验 packer permeability test
+咽 喉 throat,bottle-neck,bottleneck 咽喉道岔 throat  point  [turnouts]
+岩石的泊松比 Poisson's ratio of rock
+沿山脚铁路 sub-mountain   railway 沿线，线旁 wayside  [trackside]
+养路工 plate   layer,track   man    [hand,layer 养路工长 section  foreman,leading  trackman
+养路工区[队] track  section,maintenance  gang 养路工区房屋 section  house
+(MMS)
+业务管理系统 serice  management  system(SMS)
+业务信道 traffic    channel(TCH)
+液力变扭器 converter(flow-)
+一 般冲刷 general scour[general washout] 一 般事故 ordinary accident
+一 阶段设计 one-step          [one-phase]design
+移动交换中心 mobile switching center(MSC)
+异步传输模式 asynchronous transfer mode(ATM)
+易冻货物 freezable freight,easily frozen goods 易腐货物 perishable goods  [freight]
+易燃货物 inflammable goods [freight]
+易行线 easy        [good]rolling[running]track 易于维修，易于保养 easy  maintenance
+因特网服务商 ISP(internet  service  provider)
+因特网工程任务组 IETF(internet   engineering  task force)
+因特网信息访问协议 IMAP(internet mesage access protocol)
+因特网中继对话服务器 IRC(internet  relay  chat)
+es that should be cancelled after verification 应急轨，备用轨 emergency [spare]rail
+应急轨夹 emergency rail clamp  [emergency strap] 应急接头夹板 emergency   [safety]joint   bar
+英国达比铁路技术中心 Derby Railway Technical Center(British    Rail)
+英国养路学会 Permanent  Way Institute 英里标 mile  post  [stone]
+英特尔移动模块 IMM(intel mobile module) 膺 架 centering    [scaffold]
+thenticity of drawing and using surplus fund 营销费用 marketing expenses
+营业外支出(扣除实际清算部分) non-operating expense(unincluding   actualliquidation   part)
+硬盘防碰撞保护系统 SPS(shot  protection  system) 硬盘驱动器 HDD(hard  disk  drive)
+on passenger train 拥 塞 congestion
+用户界面管理系统 UIMS(user interface management system)
+用户开关 subscriber   switch(SSS)
+用户线路接口电路 subscriber line interface circuit (SLIC)
+油 枕 treated   timber[wooden]sleeper 游标经纬仪 vernier theodolite
+procedure of transit train with resorting 有调中转车 transit car with resorting
+有轨电车架空线 trolley  wire  [line]
+有 人 看 守 道 口 manned [staffed]level crossing,
+guarded       [watched]croing 有人值守 attended
+有效长 useful    [effective]length 有效电阻 effective  resistance
+有效功率 active    [effctive]power
+迂回线，联络线，绕行线  by-pass         [bypass]route [track],roundabout          line           [track],detour(line), avoiding line
+雨量计 rain-gage 雨棚 [goods]shed 语 法 syntax
+预 防 性 维 修 preventive maintenance [programmed maintenance]
+预应力混凝土桁架桥 P.C.truss   bridge   lining   seg
+预应力混凝土简支梁 P.C.simple  supported  beam 预应力混凝土连续梁 P.C.continuous    beam
+预应力混凝土桥 P.C.bridge
+圆端形桥墩 round-ended    pier 圆 缓 点 curve   to   spiral(CS)
+月度货物运输计划 monthly goods [freight]transport
+of line in mountain region,location over mountain 越岭垭口，越岭隘口 mountain crossing
+越 行 线 passing      loop      [siding,track],side      [pass-
+运量适应图 transport-capacity         vs.traffic-volume
+运 量 预 测 traffic   estimate,traffic   volume   forecast [prediction]
+运煤铁路 coal  railway  [coaler]
+运 输 调 度 traffic  control   [dispatch]
+运输管理信息系统 transportation management infor- mation system(TMIS)
+运输条件 traffic   [transport]condition
+运行性能 operating[running]performance
+运营线路 line   operated(to   trafic)
+ployed obtain employment again 再生段 regenerator  section
+再生式中继器 regenerative  repeater    再生式转发器 regenerative repeater     再生制动(作用) regenerative braking 再 用 轨 relay    rail[second-hand    rail
+脏 污 道 床 fouled  ballast  bed  [contaminated  ballast bed]
+脏污的道床 contaminated ballast bed  [fouled ballast bed  ]
+增长的极限 the limits to growth  增 量 调 制 delta  modulation(DM)
+增值网络 value-added    network(VAN)
+闸门关断可控硅整流器 GTO thyristor   闸瓦，闸片，刹车片 brake   block[shoe]   闸瓦吊，闸瓦托吊 brake-block hanger 闸瓦调整垫片 brake-shoe      insert
+展 线 extension   [development]of   line,line   develop-
+展线系数  coeficient  of  line   development,coeffcient of  extension  [developed]line
+占用的股道，占用的线路 occupied track 占用的线路 occupiedline    [track]
+站别卸车计划 unloading plan by  stations[scheme of unloading by stations]
+站别装车计划  loading  plan  by  stations  [scheme  of
+loading by stations] 站 场 station yard
+站调楼 yard  controller's tower
+站 界 标 station    boundary    [limit]sigm,station    limit
+站坪坡度 grade[gradient]of   station   site
+站台线 platform  line  [track],platform  road[装卸车]
+站线，股道[美] station     [yard]track 站线全长 full length of station track
+张 力 补 偿 架 空 线 overhead contact line(counter- weight   for   tightening-)
+招标投标法 the  bid  and  tenderlaw 沼 气 biological  gas  [biogas
+折返三角线，转向三角线 reserving  triangle,triangle [triangular,wye,Y]track,turnaround          wye
+折 返 站 reversing   station,servicing   depot   [terminal]
+折线编码律 segmented encoding law 辙 叉 frog   [crossing
+辙叉跟长[辙叉跟距] heel length of frog
+辙 叉 角 crossing angle [frog angle] 辙叉螺栓 frog bolt
+辙叉有害空间  gap   in   the    frog[open   throat,un- guarded    flange-way]
+辙叉趾长[辙叉趾距]toe  length  of frog
+辙叉趾端开口[辙叉前开口] frog toe spread 褶 皱 fold
+针 叶 林 needle-leaf forest [coniferous forest] 针状滚柱轴承 needle roller bearing
+帧 号 码 frame  number(FN)
+振 幅 和 相 移 键 控amplitude  and  phase   shift  keying (APSK)
+整备线 feed     [service,serving]track     [line]
+without ballast and sleeper 整 流 rectification
+整体车轮 monobloc wheel,wheel rim with tyre 整体道床 solid[concrete]bed
+整正曲线 curve  adjusting[curve  lining] 整正水平 adjusting of cross level
+整铸电动机 block-cast     motor[engine]
+正交桥 right  bridge[square  bridge]
+正线1  main     line     [track,route],main
+正 线 2  main      [major,through]track      [line],through
+pushing process 支撑 support
+支 线 branch          [feeder,minor,secondary          ]line
+[track],spur(track)
+支线铁路 branch-line         [secondary]railway,second-
+直达运输 through  [traffic]transport
+直角交叉 rectangular crossing [square crossing] 直接长途拨号网 direct distance dial network
+直接数字控制 DDC(directdigital   control)
+直流(电力)机车 d.c.locomotive 直流电动机 direct motor
+直流电气牵引 d.c.electric traction  直流电源屏 d.e.power   supply   panel 直流放大器 direct current amplifier     直流轨道电路 d.c.track     circuit
+直流弧焊机 d.c.arc  welding  machine 直流继电器d.c.relay
+直流受电器 d.c.pantograph
+直通列车 transit    [through]train
+直线线路，直向股道 tangent   track 直向股道 straight     [tangent]track
+直向过岔速度 speed through turnout main 直 圆 点 tangent  to  curve(TC)
+纸上定线 paper     location(ofline)
+制动管充气，制动管路充气 filling of brake-pipe 制动管排空加速器(列车管紧急减压加速装置)
+brake-pipe  emptying  accelerator   制动缓解踏板 brake release pedal
+head of a retarder location 制动盘 brakedisc
+制动坡度 braking  gradient  [slope 制动曲线 braking curve
+制动软管夹 brake   hose-pipe   clamp[clip] 制动软管接头 brake-hose  coupling  head  制动软管连接 brake hose joint
+制动试验，试闸 braketest[trial] 制动手柄 brake  handle
+制动员室 brakeman's    cabin 制动圆鼓 brake drum
+智能机器人 knowbot(knowledge  robot)
+中 毒 intoxication [poisoning] 中 断 interrupt
+中国对外承包工程商会 China  International  Cont ractors Association(CICA)
+中国教育科研网 CERNET(China Education and Re- search Network)
+中国数字数据网 CHINADDN(China digital data net- work)
+中继线全忙 all    trunks    busy(ATB)
+中间给水站 intermediate water supply station 中 间 坡 intermediate   grade[gradient]
+中 间 站 intermediate             [through,way,wayside]sta-
+中 立 位 isolation[neutral]position 中 埋 medium  depth
+中转旅客候车室 transfer  passengers'waiting  room 中转整零车 transshipment  part-load   wagon
+终点站，枢纽 terminal,terminus(station),terminal depot[ 美 ]
+重力调车，驼峰调车 gravity shunting[switching]
+重水反应堆 heavy-water      reactor[HWR] 重现期 rainfall reappearing period
+州有铁路，国有铁路 state [state-owned]railway
+轴载荷调节装置 axle-load  adjusting  device 轴重，轴载荷 axle    load[weigh]
+轴重比率 axle(ratio  for  weight  per  -)
+主动齿轮，驱动装置 driving gear 主动构件 member(active-)
+主 力 main  loads[principal  loads 主链路站 primary link station
+主 梁 main   girder[beam]
+主任客运调度员 chief of passenger train controller 主速率接口 PRI(primary rate  interface)
+专题地图 thematic map [special-subject map]
+专线业务 private-line     service(PLS)
+专业性货运站 specialized   goods[freight]station 专用(电话)交换网 private switching network
+专用电话交换机 private branch exchange(PBX)
+(ASIC)
+专用集装箱 specific purpose container 专用交换机 private  exchange(PX)
+专用铁路 special          [special-purpose,exclusive]rail-
+专用自动交换机 private automatic exchange(PAX)
+专 用 自 动 小 交 换 机 private  automatic  branch  ex- change(PABX)
+转向架旋转枢轴 bogie pivot   转向架摇枕 [centre-pin]bolster 转向架支承板 bogie  solebar
+桩 帽 pile    cover[bonnet    pile     cap],driving    cap
+装 ( 卸 ) 车 数 rolling    stock    amount    of   loading(discharg- ing)
+装 车 数 car    loadings,number    of    wagon    loaded    [wagon
+装 车 线 loading     siding     [track]
+装 卸 滑 轮 loading 装 卸 机 械 loading 装 卸 排 作 业 收 入
+装 卸 线 loading      and      unloading       siding      [track],team
+锥 体 护 坡 conical      flling[conical      pitching]
+资产周转率，资产利用率      eet              hTn0Ve
+自动报警装置，自动报警 automatic  vigilance   de- vice,auto-alarm,automatic   alarm   [warning   device]
+自动拨号装置 automatic  dialing  unit(ADU)
+自 动 波 特 率 检 测 automatic   baud    rate   detection (ABR)
+自 动 导 向 运 输 系 统 automatic guided(transport) system(AGT)
+自动调制解调器选择 automatic moden selection 自动断路器 circuit-breaker(automatic-)
+自动化编组站 automatic marshalling [classification] station
+自动立体测图仪 steroautograph  [automatic  stereo-
+自动路由选择 automatic route  selection(ARS)
+自动频率控制 automatic frequency control(AFC)
+自动频率微调 automatic frequency fine control(AF- FC)
+自动液压大型捣固车[自动整平 - 起道 - 拨道 - 捣固车] auto-leveling-ifing-iining-tamping
+自动应答调制解调器 automatic answering modem 自动应答器 automatic answering unit(AAU)
+(ARQ)
+自然灾害 natural   disaster   [calamity,catastrophe] 自然资源 natural  resources
+自适应增量调制 adaptive delta modulation(ADM)
+自由活塞式发电机 free-piston generator[engine]
+综合布线网络系统 IDNS(integrated distribution net- work system)
+综合数字网interated   digital   network(IDN)
+综合性货运站 general   goods   [freight]station,com- prehensive goods station
+综 合 业 务 数 字 网  ISDN(integrated services digital network)
+总布置图，总体设计 general        [master]plan[layout
+总悬浮微粒 total  suspended  particles[total  suspend
+纵断面测量 profile level  [profile  survey] 纵断面图 elevation,longitudinal profile
+纵列式会让站 longitudinal type passing station 纵列式区段站 longitudinal type district station  纵向磁场磁铁 magnet(longitudinal    flux   -)
+纵向轨枕 longitudinal   tie    [sleeper,timber 纵向轨枕线路 longitudinal sleeper track
+纵 向 梁 longitudinal  beam[girder] 纵向平衡 foreand  aft  balancing
+组 合 辙 叉 built-up    crossing[bolted    rigid    frog,as-
+sembled frog]    组 件 component
+最大坡度 maximum   grade,steepest    [steepest]gradi-
+最大线路通过能力，最大股道容车数 maximum line    [track]capacity
+最高速度 maximum[top]speed     [velocity]
+最高允许速度 maximum   authorized   [permissive permitted]speed                                                                       作业成本法 activity-based  costing  methods
+最高运行速度 maximum  operating   [service]speed            作业管理程序 job management program
+最佳含水量 optimum      moisture(water)content                   作业输入子系统 JES(job entry subaystem)
+最小曲线半径  minimum  radius  of  curve,minimum        (辙叉)有害空间 open   throat   [unguarded   flange-
+tracks                                                                                            (直线力)线性推进 linear propulsion
+作 业 标 working  post  [sign]                                                   (转向架)鹅颈式托架 swan-neck bearer
