@@ -7,8 +7,8 @@ from volcengine.base.Service import Service
 
 
 def batch_translate(txt_list):
-    k_access_key = 'AKLTNzYzMDhlY2Y3OGJmNDA2NmIzMWViYWExMDBjMDJhNDc'  # https://console.volcengine.com/iam/keymanage/
-    k_secret_key = 'TW1Wa04yRTNNR1ZoWkRnME5EQmxPVGd5TkdNeU16aGlPVFpoTWpFeE9XWQ=='
+    k_access_key = 'todo'  # https://console.volcengine.com/iam/keymanage/
+    k_secret_key = 'todo'
     k_service_info = \
         ServiceInfo('translate.volcengineapi.com',
                     {'Content-Type': 'application/json'},
