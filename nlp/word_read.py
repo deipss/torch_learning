@@ -1,16 +1,16 @@
 # 导入 python-docx 库中的 Document 类，用于处理 .docx 文件
 from docx import Document
+from tencent_client import batch_translate as tbt
+from volcano_client import batch_translate as vbt
 import re
-# 导入 WD_BREAK 枚举类型，用于检测分栏符等特殊格式
-from docx.enum.text import WD_BREAK
-from nltk.corpus.europarl_raw import english
-from sympy import false
+from docx.shared import RGBColor
+import json
 
 
 def recognized_cn_en(input_text: str):
     # 定义正则表达式模式，用于匹配中文和英文部分
     # 匹配中文、中文标点 / 以及空格
-    chinese_pattern = r'[\u4e00-\u9fa5()，。、；：“”‘’（）—/ ]+'
+    chinese_pattern = r'[\u4e00-\u9fa5()，。、；;：“”‘’（）—/ ]+'
     english_pattern = r'[a-zA-Z_\-, ;]+'
     # 使用正则表达式查找所有中文和英文部分
     chinese_list = re.findall(chinese_pattern, input_text)
@@ -36,6 +36,40 @@ def recognized_cn_en(input_text: str):
 
 
 # 定义函数 read_columns_from_docx，传入参数为 docx 文件路径
+def extract_paragraphs_txt(docx_path):
+    """
+    从给定的docx文件中提取段落。
+
+    参数:
+    docx_path (str): docx文件的路径。
+
+    返回:
+    list: 包含文档中所有段落的列表，不包含空行。
+    """
+    # 加载文档
+    doc = Document(docx_path)
+    # 初始化段落列表
+    paragraph_txt_list = []
+    paragraph_list = []
+
+    # 遍历文档中的每个段落
+    for paragraph in doc.paragraphs:
+        # 提取段落文本（自动过滤空行）
+        text = paragraph.text.strip()
+        # 仅保留非空内容
+        if text:
+            paragraph_txt_list.append(text)
+            paragraph_list.append(paragraph)
+
+    # 返回提取的段落列表
+    return paragraph_txt_list
+
+
+def contains_chinese(text):
+    pattern = r'[\u4e00-\u9fa5()，。、；：“”‘’（）—/]+'
+    return re.findall(pattern, text)
+
+
 def read_vocabulary_from_docx(docx_path):
     # 打开并加载指定路径的 .docx 文件
     doc = Document(docx_path)
@@ -59,20 +93,9 @@ def read_vocabulary_from_docx(docx_path):
             file.write(line + '\n')
 
 
-def extract_paragraphs(docx_path):
-    """
-    从给定的docx文件中提取段落。
-
-    参数:
-    docx_path (str): docx文件的路径。
-
-    返回:
-    list: 包含文档中所有段落的列表，不包含空行。
-    """
-    # 加载文档
-    doc = Document(docx_path)
+def extract_paragraphs(doc, en_map):
     # 初始化段落列表
-    paragraphs = []
+    paragraph_list = []
 
     # 遍历文档中的每个段落
     for paragraph in doc.paragraphs:
@@ -80,72 +103,87 @@ def extract_paragraphs(docx_path):
         text = paragraph.text.strip()
         # 仅保留非空内容
         if text:
-            paragraphs.append(text)
-
+            paragraph_list.append(paragraph)
+    paragraph_list = paragraph_list[3:]
+    idx = 0
+    txt_set = set()
+    while idx < len(paragraph_list):
+        paragraph = paragraph_list[idx]
+        text_strip = paragraph.text.strip()
+        if contains_chinese(text_strip):
+            txt = f'{text_strip}={paragraph_list[idx + 1].text.strip()}'
+            txt_set.add(text_strip)
+            if text_strip in en_map:
+                run = paragraph_list[idx + 1].add_run(f'\n{en_map[text_strip]}')
+                font = run.font
+                font.color.rgb = RGBColor(255, 0, 0)
+            idx += 2
+        else:
+            idx += 1
     # 返回提取的段落列表
-    return paragraphs
+    return txt_set
 
 
-def read_table_content(table, indent=0):
-    """
-    递归读取表格内容，包括合并单元格和嵌套表格。
-
-    :param table: 要读取的表格对象。
-    :param indent: 缩进级别，用于处理嵌套表格。
-    """
-    rows = []
-    for i, row in enumerate(table.rows):
-        cols = []
-        for j, cell in enumerate(row.cells):
-            # 检查单元格是否是合并单元格的一部分
-
-            paragraphs = [para.text.strip() for para in cell.paragraphs if para.text.strip()]
-            paragraphs_text = "=".join(paragraphs)
-            cell_text = f"{' ' * indent}{paragraphs_text}"
-
-            # # 检查单元格内是否有嵌套表格
-            # nested_tables = cell.tables
-            # if nested_tables:
-            #     # todo 程序没有执行到这里，处理嵌套表格的情况没有被识别
-            #     cell_text += "\n"
-            #     for nested_table in nested_tables:
-            #         cell_text += "Nested Table:\n"
-            #         cell_text += read_table_content(nested_table, indent + 4)
-
-            cols.append(cell_text)
-        rows.append(cols)
-
-    return "\n".join(["".join(row) for row in rows])
-
-
-def extract_all_tables(doc):
-    """
-    提取文档中的所有表格内容，并打印出来。
-
-    :param doc: 文档对象。
-    """
+def extract_all_tables(doc, en_map):
     tables = doc.tables
+    txt_set = set()
     for idx, table in enumerate(tables):
-        print(f"Table {idx + 1}:")
-        print(read_table_content(table))
-        print("\n" + "-" * 80 + "\n")
+        cn = []
+        en = []
+        for i, row in enumerate(table.rows):
+            for j, cell in enumerate(row.cells):
+                # 检查单元格是否是合并单元格的一部分
+                paragraphs = [para.text.strip().replace('..', '').replace('\n', '') for para in cell.paragraphs if
+                              para.text.strip()]
+                if len(paragraphs) == 1:
+                    continue
+                elif len(paragraphs) > 2 and len(paragraphs) & 1 == 0:
+                    idx = 0
+                    while idx < len(paragraphs):
+                        paragraph = paragraphs[idx]
+                        if contains_chinese(paragraph):
+                            cn.append(paragraph)
+                            en.append(paragraphs[idx + 1])
+                            if paragraph in en_map:
+                                run = cell.paragraphs[idx + 1].add_run(f'\n{en_map[paragraph]}')
+                                font = run.font
+                                font.color.rgb = RGBColor(255, 0, 0)
+                            idx += 2
+                        else:
+                            idx += 1
+                elif len(paragraphs) == 2:
+                    cn.append(paragraphs[0])
+                    en.append(paragraphs[1])
+                    if paragraphs[0] in en_map:
+                        run = cell.paragraphs[1].add_run(f'\n{en_map[paragraphs[0]]}')
+                        font = run.font
+                        font.color.rgb = RGBColor(255, 0, 0)
+            result = list(zip(cn, en))
+            for c, e in result:
+                txt = f'{c}={e}'
+                txt_set.add(c)
+    return txt_set
 
 
-def vocabulary():
-    # 主程序入口
-    # 调用函数读取指定路径的 .docx 文件，并获取分栏后的文本内容
-    columns = read_vocabulary_from_docx("/Users/deipss/Desktop/LZTD/供电专业课程国际化翻译/铁路中英文词汇（全）.docx")
-    # 遍历每一栏的内容并打印
-    # for idx, column_texts in enumerate(columns):
-    #     print(f"Column {idx + 1}:")  # 打印栏号
-    #     for line in column_texts:
-    #         print(line)  # 打印栏中的每一行文本
-    # print(f'total colums is ', {len(columns)})
+def cn_to_en(cn_text):
+    pass
+
+
+def translate_in_batches(union_set, output_file):
+    batches = [list(union_set)[i:i + 10] for i in range(0, len(union_set), 10)]
+    translation_map = {}
+    for batch in batches:
+        translated_texts = tbt(batch)
+        for original, translated in zip(batch, translated_texts):
+            translation_map[original] = translated
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(translation_map, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == '__main__':
-    # paragraphs =extract_paragraphs('/Users/deipss/Desktop/LZTD/供电专业课程国际化翻译/test1.docx')
-    # for id,paragraph in enumerate(paragraphs[3:]):
-    #     print(f'{id} : {paragraph}')
-
-    vocabulary()
+    with open('test1.json', 'r', encoding='utf-8') as file:
+        en_map = json.load(file)
+        doc = Document('/Users/deipss/Desktop/LZTD/a供电专业课程国际化翻译/test1.docx')
+        txt_set = extract_paragraphs(doc,en_map)
+        txt_set_table = extract_all_tables(doc,en_map)
+        doc.save('z.docx')

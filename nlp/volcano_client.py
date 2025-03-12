@@ -6,7 +6,7 @@ from volcengine.ServiceInfo import ServiceInfo
 from volcengine.base.Service import Service
 
 
-def batch_translate():
+def batch_translate(txt_list):
     k_access_key = 'AKLTNzYzMDhlY2Y3OGJmNDA2NmIzMWViYWExMDBjMDJhNDc'  # https://console.volcengine.com/iam/keymanage/
     k_secret_key = 'TW1Wa04yRTNNR1ZoWkRnME5EQmxPVGd5TkdNeU16aGlPVFpoTWpFeE9XWQ=='
     k_service_info = \
@@ -25,11 +25,16 @@ def batch_translate():
     service = Service(k_service_info, k_api_info)
     body = {
         'TargetLanguage': 'en',
-        'TextList': ["⑴投运后，流向、温升和声响正常，无渗漏；", "⑵强油水冷装置的检查和试验，按制造厂规定；"],
+        'TextList': txt_list,
     }
-    res = service.json('translate', {}, json.dumps(body))
-    print(json.loads(res))
+    res_json = service.json('translate', {}, json.dumps(body))
+    res = json.loads(res_json)
+    cn_list = []
+    for i in res['TranslationList']:
+        cn_list.append(i['Translation'])
+    return cn_list
 
 
 if __name__ == '__main__':
-    batch_translate()
+    data = batch_translate(['在在城桂林枯在在', '要在有有有以夺有'])
+    print(data)
