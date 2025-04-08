@@ -5,8 +5,11 @@ import numpy as np
 
 def show_1():
     # 创建一些示例数据
+    # 生成一个10x10的随机数矩阵，用于后续的数据可视化
     data = np.random.rand(10, 10)
+
     # 使用imshow展示数据分布
+    # 这里省略了实际的绘图代码，通常会包括导入matplotlib库并使用plt.imshow(data)等语句
     plt.imshow(data, cmap='viridis')  # 选择颜色映射
     plt.colorbar()  # 显示颜色条
     plt.show()
@@ -14,7 +17,9 @@ def show_1():
 
 def show2():
     # 创建一些示例数据
+    # 生成一个从-1到1的等差数列，包含100个元素
     x = np.linspace(-1, 1, 100)
+    # 打印x数组的所有元素
     print(x)
     y = np.sin(x)
     # 根据y值设置点的颜色
@@ -42,8 +47,8 @@ def show4():
     import matplotlib.pyplot as plt
 
     # 定义x的范围
+    # 生成一个等差数列，用于后续的绘图或计算
     x = np.linspace(-2 * np.pi, 2 * np.pi, 1000)
-
     # 计算y值
     y_cos = np.cos(x)
     y_sin = np.sin(x)

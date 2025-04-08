@@ -3,7 +3,6 @@ import numpy as np
 from torch import nn
 import os
 
-from torchviz import make_dot
 from torchsummary import summary
 
 
@@ -11,7 +10,7 @@ def zip_stack():
     # stack函数 将2个一维数组，堆叠为一个2x18的二维数组
     data = torch.stack([torch.arange(1, 19), torch.arange(20, 38)], dim=0)
     print(data.shape)
-    # zip函数将两个一维数组，进行
+    # zip函数将两个一维数组，进行 todo
     data_z = zip(data[0], data[1])
     print(next(data_z))
     # 打印操作系统中的环境变量
