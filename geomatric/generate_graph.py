@@ -167,4 +167,4 @@ def torch_geometric_generate():
     plt.show()
 if __name__ == '__main__':
 
-    torch_geometric_generate()
+    motif_graph_nx()

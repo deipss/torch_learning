@@ -5,6 +5,8 @@ import os
 import matplotlib.pyplot as plt
 from torch_geometric.datasets import TUDataset
 import platform
+from tabulate import tabulate
+
 
 data_path = '/data/ai_data' if platform.system() == 'Linux' else '../data'
 
@@ -162,5 +164,122 @@ def show_loss(file=None):
         plt.show()
 
 
+
+
+def parse_line(line):
+    """解析一行数据为字典，并计算 acc0-acc4 的标准差"""
+    fields = line.strip().split(',')
+    result = {}
+    acc_values = []  # 用于存储 acc0-acc4 的数值部分
+
+    for field in fields:
+        if '=' in field:
+            key, value = field.split('=', 1)  # 仅分割第一个等号
+            result[key] = value
+
+            # 提取 acc0-acc4 的数值部分
+            if key.startswith('acc') and key[3:].isdigit():
+                acc_values.append(float(value))
+
+    # 计算 acc0-acc4 的标准差
+    if acc_values:
+        std_dev = np.std(acc_values)
+        result['acc_std_dev'] = std_dev
+    else:
+        result['acc_std_dev'] = 0.0  # 如果没有 acc0-acc4 字段，标准差设为 0
+
+    return result
+
+def process_files_in_folder(folder_path):
+    """处理文件夹中的所有文件"""
+    all_data = []
+
+    # 遍历文件夹中的所有文件
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        if os.path.isfile(file_path) and filename.startswith('graph'):  # 确保是文本文件
+            with open(file_path, 'r') as f:
+                for line in f:
+                    # 解析每一行的数据
+                    data = parse_line(line)
+                    if data:  # 确保解析成功
+                        all_data.append(data)
+
+    return all_data
+
+
+def group_and_sort_data(data_list):
+    """根据 ds, model, dim, h 分组，并按 gm 和 acc 降序排序"""
+    grouped_data = {}
+
+    for data in data_list:
+        ds = data.get('ds')
+        model = data.get('model')
+        dim = data.get('dim')
+        h = data.get('h')
+        gm = data.get('gm', '')  # 默认为空字符串
+        acc = float(data.get('acc', 0.0))  # 将 acc 转换为浮点数
+
+        # 创建分组键
+        group_key = (ds, model, dim, h)
+
+        if group_key not in grouped_data:
+            grouped_data[group_key] = []
+
+        # 将数据添加到对应的分组
+        grouped_data[group_key].append(data)
+
+    # 对每个分组按 gm 和 acc 降序排序
+    for group_key in grouped_data:
+        grouped_data[group_key].sort(
+            key=lambda x: (-float(x.get('acc', 0.0)), x.get('gm', '')),
+            reverse=True
+        )
+
+    return grouped_data
+
+
+def print_as_table(grouped_data):
+    """以表格形式打印分组数据"""
+    for group_key, data_list in grouped_data.items():
+        print(f"Group: ds={group_key[0]}, model={group_key[1]}, dim={group_key[2]}, h={group_key[3]}")
+
+        # 准备表格数据
+        table_data = []
+        headers = ['gm', 'acc', 'execution_time']
+
+        for data in data_list:
+            row = [
+                data.get('gm', ''),
+                data.get('acc', ''),
+                data.get('execution_time', '')
+            ]
+            table_data.append(row)
+
+        # 打印表格
+        print(tabulate(table_data, headers=headers, tablefmt='grid'))
+        print('-' * 50)
+
+
+def save_to_excel():
+    import pandas as pd
+    """将数据保存到 Excel 文件中"""
+    # 将数据转换为 DataFrame
+    all_data = process_files_in_folder('../records' )
+
+    df = pd.DataFrame(all_data)
+
+    # 确保 Excel 文件存在
+    df.to_excel('../records/result.xlsx', index=False)
+
+
 if __name__ == '__main__':
-    analysis_fold_data('../records', 'graph_class__20241213_192005_415.json')
+    # analysis_fold_data('../records', 'graph_class__20241213_192005_415.json')
+    #
+    # # 示例用法
+    # folder_path = '../records'  # 替换为你的文件夹路径
+    # all_data = process_files_in_folder(folder_path)
+    # grouped_sorted_data = group_and_sort_data(all_data)
+    # print_as_table(grouped_sorted_data)
+    save_to_excel()
+
