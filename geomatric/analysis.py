@@ -274,12 +274,65 @@ def save_to_excel():
 
 
 if __name__ == '__main__':
-    # analysis_fold_data('../records', 'graph_class__20241213_192005_415.json')
-    #
-    # # 示例用法
-    # folder_path = '../records'  # 替换为你的文件夹路径
-    # all_data = process_files_in_folder(folder_path)
-    # grouped_sorted_data = group_and_sort_data(all_data)
-    # print_as_table(grouped_sorted_data)
-    save_to_excel()
+    import json
+    import matplotlib.pyplot as plt
+
+    # 从文件名中提取参数
+    filename = "name=GATConv_gname=CrossBlockGnn_ds=AIDS_max_acc=0.7700_ep=1500.0000_lr=0.0100_drop=0.6000_loss=0.0010_dim=032_h_layer=005_min_acc=0.1000_debug=000___20250312_225850.json"
+    params = {}
+    for part in filename.split("___")[0].split("_"):  # 提取参数部分（忽略时间戳）
+        if "=" in part:
+            key, value = part.split("=", 1)
+            params[key] = value
+
+    file_path='/Users/deipss/workspace/ai/torch_learning/log/AIDS_GATConv32/'+filename
+    # 2. 读取JSON文件内容
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)  # 正确使用 json.load() 读取文件对象
+    except FileNotFoundError:
+        print(f"错误：文件 {file_path} 不存在！")
+        exit()
+    except json.JSONDecodeError:
+        print(f"错误：文件 {file_path} 不是有效的JSON格式！")
+        exit()
+
+    records = data["records"]
+
+    # 提取数据
+    epochs = [record["epoch"] for record in records]
+    loss_values = [record["loss"] for record in records]
+    test_acc_values = [record["test_acc"] for record in records]
+    train_acc_values = [record["train_acc"] for record in records]
+
+    # 生成图表标题
+    title = (
+        f"Model: {params.get('gname', 'N/A')} on {params.get('ds', 'N/A')} Dataset\n"
+        f"LR={params.get('lr', 'N/A')}, Dropout={params.get('drop', 'N/A')}, "
+        f"Dim={params.get('dim', 'N/A')}, Hidden Layers={params.get('h_layer', 'N/A')}"
+    )
+
+    # 绘制图表
+    plt.figure(figsize=(12, 8))
+
+    # Loss 曲线
+    plt.subplot(3, 1, 1)
+    plt.plot(epochs, loss_values, color="red")
+    plt.title("Training Loss")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+
+    # Test/Train Accuracy 曲线
+    plt.subplot(3, 1, 2)
+    plt.plot(epochs, test_acc_values, label="Test Accuracy", color="blue")
+    plt.plot(epochs, train_acc_values, label="Train Accuracy", color="green")
+    plt.title("Accuracy")
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.legend()
+
+    # 全局标题
+    plt.suptitle(title, fontsize=12, y=1.02)
+    plt.tight_layout()
+    plt.show()
 

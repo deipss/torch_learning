@@ -424,6 +424,7 @@ def train_model(start_index):
     loss = 1e6
     while loss > 0.0001 and epoch < args.ep:
         loss = train()
+        # todo
         train_acc = test(train_loader)
         test_acc = test(test_loader)
         if (max_acc < test_acc):

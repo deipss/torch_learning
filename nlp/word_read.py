@@ -183,7 +183,7 @@ def translate_in_batches(union_set, output_file):
 if __name__ == '__main__':
     with open('test1.json', 'r', encoding='utf-8') as file:
         en_map = json.load(file)
-        doc = Document('/Users/deipss/Desktop/LZTD/a供电专业课程国际化翻译/test1.docx')
+        doc = Document('/Users/deipss/Desktop/LZTD/a供电专业课程国际化翻译/Test.docx')
         txt_set = extract_paragraphs(doc,en_map)
         txt_set_table = extract_all_tables(doc,en_map)
         doc.save('z.docx')
