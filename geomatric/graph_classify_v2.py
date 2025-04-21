@@ -397,10 +397,10 @@ def train_model(start_index):
     model.to(device=_device)
     criterion.to(device=_device)
 
-    def train():
+    def train(loader):
         model.train()
         min_loss = 1e6
-        for data in train_loader:  # Iterate in batches over the training dataset.
+        for data in loader:  # Iterate in batches over the training dataset.
             out, _ = model(data.x, data.edge_index, data.batch)  # Perform a single forward pass.
             loss = criterion(out, data.y)  # Compute the loss.
             min_loss = min(loss, min_loss)
@@ -425,7 +425,7 @@ def train_model(start_index):
     while loss > 0.0001 and epoch < args.ep:
         loss = train()
         # todo
-        train_acc = test(train_loader)
+        train_acc = train(train_loader)
         test_acc = test(test_loader)
         if (max_acc < test_acc):
             max_acc = test_acc
