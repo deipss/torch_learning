@@ -414,7 +414,7 @@ def train_model(start_index):
         correct = 0
         for data in loader:  # Iterate in batches over the training/test dataset.
             out, _ = model(data.x, data.edge_index, data.batch)
-            pred = out.argmax(dim=1)  # Use the class with highest probability.
+            pred = out.argmax(dim=1)  # Use the class with the highest probability.
             correct += int((pred == data.y).sum())  # Check against ground-truth labels.
         return correct / len(loader.dataset)  # Derive ratio of correct predictions.
 
@@ -423,9 +423,8 @@ def train_model(start_index):
     records = []
     loss = 1e6
     while loss > 0.0001 and epoch < args.ep:
-        loss = train()
-        # todo
-        train_acc = train(train_loader)
+        loss = train(train_loader)
+        train_acc = test(train_loader)
         test_acc = test(test_loader)
         if (max_acc < test_acc):
             max_acc = test_acc
@@ -508,7 +507,7 @@ def true_train():
     start_index_list = [0, 1, 2, 3, 4]
     results = []
     count = 1
-    filename = "graph_classify_v3_5_fold_0107_" + "_".join([args.ds, args.name, str(args.dim)])
+    filename = "graph_classify_v4_5_fold_0421_" + "_".join([args.ds, args.name, str(args.dim)])
     fp = '../records/' + filename
     print(f'file name ={fp}')
     exist_row = count_lines(fp)
@@ -556,45 +555,62 @@ def true_train():
 
 def pre_check_train():
     global args
-    models = ['GCNConv']
-    g_models = ['CrossBlockGnn', 'CrossGraphBlockGnn', 'ResBlockGnn', 'ResGraphBlockGnn', 'BlockGNN', 'GraphBlockGnn']
-    ds_list = ['MUTAG', 'AIDS']
-    h_list = [1, 2, 3, 4, 5, 6, 7]
+    # models = ['GCNConv', 'GATConv', 'TransformerConv']
+    g_models = ['BlockGNN']
+    # ds_list = ['MUTAG', 'AIDS', 'DD', 'MSRC_9']
     start_index_list = [0, 1, 2, 3, 4]
-    acc = 0
     results = []
-    line = ''
-    for ds in ds_list:
-        for dim in [32]:
-            for h in h_list:
-                for m in models:
-                    for gm in g_models:
-                        args.ds = ds
-                        args.name = m
-                        args.dim = dim
-                        args.gname = gm
-                        args.h_layer = h
-                        start_time = time.time()
-                        acc_list = []
-                        f_name = None
-                        for start_index in start_index_list:
-                            try:
-                                acc, f_name = train_model(start_index)
-                                acc_list.append(acc)
-                            except Exception as e:
-                                print(f'gm={gm},model={m},h={h},ds={ds},dim={dim},e={e}')
-                        execution_time = time.time() - start_time
-                        avg_acc = sum(acc_list) / len(acc_list)
-                        line = (
-                            f'gm={gm},model={m},h={h},ds={ds},dim={dim},acc={avg_acc:.5f},acc0={acc_list[0]:.5f},acc1={acc_list[1]:.5f}'
-                            f',acc2={acc_list[2]:.5f},acc3={acc_list[3]:.5f},acc4={acc_list[4]:.5f},execution_time={execution_time:.3f}'
-                            f',f_name={f_name}')
-                        print(line)
-                        results.append(line)
-                        fp = '../records/graph_classify_v2_5_fold_1207_pre_check.txt'
-                        with open(fp, 'a') as file:
-                            file.writelines(line + '\n')
-    save_records(records=results, is_debug=args.debug, file_name='graph_class')
+    args.debug = True
+    args.ds = 'MUTAG'
+    args.ep = 10
+    args.name = 'GCNConv'
+    args.dim = 8
+    args.h_layer = 3
+    count = 1
+    filename = "pre_graph_classify_v3_5_fold_0421_" + "_".join([args.ds, args.name, str(args.dim)])
+    fp = '../records/' + filename
+    print(f'file name ={fp}')
+    exist_row = count_lines(fp)
+    for h in [1, 2, 3, 4, 5]:
+        for gm in g_models:
+            args.gname = gm
+            args.h_layer = h
+            if count < exist_row:
+                print(f'{count} < {exist_row} ,continue')
+                count += 1
+                continue
+            start_time = time.time()
+            accuracies = []
+            files = []
+            for start_index in start_index_list:
+                try:
+                    acc, f_name = train_model(start_index)
+                    accuracies.append(acc)
+                    files.append(f_name)
+                except Exception as e:
+                    print(f'gm={gm},model={args.name},h={h},ds={args.ds},dim={args.dim},e={e}')
+            execution_time = time.time() - start_time
+            avg_acc = sum(accuracies) / len(accuracies)
+            line = (
+                f'gm={gm},model={args.name},h={h},ds={args.ds},dim={args.dim},'
+                f'acc={avg_acc:.5f}'
+                f',acc0={accuracies[0]:.5f}'
+                f',acc1={accuracies[1]:.5f}'
+                f',acc2={accuracies[2]:.5f}'
+                f',acc3={accuracies[3]:.5f}'
+                f',acc4={accuracies[4]:.5f}'
+                f',f0={files[0]}'
+                f',f1={files[1]}'
+                f',f2={files[2]}'
+                f',f3={files[3]}'
+                f',f4={files[4]}'
+                f',execution_time={execution_time:.3f}'
+            )
+            print(line)
+            results.append(line)
+            with open(fp, 'a') as file:
+                file.writelines(line + '\n')
+            save_records(records=results, is_debug=args.debug, file_name=filename)
 
 
 def debug_one():
