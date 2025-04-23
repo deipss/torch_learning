@@ -554,7 +554,7 @@ def true_train():
             with open(fp, 'a') as file:
                 file.writelines(line + '\n')
             save_records(records=results, is_debug=args.debug, file_name=filename)
-    send_email(args.ds+" "+args.dim,'DONE')
+    send_email(args.ds + " " + args.dim, 'DONE')
 
 
 def pre_check_train():
@@ -653,31 +653,34 @@ def tools():
                 print(shell.format(dim=dim, m=m, ds=ds))
 
 
-
 # 使用示例    send_email('MUTUD', "DONE")
 def send_email(subject, body):
     import smtplib
     from email.mime.text import MIMEText
     from email.mime.multipart import MIMEMultipart
-    # 创建一个多部分的邮件对象
-    msg = MIMEMultipart()
-    from_mail = 'huxl@ltzy.edu.cn'
-    to_addrs = 'deipss@qq.com'
-    msg['From'] = from_mail
-    msg['To'] = to_addrs
-    msg['Subject'] = subject + ' GNN AI Train DONE'
+    try:
+        # 创建一个多部分的邮件对象
+        msg = MIMEMultipart()
+        from_mail = 'huxl@ltzy.edu.cn'
+        to_addrs = 'deipss@qq.com'
+        msg['From'] = from_mail
+        msg['To'] = to_addrs
+        msg['Subject'] = subject + ' GNN AI Train DONE'
 
-    # 添加邮件正文
-    msg.attach(MIMEText(body, 'plain'))
+        # 添加邮件正文
+        msg.attach(MIMEText(body, 'plain'))
 
-    # 连接到SMTP服务器
-    server = smtplib.SMTP('smtp.qiye.163.com', 587)
-    server.starttls()  # 启用TLS加密
-    server.login(from_mail, 'Y9ugNr9csf6hvEHN')  # 登录到邮箱
+        # 连接到SMTP服务器
+        server = smtplib.SMTP('smtp.qiye.163.com', 587)
+        server.starttls()  # 启用TLS加密
+        server.login(from_mail, 'Y9ugNr9csf6hvEHN')  # 登录到邮箱
 
-    # 发送邮件
-    server.sendmail(from_mail, to_addrs, msg.as_string())
-    server.close()
+        # 发送邮件
+        server.sendmail(from_mail, to_addrs, msg.as_string())
+        server.close()
+    except Exception as e:
+        print(e)
+
 
 if __name__ == '__main__':
     true_train()
