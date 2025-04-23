@@ -332,9 +332,9 @@ class GraphBlockGnn(torch.nn.Module):
 class ResGraphBlockGnn(torch.nn.Module):
     def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
         super(ResGraphBlockGnn, self).__init__()
-        self.inner_model1 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
-        self.inner_model2 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
-        self.inner_model3 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
+        self.inner_model1 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
+        self.inner_model2 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
+        self.inner_model3 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
