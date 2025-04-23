@@ -332,13 +332,15 @@ class GraphBlockGnn(torch.nn.Module):
 class ResGraphBlockGnn(torch.nn.Module):
     def __init__(self, hidden_channels, dataset, hidden_layer, model_name):
         super(ResGraphBlockGnn, self).__init__()
-        self.inner_model1 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
-        self.inner_model2 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=False)
+        self.inner_model1 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
+        self.inner_model2 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
+        self.inner_model3 = BlockGNN(hidden_channels, dataset, hidden_layer, model_name, res_graph=True)
         self.lin = nn.Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
         _, g = self.inner_model1(x, edge_index, batch)
         y, g = self.inner_model2(x, edge_index, batch, g)
+        y, g = self.inner_model3(x, edge_index, batch, g)
         y = self.lin(g)
         return y, g
 
@@ -465,6 +467,7 @@ def count_lines(file_path):
         print(f"文件 {file_path} 不存在。")
         return 0
 
+
 def debug():
     """ python graph_classify_v2.py --dim 64 --name GCNConv --ds AIDS --ep 1 --debug Ture
     MixHopConv有问题，存在一个power，需要对隐藏层的输出层的形状，作调整
@@ -551,6 +554,7 @@ def true_train():
             with open(fp, 'a') as file:
                 file.writelines(line + '\n')
             save_records(records=results, is_debug=args.debug, file_name=filename)
+    send_email(args.ds+" "+args.dim,'DONE')
 
 
 def pre_check_train():
@@ -645,9 +649,35 @@ def tools():
     ds_list = ['MUTAG', 'AIDS', 'DD', 'MSRC_9']
     for ds in ds_list:
         for dim in [32, 64]:
-                for m in models:
-                    print(shell.format(dim=dim, m=m, ds=ds))
+            for m in models:
+                print(shell.format(dim=dim, m=m, ds=ds))
 
+
+
+# 使用示例    send_email('MUTUD', "DONE")
+def send_email(subject, body):
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    # 创建一个多部分的邮件对象
+    msg = MIMEMultipart()
+    from_mail = 'huxl@ltzy.edu.cn'
+    to_addrs = 'deipss@qq.com'
+    msg['From'] = from_mail
+    msg['To'] = to_addrs
+    msg['Subject'] = subject + ' GNN AI Train DONE'
+
+    # 添加邮件正文
+    msg.attach(MIMEText(body, 'plain'))
+
+    # 连接到SMTP服务器
+    server = smtplib.SMTP('smtp.qiye.163.com', 587)
+    server.starttls()  # 启用TLS加密
+    server.login(from_mail, 'Y9ugNr9csf6hvEHN')  # 登录到邮箱
+
+    # 发送邮件
+    server.sendmail(from_mail, to_addrs, msg.as_string())
+    server.close()
 
 if __name__ == '__main__':
     true_train()
