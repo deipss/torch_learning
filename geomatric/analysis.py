@@ -197,7 +197,7 @@ def process_files_in_folder(folder_path):
     # 遍历文件夹中的所有文件
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
-        if os.path.isfile(file_path) and filename.startswith('graph'):  # 确保是文本文件
+        if os.path.isfile(file_path) and filename.startswith('graph_classify_v4'):  # 确保是文本文件
             with open(file_path, 'r') as f:
                 for line in f:
                     # 解析每一行的数据
@@ -270,13 +270,13 @@ def save_to_excel():
     df = pd.DataFrame(all_data)
 
     # 确保 Excel 文件存在
-    df.to_excel('../records/result.xlsx', index=False)
+    df.to_excel('../records/v2result.xlsx', index=False)
 
 
-if __name__ == '__main__':
+def show_loss_by_json():
+    global params, value, data, title
     import json
     import matplotlib.pyplot as plt
-
     # 从文件名中提取参数
     filename = "name=GATConv_gname=CrossBlockGnn_ds=AIDS_max_acc=0.7700_ep=1500.0000_lr=0.0100_drop=0.6000_loss=0.0010_dim=032_h_layer=005_min_acc=0.1000_debug=000___20250312_225850.json"
     params = {}
@@ -284,8 +284,7 @@ if __name__ == '__main__':
         if "=" in part:
             key, value = part.split("=", 1)
             params[key] = value
-
-    file_path='/Users/deipss/workspace/ai/torch_learning/log/AIDS_GATConv32/'+filename
+    file_path = '/Users/deipss/workspace/ai/torch_learning/log/AIDS_GATConv32/' + filename
     # 2. 读取JSON文件内容
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -296,32 +295,26 @@ if __name__ == '__main__':
     except json.JSONDecodeError:
         print(f"错误：文件 {file_path} 不是有效的JSON格式！")
         exit()
-
     records = data["records"]
-
     # 提取数据
     epochs = [record["epoch"] for record in records]
     loss_values = [record["loss"] for record in records]
     test_acc_values = [record["test_acc"] for record in records]
     train_acc_values = [record["train_acc"] for record in records]
-
     # 生成图表标题
     title = (
         f"Model: {params.get('gname', 'N/A')} on {params.get('ds', 'N/A')} Dataset\n"
         f"LR={params.get('lr', 'N/A')}, Dropout={params.get('drop', 'N/A')}, "
         f"Dim={params.get('dim', 'N/A')}, Hidden Layers={params.get('h_layer', 'N/A')}"
     )
-
     # 绘制图表
     plt.figure(figsize=(12, 8))
-
     # Loss 曲线
     plt.subplot(3, 1, 1)
     plt.plot(epochs, loss_values, color="red")
     plt.title("Training Loss")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
-
     # Test/Train Accuracy 曲线
     plt.subplot(3, 1, 2)
     plt.plot(epochs, test_acc_values, label="Test Accuracy", color="blue")
@@ -330,9 +323,11 @@ if __name__ == '__main__':
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
     plt.legend()
-
     # 全局标题
     plt.suptitle(title, fontsize=12, y=1.02)
     plt.tight_layout()
     plt.show()
 
+
+if __name__ == '__main__':
+    save_to_excel()
