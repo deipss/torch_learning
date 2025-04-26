@@ -29,6 +29,7 @@ from datetime import datetime
 import json
 import torch
 import os
+from torch.utils.tensorboard import SummaryWriter
 
 #########################################################################
 # 创建 ArgumentParser 对象
@@ -682,5 +683,73 @@ def send_email(subject, body):
         print(e)
 
 
+def summary_wirter_demo():
+    global Net, step
+    # 创建SummaryWriter实例，指定日志保存路径
+    writer = SummaryWriter('runs/demo_experiment')
+
+    class Net(nn.Module):
+        def __init__(self):
+            super(Net, self).__init__()
+            self.conv1 = nn.Conv2d(1, 6, 5)
+            self.pool = nn.MaxPool2d(2, 2)
+            self.conv2 = nn.Conv2d(6, 16, 5)
+            self.fc1 = nn.Linear(16 * 4 * 4, 120)
+            self.fc2 = nn.Linear(120, 84)
+            self.fc3 = nn.Linear(84, 10)
+
+        def forward(self, x):
+            x = self.pool(F.relu(self.conv1(x)))
+            x = self.pool(F.relu(self.conv2(x)))
+            x = x.view(-1, 16 * 4 * 4)
+            x = F.relu(self.fc1(x))
+            x = F.relu(self.fc2(x))
+            x = self.fc3(x)
+            return x
+
+    net = Net()
+    # 模拟训练过程，记录100个迭代的数据
+    for step in range(110):
+        # 生成一些随机的loss和accuracy数据
+        loss = random.random() * 2  # 随机生成一个0到2之间的数作为loss
+        accuracy = random.random()  # 随机生成一个0到1之间的数作为accuracy
+
+        # 使用add_scalar方法将数据写入日志
+        writer.add_scalar('Loss/train', loss, step)
+        writer.add_scalar('Loss/test', loss, step)
+        writer.add_scalar('Accuracy/train', accuracy, step)
+        writer.add_scalar('Accuracy/test', accuracy, step)
+        writer.add_scalar('Accuracy/train/a', accuracy, step)
+        writer.add_pr_curve('Accuracy/pr', accuracy, step)
+        # 记录每个层的权重分布
+        for name, param in net.named_parameters():
+            writer.add_histogram(
+                tag=f"Weights/{name}",
+                values=param.clone().detach().cpu().numpy(),
+                global_step=step
+            )
+
+        # 记录梯度分布（需确保参数可训练）
+        for name, param in net.named_parameters():
+            # if param.grad is not None:
+            writer.add_histogram(
+                tag=f"Gradients/{name}",
+                values=param.clone().detach().cpu().numpy(),
+                global_step=step
+            )
+
+        # 生成一张随机的示例图片（假设为3通道，28x28的RGB图像）
+        # 注意：TensorBoard要求图像格式为 [C, H, W]，且像素值在 [0, 1] 或 [-1, 1] 范围内
+        image = torch.rand(3, 28, 28)  # 生成一个随机的3通道28x28图像（假设使用PyTorch张量）
+        writer.add_image('Training_Images', image, global_step=step)
+    images = torch.randn(1, 28, 28)
+    # 关闭writer，确保所有内容都被正确写入到磁盘上
+    writer.add_graph(net, images)
+    writer.close()
+    print("数据已成功写入TensorBoard日志文件。请运行以下命令查看结果：")
+    print("tensorboard --logdir=runs/demo_experiment")
+
+
 if __name__ == '__main__':
-    true_train()
+
+    summary_wirter_demo()
