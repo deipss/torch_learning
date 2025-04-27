@@ -400,25 +400,43 @@ def train_model(start_index):
     model.to(device=_device)
     criterion.to(device=_device)
 
+    # 初始化 SummaryWriter
+    log_dir = os.path.join(data_path, 'logs', f"{args.gname}_{args.name}_{args.ds}_{args.dim}_{args.h_layer}")
+    writer = SummaryWriter(log_dir)
+
+    # 保存模型结构
+    data = next(iter(train_loader))
+    writer.add_graph(model, (data.x.to(_device), data.edge_index.to(_device), data.batch.to(_device)))
+
     def train(loader):
         model.train()
+        correct = 0
+        cnt = 1
+        data_size = len(loader.dataset)
         min_loss = 1e6
         for data in loader:  # Iterate in batches over the training dataset.
-            out, _ = model(data.x, data.edge_index, data.batch)  # Perform a single forward pass.
-            loss = criterion(out, data.y)  # Compute the loss.
-            min_loss = min(loss, min_loss)
+            out, _ = model(data.x.to(_device), data.edge_index.to(_device),
+                           data.batch.to(_device))  # Perform a single forward pass.
+
+            predict = out.argmax(dim=1)  # Use the class with the highest probability.
+            correct += int((predict == data.y.to(_device)).sum())  # Check against ground-truth labels.
+
+            loss = criterion(out, data.y.to(_device))  # Compute the loss.
+            writer.add_scalar('Loss/train', loss.item(), epoch * data_size + cnt)
             loss.backward()  # Derive gradients.
             optimizer.step()  # Update parameters based on gradients.
             optimizer.zero_grad()  # Clear gradients.
-        return min_loss
+            min_loss = min(loss, min_loss)
+            cnt += 1
+        return min_loss, correct / data_size
 
     def test(loader):
         model.eval()
         correct = 0
         for data in loader:  # Iterate in batches over the training/test dataset.
-            out, _ = model(data.x, data.edge_index, data.batch)
-            pred = out.argmax(dim=1)  # Use the class with the highest probability.
-            correct += int((pred == data.y).sum())  # Check against ground-truth labels.
+            out, _ = model(data.x.to(_device), data.edge_index.to(_device), data.batch.to(_device))
+            predict = out.argmax(dim=1)  # Use the class with the highest probability.
+            correct += int((predict == data.y.to(_device)).sum())  # Check against ground-truth labels.
         return correct / len(loader.dataset)  # Derive ratio of correct predictions.
 
     epoch = 0
@@ -426,17 +444,29 @@ def train_model(start_index):
     records = []
     loss = 1e6
     while loss > 0.0001 and epoch < args.ep:
-        loss = train(train_loader)
-        train_acc = test(train_loader)
+        loss,train_acc = train(train_loader)
         test_acc = test(test_loader)
         if (max_acc < test_acc):
             max_acc = test_acc
-            # print_loss(epoch=epoch, is_debug=args.debug, loss=loss.item(), test_acc=test_acc, train_acc=train_acc,
-            #            max_acc=max_acc)
+
+        # 记录训练 loss 和测试 acc
+        writer.add_scalar('Accuracy/test', test_acc, epoch)
+        writer.add_scalar('Accuracy/train', train_acc, epoch)
+
+        # 记录模型参数和梯度
+        for name, param in model.named_parameters():
+            writer.add_histogram(f"Weights/{name}", param.data.cpu().numpy(), epoch)
+            if param.grad is not None:
+                writer.add_histogram(f"Gradients/{name}", param.grad.cpu().numpy(), epoch)
+
         records.append({'epoch': epoch, 'loss': loss.item(), 'test_acc': test_acc, 'train_acc': train_acc})
         epoch += 1
     args.max_acc = max_acc
     f_name = save_json(records=records, is_debug=args.debug, **vars(args))
+
+    # 关闭 SummaryWriter
+    writer.close()
+
     return max_acc, f_name
 
 
@@ -751,5 +781,4 @@ def summary_wirter_demo():
 
 
 if __name__ == '__main__':
-
     summary_wirter_demo()
