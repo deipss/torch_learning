@@ -406,7 +406,7 @@ def train_model(start_index):
     criterion.to(device=_device)
 
     # 初始化 SummaryWriter
-    log_dir = os.path.join(data_path, 'logs', f"{args.gname}_{args.name}_{args.ds}_{args.dim}_{args.h_layer}")
+    log_dir = os.path.join(data_path, 'runs', f"{args.gname}_{args.name}_{args.ds}_{args.dim}_{args.h_layer}")
     writer = SummaryWriter(log_dir)
 
     # 保存模型结构
@@ -420,20 +420,19 @@ def train_model(start_index):
         data_size = len(loader.dataset)
         min_loss = 1e6
         for data in loader:  # Iterate in batches over the training dataset.
-            out, _ = model(data.x.to(_device), data.edge_index.to(_device),
-                           data.batch.to(_device))  # Perform a single forward pass.
+            out, _ = model(data.x, data.edge_index, data.batch)  # Perform a single forward pass.
 
             predict = out.argmax(dim=1)  # Use the class with the highest probability.
-            correct += int((predict == data.y.to(_device)).sum())  # Check against ground-truth labels.
+            correct += int((predict == data.y).sum())  # Check against ground-truth labels.
             # todo 可视化
-            # plt = visualize_embedding(h, color=data.y)
-            # writer.add_figure('EmbeddingVisualization', plt.gcf(), global_step=step)
-            loss = criterion(out, data.y.to(_device))  # Compute the loss.
-            writer.add_scalar('Loss/train', loss.item(), epoch * data_size + cnt)
-            loss.backward()  # Derive gradients.
+            # plt_train = visualize_embedding(_, color=data.y)
+            # writer.add_figure('EmbeddingVisualization', plt_train.gcf(), global_step=cnt)
+            loss_train = criterion(out, data.y)  # Compute the loss.
+            writer.add_scalar('Loss/train', loss_train.item(), epoch * data_size + cnt)
+            loss_train.backward()  # Derive gradients.
             optimizer.step()  # Update parameters based on gradients.
             optimizer.zero_grad()  # Clear gradients.
-            min_loss = min(loss, min_loss)
+            min_loss = min(loss_train, min_loss)
             cnt += 1
         return min_loss, correct / data_size
 
@@ -441,9 +440,9 @@ def train_model(start_index):
         model.eval()
         correct = 0
         for data in loader:  # Iterate in batches over the training/test dataset.
-            out, _ = model(data.x.to(_device), data.edge_index.to(_device), data.batch.to(_device))
+            out, _ = model(data.x, data.edge_index, data.batch)
             predict = out.argmax(dim=1)  # Use the class with the highest probability.
-            correct += int((predict == data.y.to(_device)).sum())  # Check against ground-truth labels.
+            correct += int((predict == data.y).sum())  # Check against ground-truth labels.
         return correct / len(loader.dataset)  # Derive ratio of correct predictions.
 
     epoch = 0
@@ -598,14 +597,14 @@ def true_train():
 def pre_check_train():
     global args
     # models = ['GCNConv', 'GATConv', 'TransformerConv']
-    g_models = ['BlockGNN']
+    g_models = [ 'BlockGNN', 'GraphBlockGnn']
     # ds_list = ['MUTAG', 'AIDS', 'DD', 'MSRC_9']
     start_index_list = [0, 1, 2, 3, 4]
     results = []
     args.debug = True
     args.ds = 'MUTAG'
-    args.ep = 10
-    args.name = 'GCNConv'
+    args.ep = 20
+    args.name = 'GATConv'
     args.dim = 8
     args.h_layer = 3
     count = 1
@@ -630,7 +629,7 @@ def pre_check_train():
                     accuracies.append(acc)
                     files.append(f_name)
                 except Exception as e:
-                    print(f'gm={gm},model={args.name},h={h},ds={args.ds},dim={args.dim},e={e}')
+                    print(f'Exception when training:gm={gm},model={args.name},h={h},ds={args.ds},dim={args.dim},e={e}')
             execution_time = time.time() - start_time
             avg_acc = sum(accuracies) / len(accuracies)
             line = (
@@ -809,4 +808,4 @@ def visualize_embedding(h, color, epoch=None, loss=None):
     return plt
 
 if __name__ == '__main__':
-    summary_writer_demo()
+    pre_check_train()
