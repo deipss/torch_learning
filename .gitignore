@@ -206,3 +206,7 @@ Data/
 data/
 experiments/
 geomatric/runs
+agent/audios
+agent/images
+agent/ppts
+agent/vedios

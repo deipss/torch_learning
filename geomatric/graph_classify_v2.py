@@ -31,6 +31,11 @@ import torch
 import os
 from torch.utils.tensorboard import SummaryWriter
 
+import networkx as nx
+import matplotlib.pyplot as plt
+from torch_geometric.utils import to_networkx
+
+
 #########################################################################
 # 创建 ArgumentParser 对象
 parser = argparse.ArgumentParser(description="Process some files.")
@@ -420,7 +425,9 @@ def train_model(start_index):
 
             predict = out.argmax(dim=1)  # Use the class with the highest probability.
             correct += int((predict == data.y.to(_device)).sum())  # Check against ground-truth labels.
-
+            # todo 可视化
+            # plt = visualize_embedding(h, color=data.y)
+            # writer.add_figure('EmbeddingVisualization', plt.gcf(), global_step=step)
             loss = criterion(out, data.y.to(_device))  # Compute the loss.
             writer.add_scalar('Loss/train', loss.item(), epoch * data_size + cnt)
             loss.backward()  # Derive gradients.
@@ -713,7 +720,7 @@ def send_email(subject, body):
         print(e)
 
 
-def summary_wirter_demo():
+def summary_writer_demo():
     global Net, step
     # 创建SummaryWriter实例，指定日志保存路径
     writer = SummaryWriter('runs/demo_experiment')
@@ -776,9 +783,30 @@ def summary_wirter_demo():
     # 关闭writer，确保所有内容都被正确写入到磁盘上
     writer.add_graph(net, images)
     writer.close()
-    print("数据已成功写入TensorBoard日志文件。请运行以下命令查看结果：")
-    print("tensorboard --logdir=runs/demo_experiment")
 
+
+
+
+
+def visualize_graph(data, color):
+    G = to_networkx(data, to_undirected=True)
+    plt.figure(figsize=(7,7))
+    plt.xticks([])
+    plt.yticks([])
+    nx.draw_networkx(G, pos=nx.spring_layout(G, seed=42), with_labels=False,
+                     node_color=color, cmap="Set2")
+    plt.show()
+
+
+def visualize_embedding(h, color, epoch=None, loss=None):
+    plt.figure(figsize=(7,7))
+    plt.xticks([])
+    plt.yticks([])
+    h = h.detach().cpu().numpy()
+    plt.scatter(h[:, 0], h[:, 1], s=140, c=color, cmap="Set2")
+    if epoch is not None and loss is not None:
+        plt.xlabel(f'Epoch: {epoch}, Loss: {loss.item():.4f}', fontsize=16)
+    return plt
 
 if __name__ == '__main__':
-    summary_wirter_demo()
+    summary_writer_demo()
