@@ -29,6 +29,12 @@ from datetime import datetime
 import json
 import torch
 import os
+from torch.utils.tensorboard import SummaryWriter
+
+import networkx as nx
+import matplotlib.pyplot as plt
+from torch_geometric.utils import to_networkx
+
 
 #########################################################################
 # 创建 ArgumentParser 对象
@@ -399,25 +405,44 @@ def train_model(start_index):
     model.to(device=_device)
     criterion.to(device=_device)
 
+    # 初始化 SummaryWriter
+    log_dir = os.path.join(data_path, 'runs', f"{args.gname}_{args.name}_{args.ds}_{args.dim}_{args.h_layer}")
+    writer = SummaryWriter(log_dir)
+
+    # 保存模型结构
+    data = next(iter(train_loader))
+    writer.add_graph(model, (data.x.to(_device), data.edge_index.to(_device), data.batch.to(_device)))
+
     def train(loader):
         model.train()
+        correct = 0
+        cnt = 1
+        data_size = len(loader.dataset)
         min_loss = 1e6
         for data in loader:  # Iterate in batches over the training dataset.
             out, _ = model(data.x, data.edge_index, data.batch)  # Perform a single forward pass.
-            loss = criterion(out, data.y)  # Compute the loss.
-            min_loss = min(loss, min_loss)
-            loss.backward()  # Derive gradients.
+
+            predict = out.argmax(dim=1)  # Use the class with the highest probability.
+            correct += int((predict == data.y).sum())  # Check against ground-truth labels.
+            # todo 可视化
+            # plt_train = visualize_embedding(_, color=data.y)
+            # writer.add_figure('EmbeddingVisualization', plt_train.gcf(), global_step=cnt)
+            loss_train = criterion(out, data.y)  # Compute the loss.
+            writer.add_scalar('Loss/train', loss_train.item(), epoch * data_size + cnt)
+            loss_train.backward()  # Derive gradients.
             optimizer.step()  # Update parameters based on gradients.
             optimizer.zero_grad()  # Clear gradients.
-        return min_loss
+            min_loss = min(loss_train, min_loss)
+            cnt += 1
+        return min_loss, correct / data_size
 
     def test(loader):
         model.eval()
         correct = 0
         for data in loader:  # Iterate in batches over the training/test dataset.
             out, _ = model(data.x, data.edge_index, data.batch)
-            pred = out.argmax(dim=1)  # Use the class with the highest probability.
-            correct += int((pred == data.y).sum())  # Check against ground-truth labels.
+            predict = out.argmax(dim=1)  # Use the class with the highest probability.
+            correct += int((predict == data.y).sum())  # Check against ground-truth labels.
         return correct / len(loader.dataset)  # Derive ratio of correct predictions.
 
     epoch = 0
@@ -425,17 +450,29 @@ def train_model(start_index):
     records = []
     loss = 1e6
     while loss > 0.0001 and epoch < args.ep:
-        loss = train(train_loader)
-        train_acc = test(train_loader)
+        loss,train_acc = train(train_loader)
         test_acc = test(test_loader)
         if (max_acc < test_acc):
             max_acc = test_acc
-            # print_loss(epoch=epoch, is_debug=args.debug, loss=loss.item(), test_acc=test_acc, train_acc=train_acc,
-            #            max_acc=max_acc)
+
+        # 记录训练 loss 和测试 acc
+        writer.add_scalar('Accuracy/test', test_acc, epoch)
+        writer.add_scalar('Accuracy/train', train_acc, epoch)
+
+        # 记录模型参数和梯度
+        for name, param in model.named_parameters():
+            writer.add_histogram(f"Weights/{name}", param.data.cpu().numpy(), epoch)
+            if param.grad is not None:
+                writer.add_histogram(f"Gradients/{name}", param.grad.cpu().numpy(), epoch)
+
         records.append({'epoch': epoch, 'loss': loss.item(), 'test_acc': test_acc, 'train_acc': train_acc})
         epoch += 1
     args.max_acc = max_acc
     f_name = save_json(records=records, is_debug=args.debug, **vars(args))
+
+    # 关闭 SummaryWriter
+    writer.close()
+
     return max_acc, f_name
 
 
@@ -560,14 +597,14 @@ def true_train():
 def pre_check_train():
     global args
     # models = ['GCNConv', 'GATConv', 'TransformerConv']
-    g_models = ['BlockGNN']
+    g_models = [ 'BlockGNN', 'GraphBlockGnn']
     # ds_list = ['MUTAG', 'AIDS', 'DD', 'MSRC_9']
     start_index_list = [0, 1, 2, 3, 4]
     results = []
     args.debug = True
     args.ds = 'MUTAG'
-    args.ep = 10
-    args.name = 'GCNConv'
+    args.ep = 20
+    args.name = 'GATConv'
     args.dim = 8
     args.h_layer = 3
     count = 1
@@ -592,7 +629,7 @@ def pre_check_train():
                     accuracies.append(acc)
                     files.append(f_name)
                 except Exception as e:
-                    print(f'gm={gm},model={args.name},h={h},ds={args.ds},dim={args.dim},e={e}')
+                    print(f'Exception when training:gm={gm},model={args.name},h={h},ds={args.ds},dim={args.dim},e={e}')
             execution_time = time.time() - start_time
             avg_acc = sum(accuracies) / len(accuracies)
             line = (
@@ -682,5 +719,93 @@ def send_email(subject, body):
         print(e)
 
 
+def summary_writer_demo():
+    global Net, step
+    # 创建SummaryWriter实例，指定日志保存路径
+    writer = SummaryWriter('runs/demo_experiment')
+
+    class Net(nn.Module):
+        def __init__(self):
+            super(Net, self).__init__()
+            self.conv1 = nn.Conv2d(1, 6, 5)
+            self.pool = nn.MaxPool2d(2, 2)
+            self.conv2 = nn.Conv2d(6, 16, 5)
+            self.fc1 = nn.Linear(16 * 4 * 4, 120)
+            self.fc2 = nn.Linear(120, 84)
+            self.fc3 = nn.Linear(84, 10)
+
+        def forward(self, x):
+            x = self.pool(F.relu(self.conv1(x)))
+            x = self.pool(F.relu(self.conv2(x)))
+            x = x.view(-1, 16 * 4 * 4)
+            x = F.relu(self.fc1(x))
+            x = F.relu(self.fc2(x))
+            x = self.fc3(x)
+            return x
+
+    net = Net()
+    # 模拟训练过程，记录100个迭代的数据
+    for step in range(110):
+        # 生成一些随机的loss和accuracy数据
+        loss = random.random() * 2  # 随机生成一个0到2之间的数作为loss
+        accuracy = random.random()  # 随机生成一个0到1之间的数作为accuracy
+
+        # 使用add_scalar方法将数据写入日志
+        writer.add_scalar('Loss/train', loss, step)
+        writer.add_scalar('Loss/test', loss, step)
+        writer.add_scalar('Accuracy/train', accuracy, step)
+        writer.add_scalar('Accuracy/test', accuracy, step)
+        writer.add_scalar('Accuracy/train/a', accuracy, step)
+        writer.add_pr_curve('Accuracy/pr', accuracy, step)
+        # 记录每个层的权重分布
+        for name, param in net.named_parameters():
+            writer.add_histogram(
+                tag=f"Weights/{name}",
+                values=param.clone().detach().cpu().numpy(),
+                global_step=step
+            )
+
+        # 记录梯度分布（需确保参数可训练）
+        for name, param in net.named_parameters():
+            # if param.grad is not None:
+            writer.add_histogram(
+                tag=f"Gradients/{name}",
+                values=param.clone().detach().cpu().numpy(),
+                global_step=step
+            )
+
+        # 生成一张随机的示例图片（假设为3通道，28x28的RGB图像）
+        # 注意：TensorBoard要求图像格式为 [C, H, W]，且像素值在 [0, 1] 或 [-1, 1] 范围内
+        image = torch.rand(3, 28, 28)  # 生成一个随机的3通道28x28图像（假设使用PyTorch张量）
+        writer.add_image('Training_Images', image, global_step=step)
+    images = torch.randn(1, 28, 28)
+    # 关闭writer，确保所有内容都被正确写入到磁盘上
+    writer.add_graph(net, images)
+    writer.close()
+
+
+
+
+
+def visualize_graph(data, color):
+    G = to_networkx(data, to_undirected=True)
+    plt.figure(figsize=(7,7))
+    plt.xticks([])
+    plt.yticks([])
+    nx.draw_networkx(G, pos=nx.spring_layout(G, seed=42), with_labels=False,
+                     node_color=color, cmap="Set2")
+    plt.show()
+
+
+def visualize_embedding(h, color, epoch=None, loss=None):
+    plt.figure(figsize=(7,7))
+    plt.xticks([])
+    plt.yticks([])
+    h = h.detach().cpu().numpy()
+    plt.scatter(h[:, 0], h[:, 1], s=140, c=color, cmap="Set2")
+    if epoch is not None and loss is not None:
+        plt.xlabel(f'Epoch: {epoch}, Loss: {loss.item():.4f}', fontsize=16)
+    return plt
+
 if __name__ == '__main__':
-    true_train()
+    pre_check_train()
