@@ -24,7 +24,7 @@ CN_NEWS_FOLDER_NAME = "cn_news"
 
 def is_sensitive_word(word):
     cnt = 0
-    sensitive_words = ["平", "%%", "习","&&&&&#", "近"]  # 去除了重复项
+    sensitive_words = ["平", "%%", "习", "&&&&&#", "近"]  # 去除了重复项
     for sensitive_word in sensitive_words:
         if sensitive_word in word:
             cnt += 1
@@ -137,6 +137,9 @@ def crawling_news_meta():
     results = []
     for id, url in enumerate(urls):
         context = extract_news_content(url)
+        if not context:
+            print(f"[ERROR] 无法获取新闻内容: {url}")
+            continue
         if len(context['images']) == 0:
             print(f"[ERROR] 未找到图片: {url}")
             continue
