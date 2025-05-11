@@ -208,5 +208,8 @@ experiments/
 geomatric/runs
 agent/audios
 agent/images
+agent/temp
 agent/ppts
+agent/20*/
 agent/vedios
+agent/cn_news/
