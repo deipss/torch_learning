@@ -1,6 +1,4 @@
 from moviepy import *
-import os
-import numpy as np
 from PIL import Image, ImageDraw
 import datetime
 from zhdate import ZhDate
@@ -10,7 +8,7 @@ import textwrap
 BACKGROUND_IMAGE_PATH = "images/generated_background.png"
 GLOBAL_WIDTH = 2560
 GLOBAL_HEIGHT = 1440
-GAP = int(GLOBAL_WIDTH * 0.03)
+GAP = int(GLOBAL_WIDTH * 0.02)
 INNER_WIDTH = GLOBAL_WIDTH - GAP
 INNER_HEIGHT = GLOBAL_HEIGHT - GAP
 W_H_RADIO = GLOBAL_WIDTH / GLOBAL_HEIGHT
@@ -27,9 +25,7 @@ NEWS_MATE = {
 }
 
 
-
-
-def create_region_bg(width, height, color='#FFFFFF', duration=5):
+def create_region_bg(width, height, color='#FFFFFF', duration=1):
     img = Image.new("RGB", (width, height), color)
     draw = ImageDraw.Draw(img)
     draw.rectangle(
@@ -119,13 +115,13 @@ def generate_quad_layout_video(audio_path, image_path_top, txt_cn, txt_en, outpu
     final_video.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=FPS)
 
 
-def generate_background_image(width, height, color):
+def generate_background_image(width, height, color='#FF9900'):
     # 创建一个新的图像
-    image = Image.new("RGB", (width, height), "#FF9900")  # 橘色背景
+    image = Image.new("RGB", (width, height), color)  # 橘色背景
     draw = ImageDraw.Draw(image)
 
     # 计算边框宽度(1%的宽度)
-    border_width = int(width * 0.02)
+    border_width = GAP
 
     # 绘制圆角矩形(内部灰白色)
     draw.rounded_rectangle(
@@ -155,7 +151,7 @@ def get_full_date():
     return "今天是{}, \n农历{}, \n{}".format(solar_date, lunar_date, weekday)
 
 
-def generate_video_intro(bg_music_path, output_path="vedios/intro.mp4"):
+def generate_video_intro(bg_music_path, output_path="videos/intro.mp4"):
     """生成带日期文字和背景音乐的片头视频
 
     Args:
@@ -197,39 +193,29 @@ def generate_video_intro(bg_music_path, output_path="vedios/intro.mp4"):
     )
 
 
-
-
-def generate_today_video():
-    # todo 生成当天的若干视频
-
-    pass
-
-
 def combine_videos_with_transitions():
     # todo 组装生成今天的信息
     # 设置三个视频的资源路径
     video_paths = [
-        "vedios/intro.mp4",
-        "vedios/quad_layout_video_1.mp4",
-        "vedios/quad_layout_video_2.mp4"
+        "videos/intro.mp4",
+        "videos/quad_layout_video_1.mp4",
+        "videos/quad_layout_video_2.mp4"
     ]
 
-    output_path = "vedios/combined_final.mp4"
+    output_path = "videos/combined_final.mp4"
     bg_clip = ImageClip(BACKGROUND_IMAGE_PATH)
-
-
 
     # 加载视频和音频
     clips = []
     for i, video_path in enumerate(video_paths):
         # 加载视频
         video = VideoFileClip(video_path)
-        video = video.with_position(('center','center'), relative=True)
+        video = video.with_position(('center', 'center'), relative=True)
         # 将视频放置在背景上
         video_with_bg = CompositeVideoClip([
             bg_clip,
             video
-        ],use_bgclip=True)
+        ], use_bgclip=True)
         # 将视频放置在背景上
         clips.append(video_with_bg)
 
@@ -243,35 +229,38 @@ def combine_videos_with_transitions():
 
 
 def temp():
-    pass
+    generate_background_image(GLOBAL_WIDTH, GLOBAL_HEIGHT)
+    generate_video_intro("audios/1.mp3", "videos/intro.mp4")
+    generate_quad_layout_video(
+        output_path="videos/quad_layout_video_2.mp4",
+        audio_path="audios/vallex_generation.wav",
+        image_path_top="images/quantum.png",
+        txt_cn=
+        """
+        美国总统特朗普4日宣布对所有进入美国、在外国制作的电影征收100%关税，这一决定持续引发业界强烈反对。 美国和加拿大电影电视行业从业者的工会组织——国际戏剧舞台从业者联盟近日发布声明表示，鉴于加拿大与美国的文化和经济伙伴关系，美国政府需要采取措施，恢复公平竞争环境，维护美加两国的电影和电视行业利益。 国际戏剧舞台从业者联盟主席 马修·勒布：我们希望创造公平的竞争环境，并正在寻求惠及所有成员的解决方案，尤其是电视剧、小成本电影和独立电影。我们期待美国政府就拟议的关税计划提供更多信息，但任何的贸易决策都不能损害我们加拿大成员和整个行业的利益。 国际戏剧舞台从业者联盟是一个有着超百年历史的美国和加拿大联合工会组织。联盟成立于1893年，1898年以来一直代表美国和加拿大的影视业幕后从业者，在美加两地有超17万名业内人员。勒布表示，成千上万的家庭、小企业和社区承受着行业萎缩带来的经济压力，关税将对该联盟造成严重影响。此外，鉴于加拿大与美国独特的文化和经济伙伴关系，联盟认为应特别考虑加拿大的电影和电视制作。
+        """
+        ,
+        txt_en="""
+            This came as Israeli Prime Minister Benjamin Netanyahu said on Wednesday there is doubt over the survival of three hostages previously believed alive in Gaza. His statement came a day after US President Donald Trump said only 21 of 24 hostages believed alive had survived.The news sent families of remaining captives in Gaza into panic.The new bloodshed on Wednesday came days after Israel approved a plan to intensify its operations in the Palestinian enclave, which would include seizing Gaza, holding on to captured territories, forcibly displacing Palestinians to southern Gaza and taking control of aid distribution along with private security companies.
+            """
+    )
+
+    generate_quad_layout_video(
+        output_path="videos/quad_layout_video_1.mp4",
+        audio_path="audios/vallex_generation.wav",
+        image_path_top="images/quantum.png",
+        txt_cn=
+        """
+        美国总统特朗普4日宣布对所有进入美国、在外国制作的电影征收100%关税，这一决定持续引发业界强烈反对。 美国和加拿大电影电视行业从业者的工会组织——国际戏剧舞台从业者联盟近日发布声明表示，鉴于加拿大与美国的文化和经济伙伴关系，美国政府需要采取措施，恢复公平竞争环境，维护美加两国的电影和电视行业利益。 国际戏剧舞台从业者联盟主席 马修·勒布：我们希望创造公平的竞争环境，并正在寻求惠及所有成员的解决方案，尤其是电视剧、小成本电影和独立电影。我们期待美国政府就拟议的关税计划提供更多信息，但任何的贸易决策都不能损害我们加拿大成员和整个行业的利益。 国际戏剧舞台从业者联盟是一个有着超百年历史的美国和加拿大联合工会组织。联盟成立于1893年，1898年以来一直代表美国和加拿大的影视业幕后从业者，在美加两地有超17万名业内人员。勒布表示，成千上万的家庭、小企业和社区承受着行业萎缩带来的经济压力，关税将对该联盟造成严重影响。此外，鉴于加拿大与美国独特的文化和经济伙伴关系，联盟认为应特别考虑加拿大的电影和电视制作。
+        """
+        ,
+        txt_en="""
+            This came as Israeli Prime Minister Benjamin Netanyahu said on Wednesday there is doubt over the survival of three hostages previously believed alive in Gaza. His statement came a day after US President Donald Trump said only 21 of 24 hostages believed alive had survived.The news sent families of remaining captives in Gaza into panic.The new bloodshed on Wednesday came days after Israel approved a plan to intensify its operations in the Palestinian enclave, which would include seizing Gaza, holding on to captured territories, forcibly displacing Palestinians to southern Gaza and taking control of aid distribution along with private security companies.
+            """
+    )
+
+    combine_videos_with_transitions()
 
 
 if __name__ == '__main__':
-    # generate_quad_layout_video(
-    #     output_path="vedios/quad_layout_video_2.mp4",
-    #     audio_path="audios/vallex_generation.wav",
-    #     image_path_top="images/quantum.png",
-    #     txt_cn=
-    #     """
-    #     美国总统特朗普4日宣布对所有进入美国、在外国制作的电影征收100%关税，这一决定持续引发业界强烈反对。 美国和加拿大电影电视行业从业者的工会组织——国际戏剧舞台从业者联盟近日发布声明表示，鉴于加拿大与美国的文化和经济伙伴关系，美国政府需要采取措施，恢复公平竞争环境，维护美加两国的电影和电视行业利益。 国际戏剧舞台从业者联盟主席 马修·勒布：我们希望创造公平的竞争环境，并正在寻求惠及所有成员的解决方案，尤其是电视剧、小成本电影和独立电影。我们期待美国政府就拟议的关税计划提供更多信息，但任何的贸易决策都不能损害我们加拿大成员和整个行业的利益。 国际戏剧舞台从业者联盟是一个有着超百年历史的美国和加拿大联合工会组织。联盟成立于1893年，1898年以来一直代表美国和加拿大的影视业幕后从业者，在美加两地有超17万名业内人员。勒布表示，成千上万的家庭、小企业和社区承受着行业萎缩带来的经济压力，关税将对该联盟造成严重影响。此外，鉴于加拿大与美国独特的文化和经济伙伴关系，联盟认为应特别考虑加拿大的电影和电视制作。
-    #     """
-    #     ,
-    #     txt_en="""
-    #         This came as Israeli Prime Minister Benjamin Netanyahu said on Wednesday there is doubt over the survival of three hostages previously believed alive in Gaza. His statement came a day after US President Donald Trump said only 21 of 24 hostages believed alive had survived.The news sent families of remaining captives in Gaza into panic.The new bloodshed on Wednesday came days after Israel approved a plan to intensify its operations in the Palestinian enclave, which would include seizing Gaza, holding on to captured territories, forcibly displacing Palestinians to southern Gaza and taking control of aid distribution along with private security companies.
-    #         """
-    # )
-    # generate_quad_layout_video(
-    #     output_path="vedios/quad_layout_video_1.mp4",
-    #     audio_path="audios/vallex_generation.wav",
-    #     image_path_top="images/quantum.png",
-    #     txt_cn=
-    #     """
-    #     美国总统特朗普4日宣布对所有进入美国、在外国制作的电影征收100%关税，这一决定持续引发业界强烈反对。 美国和加拿大电影电视行业从业者的工会组织——国际戏剧舞台从业者联盟近日发布声明表示，鉴于加拿大与美国的文化和经济伙伴关系，美国政府需要采取措施，恢复公平竞争环境，维护美加两国的电影和电视行业利益。 国际戏剧舞台从业者联盟主席 马修·勒布：我们希望创造公平的竞争环境，并正在寻求惠及所有成员的解决方案，尤其是电视剧、小成本电影和独立电影。我们期待美国政府就拟议的关税计划提供更多信息，但任何的贸易决策都不能损害我们加拿大成员和整个行业的利益。 国际戏剧舞台从业者联盟是一个有着超百年历史的美国和加拿大联合工会组织。联盟成立于1893年，1898年以来一直代表美国和加拿大的影视业幕后从业者，在美加两地有超17万名业内人员。勒布表示，成千上万的家庭、小企业和社区承受着行业萎缩带来的经济压力，关税将对该联盟造成严重影响。此外，鉴于加拿大与美国独特的文化和经济伙伴关系，联盟认为应特别考虑加拿大的电影和电视制作。
-    #     """
-    #     ,
-    #     txt_en="""
-    #         This came as Israeli Prime Minister Benjamin Netanyahu said on Wednesday there is doubt over the survival of three hostages previously believed alive in Gaza. His statement came a day after US President Donald Trump said only 21 of 24 hostages believed alive had survived.The news sent families of remaining captives in Gaza into panic.The new bloodshed on Wednesday came days after Israel approved a plan to intensify its operations in the Palestinian enclave, which would include seizing Gaza, holding on to captured territories, forcibly displacing Palestinians to southern Gaza and taking control of aid distribution along with private security companies.
-    #         """
-    # )
-
-    combine_videos_with_transitions()
+    temp()
