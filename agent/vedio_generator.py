@@ -1,9 +1,11 @@
 from moviepy import *
-from PIL import Image, ImageDraw
+from PIL import ImageDraw
 import datetime
 from zhdate import ZhDate
-
-import textwrap
+import os
+import math
+from PIL import Image
+from pathlib import Path
 
 BACKGROUND_IMAGE_PATH = "images/generated_background.png"
 GLOBAL_WIDTH = 2560
@@ -13,16 +15,8 @@ INNER_WIDTH = GLOBAL_WIDTH - GAP
 INNER_HEIGHT = GLOBAL_HEIGHT - GAP
 W_H_RADIO = GLOBAL_WIDTH / GLOBAL_HEIGHT
 FPS = 60
-
-NEWS_MATE = {
-    "title": "《我是歌手》 2024 年 1 月 1 日 00:00 发布",
-    "content_cn": "《我是歌手》 2024 年 1 月 1 日 00:00 发布",
-    "content_en": "《我是歌手》 2024 年 1 月 1 日 00:00 发布",
-    "image": "images/news.png",
-    "audio": "audios/news.mp3",
-    "md5": "12345678901234567890123456789012",
-    "id": ""
-}
+NEWS_JSON_FILE_NAME = "news_results.json"
+CN_NEWS_FOLDER_NAME = "cn_news"
 
 
 def create_region_bg(width, height, color='#FFFFFF', duration=1):
@@ -38,7 +32,62 @@ def create_region_bg(width, height, color='#FFFFFF', duration=1):
     return ImageClip(temp_path).with_duration(duration)
 
 
-def generate_quad_layout_video(audio_path, image_path_top, txt_cn, txt_en, output_path):
+def add_newline_every_n_chars(text, n):
+    """
+    每隔固定的字数在文本中添加换行符
+
+    参数:
+    text (str): 需要添加换行符的长文本
+    n (int): 指定的固定字数
+
+    返回:
+    str: 添加换行符后的文本
+    """
+    if n <= 0:
+        return text
+
+    return '\n'.join([text[i:i + n] for i in range(0, len(text), n)])
+
+
+def calculate_font_size_and_line_length(text, box_width, box_height, font_ratio=1.0, line_height_ratio=1.5,
+                                        start_size=72):
+    """
+    计算适合文本框的字体大小和每行字数
+
+    参数:
+    text (str): 要显示的文本
+    box_width (int): 文本框宽度（像素）
+    box_height (int): 文本框高度（像素）
+    font_ratio (float): 字体大小与平均字符宽度的比例系数
+    line_height_ratio (float): 行高与字体大小的比例系数
+    start_size (int): 开始尝试的最大字体大小
+
+    返回:
+    dict: 包含计算结果的字典，键为 'font_size' 和 'chars_per_line'
+    """
+    # 从最大字体开始尝试，逐步减小直到文本适应文本框
+    for font_size in range(start_size, 0, -1):
+        # 计算每个字符的平均宽度和行高
+        char_width = font_size * font_ratio
+        line_height = font_size * line_height_ratio
+
+        # 计算每行可容纳的字符数
+        chars_per_line = max(1, math.floor(box_width / char_width))
+
+        # 计算所需的总行数
+        total_lines = math.ceil(len(text) / chars_per_line)
+
+        # 计算所需的总高度
+        total_height = total_lines * line_height
+
+        # 如果高度符合要求，返回当前字体大小和每行字符数
+        if total_height <= box_height:
+            return font_size, chars_per_line
+
+    return 40, len(text)
+
+
+def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, output_path):
     # 加载背景和音频
     bg_clip = ColorClip(size=(INNER_WIDTH, INNER_HEIGHT), color=(255, 255, 255))  # 白色背景
     audio_clip = AudioFileClip(audio_path)
@@ -62,10 +111,13 @@ def generate_quad_layout_video(audio_path, image_path_top, txt_cn, txt_en, outpu
     offset_w, offest_h = (left_width - top_left_img.w) // 2, (top_height - top_left_img.h) // 2
     top_left_img = top_left_img.with_position((offset_w, offest_h)).with_duration(duration)
 
-    # 右上文字处理 todo
-
+    font_size, chars_per_line = calculate_font_size_and_line_length(txt_cn, right_width * 95 / 100,
+                                                                    top_height * 95 / 100)
+    txt_cn = '\n'.join([txt_cn[i:i + chars_per_line] for i in range(0, len(txt_cn), chars_per_line)])
     top_right_txt = TextClip(
+        interline=font_size // 2,
         text=txt_cn,
+        font_size=font_size,
         color='white',
         font='./font/simhei.ttf',
         size=(right_width, top_height),
@@ -73,11 +125,12 @@ def generate_quad_layout_video(audio_path, image_path_top, txt_cn, txt_en, outpu
         method='label'
     ).with_duration(duration).with_position((left_width, 'top'))
 
-    # 左下文字处理 todo
-    wrapped_text = textwrap.fill(txt_en, width=bottom_left_width * 9 // 10)
-    font_size = min(30, int(bottom_height / (wrapped_text.count('\n') + 1) * 0.8))
+    font_size, chars_per_line = calculate_font_size_and_line_length(title, bottom_left_width * 95 / 100,
+                                                                    bottom_height * 95 / 100)
+    title = '\n'.join([title[i:i + chars_per_line] for i in range(0, len(title), chars_per_line)])
     bottom_left_txt = TextClip(
-        text=wrapped_text,
+        text=title,
+        interline=font_size // 2,
         font_size=font_size,
         color='black',
         font='./font/simhei.ttf',
@@ -193,16 +246,8 @@ def generate_video_intro(bg_music_path, output_path="videos/intro.mp4"):
     )
 
 
-def combine_videos_with_transitions():
-    # todo 组装生成今天的信息
-    # 设置三个视频的资源路径
-    video_paths = [
-        "videos/intro.mp4",
-        "videos/quad_layout_video_1.mp4",
-        "videos/quad_layout_video_2.mp4"
-    ]
-
-    output_path = "videos/combined_final.mp4"
+def combine_videos_with_transitions(video_paths):
+    output_path = build_today_combine_video_path()
     bg_clip = ImageClip(BACKGROUND_IMAGE_PATH)
 
     # 加载视频和音频
@@ -228,39 +273,120 @@ def combine_videos_with_transitions():
     # final_clip.preview()
 
 
-def temp():
+def temp_video_text_align():
+    generate_quad_layout_video(
+        output_path="videos/quad_layout_video_4.mp4",
+        audio_path="audios/vallex_generation.wav",
+        image_path_top="images/quantum.png",
+        txt_cn=
+        """
+        美国总统特朗普4日宣布对所有进入美国、在外国制作的电影征收100%关税，这一决定持续引发业界强烈反对。 美国和加拿大电影电视行业从业者的工会组织——国际戏剧舞台从业者联盟近日发布声明表示，鉴于加拿大与美国的文化和经济伙伴关系，美国政府需要采取措施，恢复公平竞争环境，维护美加两国的电影和电视行业利益。 国际戏剧舞台从业者联盟主席 马修·勒布：我们希望创造公平的竞争环境，并正在寻求惠及所有成员的解决方案，尤其是电视剧、小成本电影和独立电影。我们期待美国政府就拟议的关税计划提供更多信息，但任何的贸易决策都不能损害我们加拿大成员和整个行业的利益。 国际戏剧舞台从业者联盟是一个有着超百年历史的美国和加拿大联合工会组织。联盟成立于1893年，1898年以来一直代表美国和加拿大的影视业幕后从业者，在美加两地有超17万名业内人员。勒布表示，成千上万的家庭、小企业和社区承受着行业萎缩带来的经济压力，关税将对该联盟造成严重影响。此外，鉴于加拿大与美国独特的文化和经济伙伴关系，联盟认为应特别考虑加拿大的电影和电视制作。
+        """
+        ,
+        title="""美国总统特朗普4日宣布对所有进入美国、在外国制作的电影征收100%关税，"""
+    )
+
+
+def build_today_path():
+    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"))
+
+
+def build_today_news_path():
+    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), NEWS_JSON_FILE_NAME)
+
+
+def build_today_intro_path():
+    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), "intro.mp4")
+
+
+def build_today_combine_video_path():
+    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), "video.mp4")
+
+
+def build_today_video_path(index: str):
+    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), index, "video.mp4")
+
+
+def build_today_bg_music_path(index: str):
+    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), index, "bg_music.mp4")
+
+
+def build_today_index_path(index: str):
+    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), index)
+
+
+
+
+def find_highest_resolution_image(directory: str) -> tuple[str, int, int] | None:
+    """
+    遍历指定目录（包括子目录）找出分辨率最高的图片
+
+    参数:
+    directory (str): 要搜索的目录路径
+
+    返回:
+    tuple: (图片路径, 宽度, 高度) 或 None(如果未找到图片)
+    """
+    if not os.path.isdir(directory):
+        raise NotADirectoryError(f"指定的路径 '{directory}' 不是有效目录")
+
+    # 支持的图片扩展名集合
+    IMAGE_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.webp', '.gif'}
+
+    highest_resolution = 0
+    best_image = None
+
+    # 使用 os.walk 遍历目录树
+    for root, _, files in os.walk(directory):
+        for file in files:
+            # 检查文件扩展名是否为支持的图片格式
+            ext = Path(file).suffix.lower()
+            if ext in IMAGE_EXTENSIONS:
+                file_path = os.path.join(root, file)
+
+                try:
+                    # 使用 PIL 打开图片并获取尺寸
+                    with Image.open(file_path) as img:
+                        width, height = img.size
+                        resolution = width * height
+
+                        # 如果当前图片分辨率更高，则更新最佳图片
+                        if resolution > highest_resolution:
+                            highest_resolution = resolution
+                            best_image = (file_path, width, height)
+                except Exception as e:
+                    print(f"无法处理图片 {file_path}: {e}")
+
+    return best_image
+
+
+def combine_videos():
+    import json
     generate_background_image(GLOBAL_WIDTH, GLOBAL_HEIGHT)
-    generate_video_intro("audios/1.mp3", "videos/intro.mp4")
-    generate_quad_layout_video(
-        output_path="videos/quad_layout_video_2.mp4",
-        audio_path="audios/vallex_generation.wav",
-        image_path_top="images/quantum.png",
-        txt_cn=
-        """
-        美国总统特朗普4日宣布对所有进入美国、在外国制作的电影征收100%关税，这一决定持续引发业界强烈反对。 美国和加拿大电影电视行业从业者的工会组织——国际戏剧舞台从业者联盟近日发布声明表示，鉴于加拿大与美国的文化和经济伙伴关系，美国政府需要采取措施，恢复公平竞争环境，维护美加两国的电影和电视行业利益。 国际戏剧舞台从业者联盟主席 马修·勒布：我们希望创造公平的竞争环境，并正在寻求惠及所有成员的解决方案，尤其是电视剧、小成本电影和独立电影。我们期待美国政府就拟议的关税计划提供更多信息，但任何的贸易决策都不能损害我们加拿大成员和整个行业的利益。 国际戏剧舞台从业者联盟是一个有着超百年历史的美国和加拿大联合工会组织。联盟成立于1893年，1898年以来一直代表美国和加拿大的影视业幕后从业者，在美加两地有超17万名业内人员。勒布表示，成千上万的家庭、小企业和社区承受着行业萎缩带来的经济压力，关税将对该联盟造成严重影响。此外，鉴于加拿大与美国独特的文化和经济伙伴关系，联盟认为应特别考虑加拿大的电影和电视制作。
-        """
-        ,
-        txt_en="""
-            This came as Israeli Prime Minister Benjamin Netanyahu said on Wednesday there is doubt over the survival of three hostages previously believed alive in Gaza. His statement came a day after US President Donald Trump said only 21 of 24 hostages believed alive had survived.The news sent families of remaining captives in Gaza into panic.The new bloodshed on Wednesday came days after Israel approved a plan to intensify its operations in the Palestinian enclave, which would include seizing Gaza, holding on to captured territories, forcibly displacing Palestinians to southern Gaza and taking control of aid distribution along with private security companies.
-            """
-    )
-
-    generate_quad_layout_video(
-        output_path="videos/quad_layout_video_1.mp4",
-        audio_path="audios/vallex_generation.wav",
-        image_path_top="images/quantum.png",
-        txt_cn=
-        """
-        美国总统特朗普4日宣布对所有进入美国、在外国制作的电影征收100%关税，这一决定持续引发业界强烈反对。 美国和加拿大电影电视行业从业者的工会组织——国际戏剧舞台从业者联盟近日发布声明表示，鉴于加拿大与美国的文化和经济伙伴关系，美国政府需要采取措施，恢复公平竞争环境，维护美加两国的电影和电视行业利益。 国际戏剧舞台从业者联盟主席 马修·勒布：我们希望创造公平的竞争环境，并正在寻求惠及所有成员的解决方案，尤其是电视剧、小成本电影和独立电影。我们期待美国政府就拟议的关税计划提供更多信息，但任何的贸易决策都不能损害我们加拿大成员和整个行业的利益。 国际戏剧舞台从业者联盟是一个有着超百年历史的美国和加拿大联合工会组织。联盟成立于1893年，1898年以来一直代表美国和加拿大的影视业幕后从业者，在美加两地有超17万名业内人员。勒布表示，成千上万的家庭、小企业和社区承受着行业萎缩带来的经济压力，关税将对该联盟造成严重影响。此外，鉴于加拿大与美国独特的文化和经济伙伴关系，联盟认为应特别考虑加拿大的电影和电视制作。
-        """
-        ,
-        txt_en="""
-            This came as Israeli Prime Minister Benjamin Netanyahu said on Wednesday there is doubt over the survival of three hostages previously believed alive in Gaza. His statement came a day after US President Donald Trump said only 21 of 24 hostages believed alive had survived.The news sent families of remaining captives in Gaza into panic.The new bloodshed on Wednesday came days after Israel approved a plan to intensify its operations in the Palestinian enclave, which would include seizing Gaza, holding on to captured territories, forcibly displacing Palestinians to southern Gaza and taking control of aid distribution along with private security companies.
-            """
-    )
-
-    combine_videos_with_transitions()
+    video_paths = []
+    intro_path = build_today_intro_path()
+    video_paths.append(intro_path)
+    generate_video_intro("audios/1.mp3", intro_path)
+    with open(build_today_news_path(), "r", encoding="utf-8") as f:
+        news_list = json.load(f)
+        for i, news in enumerate(news_list):
+            index_path = build_today_index_path(news['folder'])
+            video_path = build_today_video_path(news['folder'])
+            img_path, w, h = find_highest_resolution_image(index_path)
+            generate_quad_layout_video(
+                output_path=video_path,
+                audio_path="audios/1.mp3",
+                image_path_top=img_path,
+                txt_cn=news["content"],
+                title=news["title"]
+            )
+            video_paths.append(video_path)
+            if i > 2:
+                break
+    combine_videos_with_transitions(video_paths)
 
 
-if __name__ == '__main__':
-    temp()
+# 示例使用
+if __name__ == "__main__":
+    combine_videos_with_transitions(
+        ['cn_news/20250512/intro.mp4', 'cn_news/20250512/0000/video.mp4', 'cn_news/20250512/0001/video.mp4'])
