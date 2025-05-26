@@ -24,3 +24,4 @@ def modify_md_file(file_path):
 if __name__ == "__main__":
     process_md_files('/Users/deipss/workspace/self/blog/docs')
     print("处理完成")
+

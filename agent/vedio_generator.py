@@ -360,12 +360,15 @@ def find_highest_resolution_image(directory: str) -> tuple[str, int, int] | None
     return best_image
 
 
+
 def combine_videos():
     import json
     generate_background_image(GLOBAL_WIDTH, GLOBAL_HEIGHT)
     video_paths = []
     intro_path = build_today_intro_path()
     video_paths.append(intro_path)
+    # todo generate audio for introduction
+    # todo generate audio for every news
     generate_video_intro("audios/1.mp3", intro_path)
     with open(build_today_news_path(), "r", encoding="utf-8") as f:
         news_list = json.load(f)
