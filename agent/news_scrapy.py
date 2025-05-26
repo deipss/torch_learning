@@ -15,7 +15,6 @@ URLS = [
     'https://china.chinadaily.com.cn/',
     'https://world.chinadaily.com.cn/',
     'https://cn.chinadaily.com.cn/gtx/'
-
 ]
 
 NEWS_JSON_FILE_NAME = "news_results.json"
@@ -24,11 +23,11 @@ CN_NEWS_FOLDER_NAME = "cn_news"
 
 def is_sensitive_word(word):
     cnt = 0
-    sensitive_words = ["平", "%%", "习", "&&&&&#", "近"]  # 去除了重复项
+    sensitive_words = ["平", "%%", "习", "&&&&&#", "近","县"]  # 去除了重复项
     for sensitive_word in sensitive_words:
         if sensitive_word in word:
             cnt += 1
-    return cnt > 2
+    return cnt > 1
 
 
 # 创建以当前日期命名的文件夹
@@ -63,6 +62,21 @@ def extract_links(html, visited_urls):
     return urls
 
 
+def truncate_after_300_find_period(text: str) -> str:
+    if len(text) <= 300:
+        return text
+
+    end_pos = 300  # 第300个字符的位置（索引从0开始，取前300个字符）
+
+    # 从end_pos位置开始向后查找第一个句号
+    last_period = text.find('。', end_pos)
+
+    if last_period != -1:
+        # 截取至句号位置（包含句号）
+        return text[:last_period + 1]
+    else:
+        # 300字符后无句号，返回全文（或截断并添加省略号）
+        return text  # 或返回 text[:end_pos] + "..."（按需选择）
 def extract_news_content(url):
     """提取新闻页面的标题、图片和正文内容"""
     try:
@@ -76,7 +90,7 @@ def extract_news_content(url):
 
         # 提取标题
         title = soup.find("h1").get_text(strip=True) if soup.find("h1") else "无标题"
-
+        title = '【中国日报】'+title
         # 提取正文图片
         images = []
         article_div = soup.find("div", class_="Artical_Content")
@@ -92,7 +106,7 @@ def extract_news_content(url):
             text = p.get_text(strip=True)
             if text and len(text) > 10:  # 过滤短文本
                 content += text + " "
-
+        content = truncate_after_300_find_period(content)
         return {
             "title": title,
             "images": images,
