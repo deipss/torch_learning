@@ -163,6 +163,9 @@ def crawling_news_meta():
         if is_sensitive_word(context['content']):
             print(f"[ERROR] 标题包含敏感词: {url}")
             continue
+        if len(context['content'])<10:
+            print(f"[ERROR] 内容过短: {url}")
+            continue
         context['folder'] = "{:04d}".format(id)
         context['url'] = url
         results.append(context)

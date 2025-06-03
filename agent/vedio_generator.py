@@ -17,14 +17,48 @@ W_H_RADIO = GLOBAL_WIDTH / GLOBAL_HEIGHT
 FPS = 60
 NEWS_JSON_FILE_NAME = "news_results.json"
 CN_NEWS_FOLDER_NAME = "cn_news"
+print(
+    f"GLOBAL_WIDTH:{GLOBAL_WIDTH},  GLOBAL_HEIGHT:{GLOBAL_HEIGHT}, W_H_RADIO:{W_H_RADIO},  FPS:{FPS},  BACKGROUND_IMAGE_PATH:{BACKGROUND_IMAGE_PATH},GAP:{GAP},INNER_WIDTH:{INNER_WIDTH},INNER_HEIGHT:{INNER_HEIGHT}")
 
+
+def generate_background_image(width, height, color='#FF9900'):
+    # 创建一个新的图像
+    image = Image.new("RGB", (width, height), color)  # 橘色背景
+    draw = ImageDraw.Draw(image)
+
+    # 计算边框宽度(1%的宽度)
+    border_width = GAP
+
+    # 绘制圆角矩形(内部灰白色)
+    draw.rounded_rectangle(
+        [(border_width, border_width), (width - border_width, height - border_width)],
+        radius=30,  # 圆角半径
+        fill="#F0F0F0"  # 灰白色填充
+    )
+
+    image.save(BACKGROUND_IMAGE_PATH)
+    return image
 
 def create_region_bg(width, height, color='#FFFFFF', duration=1):
     img = Image.new("RGB", (width, height), color)
     draw = ImageDraw.Draw(img)
-    draw.rectangle(
+    draw.rounded_rectangle(
         [(0, 0),
          (width, height)],
+        fill=color
+    )
+    temp_path = f"temp/region_bg_{width}x{height}.png"
+    img.save(temp_path)
+    return ImageClip(temp_path).with_duration(duration)
+
+
+def create_region_bg(width, height, color='#FFFFFF', duration=1,radius=20):
+    img = Image.new("RGB", (width, height), color)
+    draw = ImageDraw.Draw(img)
+    draw.rounded_rectangle(
+        [(0, 0),
+         (width, height)],
+        radius=radius,
         fill=color
     )
     temp_path = f"temp/region_bg_{width}x{height}.png"
@@ -96,11 +130,13 @@ def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, output
     bg_width, bg_height = bg_clip.size
 
     # 计算各区域尺寸
-    top_height = int(bg_height * 0.7)
+    HEIGHT_RATIO = 0.7
+    top_height = int(bg_height * HEIGHT_RATIO)
     bottom_height = bg_height - top_height
-    left_width = int(bg_width * 0.4)
+    WIDTH_RATIO = 0.4
+    left_width = int(bg_width * WIDTH_RATIO)
     right_width = bg_width - left_width
-    bottom_left_width = int(bg_width * 0.7)
+    bottom_left_width = int(bg_width * HEIGHT_RATIO)
     bottom_right_width = bg_width - bottom_left_width
 
     # 左上图片处理
@@ -111,6 +147,7 @@ def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, output
     offset_w, offest_h = (left_width - top_left_img.w) // 2, (top_height - top_left_img.h) // 2
     top_left_img = top_left_img.with_position((offset_w, offest_h)).with_duration(duration)
 
+    # 右上文字处理
     font_size, chars_per_line = calculate_font_size_and_line_length(txt_cn, right_width * 95 / 100,
                                                                     top_height * 95 / 100)
     txt_cn = '\n'.join([txt_cn[i:i + chars_per_line] for i in range(0, len(txt_cn), chars_per_line)])
@@ -118,13 +155,12 @@ def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, output
         interline=font_size // 2,
         text=txt_cn,
         font_size=font_size,
-        color='white',
+        color='black',
         font='./font/simhei.ttf',
         size=(right_width, top_height),
-        bg_color='#FFCC99',
         method='label'
     ).with_duration(duration).with_position((left_width, 'top'))
-
+    # 左下文字处理
     font_size, chars_per_line = calculate_font_size_and_line_length(title, bottom_left_width * 95 / 100,
                                                                     bottom_height * 95 / 100)
     title = '\n'.join([title[i:i + chars_per_line] for i in range(0, len(title), chars_per_line)])
@@ -139,17 +175,17 @@ def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, output
     ).with_duration(duration).with_position(('left', top_height))
 
     # 右下图片处理 todo
-    bottom_right_img = ImageClip('images/head.png')
+    bottom_right_img = ImageClip('images/male_announcer.png')
     if bottom_right_img.w > bottom_right_width or bottom_right_img.h > bottom_height:
         scale = min(bottom_right_width / bottom_right_img.w, bottom_height / bottom_right_img.h)
         bottom_right_img = bottom_right_img.resized(scale)
     bottom_right_img = bottom_right_img.with_position((bottom_left_width, top_height)).with_duration(duration)
 
     # 创建各区域背景框
-    top_left_bg = create_region_bg(left_width, top_height, '#F5F5F5', duration=duration)
-    top_right_bg = create_region_bg(right_width, top_height, '#F0F0F0', duration=duration)
+    top_left_bg = create_region_bg(left_width, top_height, '#FFFFFF', duration=duration)
+    top_right_bg = create_region_bg(right_width, top_height, '#FFFFFF', duration=duration)
     bottom_left_bg = create_region_bg(bottom_left_width, bottom_height, '#EEEEEE', duration=duration)
-    bottom_right_bg = create_region_bg(bottom_right_width, bottom_height, '#F8F8F8', duration=duration)
+    bottom_right_bg = create_region_bg(bottom_right_width, bottom_height, '#EEEEEE', duration=duration)
 
     # 合成最终视频
     final_video = CompositeVideoClip([
@@ -163,28 +199,11 @@ def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, output
         bottom_left_txt,
         bottom_right_img
     ], size=(bg_width, bg_height))
-    # final_video.preview()
+    final_video.preview()
 
-    final_video.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=FPS)
+    # final_video.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=FPS)
 
 
-def generate_background_image(width, height, color='#FF9900'):
-    # 创建一个新的图像
-    image = Image.new("RGB", (width, height), color)  # 橘色背景
-    draw = ImageDraw.Draw(image)
-
-    # 计算边框宽度(1%的宽度)
-    border_width = GAP
-
-    # 绘制圆角矩形(内部灰白色)
-    draw.rounded_rectangle(
-        [(border_width, border_width), (width - border_width, height - border_width)],
-        radius=30,  # 圆角半径
-        fill="#F0F0F0"  # 灰白色填充
-    )
-
-    image.save(BACKGROUND_IMAGE_PATH)
-    return image
 
 
 def get_full_date():
@@ -276,8 +295,8 @@ def combine_videos_with_transitions(video_paths):
 def temp_video_text_align():
     generate_quad_layout_video(
         output_path="videos/quad_layout_video_4.mp4",
-        audio_path="audios/vallex_generation.wav",
-        image_path_top="images/quantum.png",
+        audio_path="audios/1.mp3",
+        image_path_top="cn_news/20250510/0000/681ea0256b8e07c422ceb78c_m.jpeg",
         txt_cn=
         """
         美国总统特朗普4日宣布对所有进入美国、在外国制作的电影征收100%关税，这一决定持续引发业界强烈反对。 美国和加拿大电影电视行业从业者的工会组织——国际戏剧舞台从业者联盟近日发布声明表示，鉴于加拿大与美国的文化和经济伙伴关系，美国政府需要采取措施，恢复公平竞争环境，维护美加两国的电影和电视行业利益。 国际戏剧舞台从业者联盟主席 马修·勒布：我们希望创造公平的竞争环境，并正在寻求惠及所有成员的解决方案，尤其是电视剧、小成本电影和独立电影。我们期待美国政府就拟议的关税计划提供更多信息，但任何的贸易决策都不能损害我们加拿大成员和整个行业的利益。 国际戏剧舞台从业者联盟是一个有着超百年历史的美国和加拿大联合工会组织。联盟成立于1893年，1898年以来一直代表美国和加拿大的影视业幕后从业者，在美加两地有超17万名业内人员。勒布表示，成千上万的家庭、小企业和社区承受着行业萎缩带来的经济压力，关税将对该联盟造成严重影响。此外，鉴于加拿大与美国独特的文化和经济伙伴关系，联盟认为应特别考虑加拿大的电影和电视制作。
@@ -313,8 +332,6 @@ def build_today_bg_music_path(index: str):
 
 def build_today_index_path(index: str):
     return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), index)
-
-
 
 
 def find_highest_resolution_image(directory: str) -> tuple[str, int, int] | None:
@@ -360,7 +377,6 @@ def find_highest_resolution_image(directory: str) -> tuple[str, int, int] | None
     return best_image
 
 
-
 def combine_videos():
     import json
     generate_background_image(GLOBAL_WIDTH, GLOBAL_HEIGHT)
@@ -391,5 +407,6 @@ def combine_videos():
 
 # 示例使用
 if __name__ == "__main__":
-    combine_videos_with_transitions(
-        ['cn_news/20250512/intro.mp4', 'cn_news/20250512/0000/video.mp4', 'cn_news/20250512/0001/video.mp4'])
+    temp_video_text_align()
+    # combine_videos_with_transitions(
+    #     ['cn_news/20250512/intro.mp4', 'cn_news/20250512/0000/video.mp4', 'cn_news/20250512/0001/video.mp4'])
