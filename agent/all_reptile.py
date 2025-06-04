@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 from abc import abstractmethod
 from dataclasses import dataclass, asdict
 from typing import List
+import re
 
 CHINADAILY = 'chinadaily'
 EASTDAY = 'eastday'
@@ -125,8 +126,7 @@ class ChinaDailyScraper(NewsScraper):
         return [
             'https://cn.chinadaily.com.cn/',
             'https://china.chinadaily.com.cn/',
-            'https://world.chinadaily.com.cn/',
-            'https://cn.chinadaily.com.cn/gtx/'
+            'https://world.chinadaily.com.cn/'
         ]
 
     def truncate_after_300_find_period(self, text: str) -> str:
@@ -289,6 +289,178 @@ class ChinaDailyScraper(NewsScraper):
         print("图片下载完成。")
 
 
+class BbcScraper(NewsScraper):
+
+    def origin_url(self) -> list[str]:
+        return [
+            'https://www.bbc.com/news'
+        ]
+
+    def truncate_after_300_find_period(self, text: str) -> str:
+        return text  # 或返回 text[:end_pos] + "..."（按需选择）
+
+    def extract_news_content(self, url) -> NewsArticle:
+        """提取新闻页面的标题、图片和正文内容"""
+        try:
+
+            # 获取页面内容
+            html = self.fetch_page(url)
+            if not html:
+                return None
+
+            soup = BeautifulSoup(html, "html.parser")
+
+            # 提取标题
+            title = soup.find("h1").get_text(strip=True) if soup.find("h1") else "无标题"
+            title = '【BBC】' + title
+            # 提取正文图片
+            image_urls = []
+            article_div_list = soup.find_all("div", attrs={'data-component': 'image-block'})
+            if article_div_list:
+                for article_div in article_div_list:
+                    for img in article_div.select("img"):
+                        srcset = img.get("srcset")
+                        if not srcset:
+                            continue
+                        # 解析 srcset 并提取 (url, width) 元组
+                        entries = srcset.strip().split(',')
+                        image_data = []
+                        for entry in entries:
+                            entry = entry.strip()
+                            # 正则匹配：提取 URL 和宽度（例如："url.webp 1024w" 提取为 ("url.webp", 1024)）
+                            match = re.match(r'^(https?://[^ ]+) +(\d+)w$', entry)
+                            if match:
+                                img_url = match.group(1)
+                                width = int(match.group(2))
+                                image_data.append((img_url, width))
+
+                        # 找到宽度最大的条目
+                        if image_data:
+                            max_width_entry = max(image_data, key=lambda x: x[1])
+                            highest_res_url = max_width_entry[0]
+                            image_urls.append(highest_res_url)
+                            print(f"最高分辨率图片 URL: {highest_res_url}")
+                        else:
+                            print("未找到有效图片 URL")
+
+            # 提取正文文本
+            content = ""
+            for p in soup.select("p"):
+                text = p.get_text(strip=True)
+                if text and len(text) > 10:  # 过滤短文本
+                    content += text + " "
+            content = self.truncate_after_300_find_period(content)
+            article = NewsArticle(source=self.source, news_type=self.news_type)
+            article.title = title
+            article.content_en = content.strip()
+            article.url = url
+            article.image_urls = image_urls
+            article.images = [os.path.basename(i).replace(".webp", "") for i in image_urls]
+            return article
+
+        except Exception as e:
+            print(f"提取新闻内容出错: {e}")
+            return None
+
+    def extract_all_not_visit_urls(self, today):
+        # 初始爬取目标页面
+        visited_urls = set()
+        full_urls = []
+        for base_url in self.origin_url():
+
+            html = self.fetch_page(base_url)
+            if not html:
+                print("无法获取初始页面内容，程序退出。")
+                return
+
+            # 提取所有链接
+            urls = self.extract_links(html, visited_urls, today)
+            print(f"{base_url} 共发现 {len(urls)} 个链接。")
+
+        for url in visited_urls:
+            if url.startswith("/news/articles"):
+                full_urls.append("https://www.bbc.com" + url)
+        print(f"去重,拼接后共发现 {len(full_urls)} 个链接。")
+        return full_urls
+
+    def extract_links(self, html, visited_urls, today) -> set[str]:
+        """解析 HTML，提取所有链接"""
+        soup = BeautifulSoup(html, "html.parser")
+        urls = set()
+        for a_tag in soup.find_all("a", href=True):
+            href = a_tag["href"]
+            if href not in visited_urls:
+                visited_urls.add(href)
+                urls.add(href)
+        return urls
+
+    def crawling_news_meta(self, today) -> List[NewsArticle]:
+        folder_path = self.create_folder(today)
+        urls = self.extract_all_not_visit_urls(today)
+        results = []
+        if urls is None:
+            print("无法获取初始页面内容，程序退出。")
+            return results
+        for id, url in enumerate(urls):
+            article = self.extract_news_content(url)
+            if not article:
+                print(f"[ERROR] 无法获取新闻内容: {url}")
+                continue
+            if len(article.images) == 0:
+                print(f"[ERROR] 未找到图片: {url}")
+                continue
+            if self.is_sensitive_word(article.title):
+                print(f"[ERROR] 标题包含敏感词: {url}")
+                continue
+            if self.is_sensitive_word(article.content_en):
+                print(f"[ERROR] 标题包含敏感词: {url}")
+                continue
+            if '/gtx/' in url:
+                print(f"[ERROR] URL 包含敏感词gtx : {url}")
+                continue
+            if len(article.content_en) < 10:
+                print(f"[ERROR] 内容过短: {url}")
+                continue
+            article.folder = "{:04d}".format(id)
+            results.append(article)
+        for id, article in enumerate(results):
+            article.folder = "{:04d}".format(id)
+            article.index_inner = id
+            article.index_show = id
+        json_path = os.path.join(folder_path, "%s" % NEWS_JSON_FILE_NAME)
+        json_results = [i.to_dict() for i in results]
+        with open(json_path, "w", encoding="utf-8") as json_file:
+            json.dump(json_results, json_file, ensure_ascii=False, indent=4)
+        return results
+
+    def download_images(self, today: datetime.now().strftime("%Y%m%d")):
+        today_path = os.path.join(CN_NEWS_FOLDER_NAME, today, self.source)
+        results = []
+        if not os.path.exists(today_path):
+            results = self.crawling_news_meta(today)
+        else:
+            print("数据已存在，跳过爬取。")
+        for result in results:
+            folder = result.folder
+            img_folder_path = os.path.join(today_path, folder)
+            os.makedirs(img_folder_path, exist_ok=True)
+            for id, image_url in enumerate(result.image_urls):
+                image_name = os.path.basename(image_url.replace(".webp", ""))
+                image_path = os.path.join(img_folder_path, image_name)
+                if not os.path.exists(image_path):
+                    try:
+                        response = requests.get(image_url)
+                        response.raise_for_status()
+                        with open(image_path, "wb") as image_file:
+                            image_file.write(response.content)
+                    except requests.RequestException as e:
+                        print(f"[ERROR] 下载图片失败: {image_url} - {e}")
+        print("图片下载完成。")
+
+
 if __name__ == "__main__":
-    cs = ChinaDailyScraper(source_url='https://cn.chinadaily.com.cn/', source=CHINADAILY, news_type='国内新闻')
-    cs.download_images(today='20250604')
+    # cs = ChinaDailyScraper(source_url='https://cn.chinadaily.com.cn/', source=CHINADAILY, news_type='国内新闻')
+    # cs.download_images(today='20250604')
+
+    bbcs = BbcScraper(source_url='https://www.bbc.com/news/', source=BBC, news_type='国际新闻')
+    bbcs.download_images(today='20250604')
