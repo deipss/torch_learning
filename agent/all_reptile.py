@@ -1,4 +1,6 @@
 import json
+from ollama_client import OllamaClient
+from volcano_client import batch_translate
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
@@ -10,6 +12,7 @@ import re
 CHINADAILY = 'chinadaily'
 EASTDAY = 'eastday'
 BBC = 'bbc'
+import pyttsx3
 
 import os
 import requests
@@ -49,6 +52,7 @@ class NewsArticle:
 
     def __init__(self,
                  title: str = None,
+                 title_en: str = None,
                  images: List[str] = None,
                  image_urls: List[str] = None,
                  content_cn: str = None,
@@ -64,6 +68,7 @@ class NewsArticle:
                  tags: List[str] = None,
                  summary: str = None):
         self.title = title
+        self.title_en = title_en
         self.images = images or []
         self.image_urls = image_urls or []
         self.content_cn = content_cn
@@ -129,11 +134,11 @@ class ChinaDailyScraper(NewsScraper):
             'https://world.chinadaily.com.cn/'
         ]
 
-    def truncate_after_300_find_period(self, text: str) -> str:
-        if len(text) <= 300:
+    def truncate_after_700_find_period(self, text: str) -> str:
+        if len(text) <= 700:
             return text
 
-        end_pos = 300  # 第300个字符的位置（索引从0开始，取前300个字符）
+        end_pos = 700  # 第300个字符的位置（索引从0开始，取前300个字符）
 
         # 从end_pos位置开始向后查找第一个句号
         last_period = text.find('。', end_pos)
@@ -174,7 +179,7 @@ class ChinaDailyScraper(NewsScraper):
                 text = p.get_text(strip=True)
                 if text and len(text) > 10:  # 过滤短文本
                     content += text + " "
-            content = self.truncate_after_300_find_period(content)
+            content = self.truncate_after_700_find_period(content)
             article = NewsArticle(source=self.source, news_type=self.news_type)
             article.title = title
             article.content_cn = content.strip()
@@ -458,9 +463,102 @@ class BbcScraper(NewsScraper):
         print("图片下载完成。")
 
 
-if __name__ == "__main__":
-    # cs = ChinaDailyScraper(source_url='https://cn.chinadaily.com.cn/', source=CHINADAILY, news_type='国内新闻')
-    # cs.download_images(today='20250604')
-
+def auto_download_daily():
+    cs = ChinaDailyScraper(source_url='https://cn.chinadaily.com.cn/', source=CHINADAILY, news_type='国内新闻')
+    cs.download_images(today=datetime.now().strftime("%Y%m%d"))
     bbcs = BbcScraper(source_url='https://www.bbc.com/news/', source=BBC, news_type='国际新闻')
-    bbcs.download_images(today='20250604')
+    bbcs.download_images(today=datetime.now().strftime("%Y%m%d"))
+
+
+def load_and_summarize_news(json_file_path: str) -> List[NewsArticle]:
+    """
+    加载新闻数据，提取中文摘要，并翻译英文内容为中文。
+
+    :param json_file_path: JSON 文件路径
+    :return: 包含摘要和翻译后内容的 NewsArticle 列表
+    """
+    # 初始化 Ollama 客户端
+    ollama_client = OllamaClient()
+
+    # 加载 JSON 文件
+    with open(json_file_path, 'r', encoding='utf-8') as json_file:
+        news_data = json.load(json_file)
+
+    # 处理每条新闻
+    processed_news = []
+    for news_item in news_data:
+        article = NewsArticle(**news_item)
+
+        # 翻译英文内容为中文
+        if article.content_en:
+            # 如果文本过长，截断为最大长度
+            max_length = 5000  # 假设 API 支持的最大长度为 5000 字符
+            if len(article.content_en) > max_length:
+                # 找到最后一个英文句号的位置
+                last_period_index = article.content_en.rfind('.', 0, max_length)
+                if last_period_index != -1:
+                    article.content_en = article.content_en[:last_period_index + 1]
+                else:
+                    article.content_en = article.content_en[:max_length]
+            translated_content = \
+            batch_translate(txt_list=[article.content_en], source_language='en', target_language='zh')[0]
+            article.content_cn = translated_content
+
+        if article.title_en:
+            article.title = batch_translate(txt_list=[article.title_en], source_language='en', target_language='zh')[0]
+        if article.title and not article.title_cn:
+            article.title_cn = batch_translate(txt_list=[article.title], source_language='zh', target_language='en')[0]
+
+        # 提取中文摘要
+        summary = ollama_client.generate_summary(article.content_cn, max_tokens=200)
+        article.summary = summary
+        processed_news.append(article)
+
+    return processed_news
+
+
+def process_news_results(source: str, today: str = datetime.now().strftime("%Y%m%d")) -> None:
+    """
+    处理指定日期的新闻结果文件，提取摘要并翻译内容。
+
+    :param today: 日期字符串，格式为 YYYYMMDD
+    """
+    folder_path = os.path.join(CN_NEWS_FOLDER_NAME, today, source)
+    json_file_path = os.path.join(folder_path, NEWS_JSON_FILE_NAME)
+
+    if os.path.exists(json_file_path):
+        processed_news = load_and_summarize_news(json_file_path)
+
+        # 保存处理后的新闻数据
+        processed_json_path = os.path.join(folder_path, "processed_news_results.json")
+        with open(processed_json_path, 'w', encoding='utf-8') as json_file:
+            json.dump([article.to_dict() for article in processed_news], json_file, ensure_ascii=False, indent=4)
+
+        print(f"处理完成，已保存到 {processed_json_path}")
+    else:
+        print(f"未找到新闻结果文件: {json_file_path}")
+
+
+def generate_voice(text: str, output_dir: str = "audio.mp3") -> None:
+    """
+    使用 pyttsx3 将文本转换为语音并保存到指定文件。
+
+    :param text: 要转换为语音的文本
+    :param output_dir: 保存语音文件的路径，默认为 "audio.mp3"
+    """
+    engine = pyttsx3.init()
+
+    # 设置语速（默认200，2倍速为400）
+    engine.setProperty('rate', 250)
+
+    # 合成语音并保存到文件
+    engine.say(text)
+    # engine.save_to_file(text, output_dir)
+    engine.runAndWait()  # 确保语音合成完成
+    engine.stop()  # 显式关闭引擎以释放资源
+    print(f"语音已保存到 {output_dir}")
+
+
+if __name__ == "__main__":
+    # 处理今天的新闻结果
+    process_news_results(source=BBC)
