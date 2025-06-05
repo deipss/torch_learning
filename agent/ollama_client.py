@@ -56,7 +56,14 @@ class OllamaClient:
         """
         prompt = f"请为以下文本生成一个简洁的摘要（不超过{max_tokens}个字）：\n{text}"
         response = self.generate_text(prompt, model, {"max_tokens": max_tokens})
-        return response.get("response", "")
+        summary = response.get("response", "")
+        # 直接找到 </think> 的位置进行截断，并清理前后空格和换行符
+        think_end = summary.find('</think>')
+        if think_end != -1:
+            summary = summary[think_end + len('</think>'):].strip()
+        else:
+            summary = summary.strip()
+        return summary
 
     def translate_to_chinese(self, text: str, model: str = "deepseek-r1:8b") -> str:
         """

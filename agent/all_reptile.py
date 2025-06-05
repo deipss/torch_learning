@@ -356,7 +356,7 @@ class BbcScraper(NewsScraper):
                     content += text + " "
             content = self.truncate_after_300_find_period(content)
             article = NewsArticle(source=self.source, news_type=self.news_type)
-            article.title = title
+            article.title_en = title
             article.content_en = content.strip()
             article.url = url
             article.image_urls = image_urls
@@ -414,15 +414,6 @@ class BbcScraper(NewsScraper):
             if len(article.images) == 0:
                 print(f"[ERROR] 未找到图片: {url}")
                 continue
-            if self.is_sensitive_word(article.title):
-                print(f"[ERROR] 标题包含敏感词: {url}")
-                continue
-            if self.is_sensitive_word(article.content_en):
-                print(f"[ERROR] 标题包含敏感词: {url}")
-                continue
-            if '/gtx/' in url:
-                print(f"[ERROR] URL 包含敏感词gtx : {url}")
-                continue
             if len(article.content_en) < 10:
                 print(f"[ERROR] 内容过短: {url}")
                 continue
@@ -464,10 +455,12 @@ class BbcScraper(NewsScraper):
 
 
 def auto_download_daily():
-    cs = ChinaDailyScraper(source_url='https://cn.chinadaily.com.cn/', source=CHINADAILY, news_type='国内新闻')
-    cs.download_images(today=datetime.now().strftime("%Y%m%d"))
+    # cs = ChinaDailyScraper(source_url='https://cn.chinadaily.com.cn/', source=CHINADAILY, news_type='国内新闻')
+    # cs.download_images(today=datetime.now().strftime("%Y%m%d"))
     bbcs = BbcScraper(source_url='https://www.bbc.com/news/', source=BBC, news_type='国际新闻')
     bbcs.download_images(today=datetime.now().strftime("%Y%m%d"))
+    process_news_results(source=BBC,today=datetime.now().strftime("%Y%m%d"))
+    process_news_results(source=CHINADAILY,today=datetime.now().strftime("%Y%m%d"))
 
 
 def load_and_summarize_news(json_file_path: str) -> List[NewsArticle]:
@@ -506,8 +499,8 @@ def load_and_summarize_news(json_file_path: str) -> List[NewsArticle]:
 
         if article.title_en:
             article.title = batch_translate(txt_list=[article.title_en], source_language='en', target_language='zh')[0]
-        if article.title and not article.title_cn:
-            article.title_cn = batch_translate(txt_list=[article.title], source_language='zh', target_language='en')[0]
+        if article.title and not article.title_en:
+            article.title_en = batch_translate(txt_list=[article.title], source_language='zh', target_language='en')[0]
 
         # 提取中文摘要
         summary = ollama_client.generate_summary(article.content_cn, max_tokens=200)
@@ -561,4 +554,4 @@ def generate_voice(text: str, output_dir: str = "audio.mp3") -> None:
 
 if __name__ == "__main__":
     # 处理今天的新闻结果
-    process_news_results(source=BBC)
+    auto_download_daily()

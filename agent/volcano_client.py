@@ -7,8 +7,8 @@ from volcengine.base.Service import Service
 
 
 def batch_translate(txt_list,source_language='zh',target_language='en'):
-    k_access_key = 'todo'  # https://console.volcengine.com/iam/keymanage/
-    k_secret_key = 'todo'
+    k_access_key = ''  # https://console.volcengine.com/iam/keymanage/
+    k_secret_key = '=='
     k_service_info = \
         ServiceInfo('translate.volcengineapi.com',
                     {'Content-Type': 'application/json'},
@@ -36,6 +36,6 @@ def batch_translate(txt_list,source_language='zh',target_language='en'):
     return cn_list
 
 
-if __name__ == '__main__':
-    data = batch_translate(['在在城桂林枯在在', '要在有有有以夺有'])
-    print(data)
+# if __name__ == '__main__':
+#     data = batch_translate(['在在城桂林枯在在', '要在有有有以夺有'])
+#     print(data)
