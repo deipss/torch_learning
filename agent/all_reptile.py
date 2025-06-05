@@ -9,9 +9,6 @@ from dataclasses import dataclass, asdict
 from typing import List
 import re
 
-CHINADAILY = 'chinadaily'
-EASTDAY = 'eastday'
-BBC = 'bbc'
 import pyttsx3
 
 import os
@@ -24,7 +21,12 @@ headers = {
 }
 
 NEWS_JSON_FILE_NAME = "news_results.json"
-CN_NEWS_FOLDER_NAME = "cn_news"
+PROCESSED_NEWS_JSON_FILE_NAME = "processed_news_results.json"
+CN_NEWS_FOLDER_NAME = "news"
+
+CHINADAILY = 'chinadaily'
+BBC = 'bbc'
+AUDIO_FILE_NAME = "summary_audio.aiff"
 
 
 @dataclass
@@ -91,6 +93,14 @@ class NewsArticle:
 class NewsScraper:
 
     def __init__(self, source_url: str, source: str, news_type: str):
+        """
+        初始化新闻对象.
+
+        参数:
+        source_url (str): 新闻来源的URL.
+        source (str): 新闻的来源名称.
+        news_type (str): 新闻的类型.
+        """
         self.source_url = source_url
         self.source = source
         self.news_type = news_type
@@ -100,13 +110,16 @@ class NewsScraper:
         """返回新闻网站的原始URL"""
         pass
 
-    def is_sensitive_word(self, word) -> bool:
+    def is_sensitive_word_cn(self, word) -> bool:
         cnt = 0
         sensitive_words = ["平", "%%", "习", "&&&&&#", "近", "县"]  # 去除了重复项
         for sensitive_word in sensitive_words:
             if sensitive_word in word:
                 cnt += 1
         return cnt > 1
+
+    def is_sensitive_word_en(self, word) -> bool:
+        return "Jinping" in word
 
     # 创建以当前日期命名的文件夹
     def create_folder(self, today=datetime.now().strftime("%Y%m%d")) -> str:
@@ -115,7 +128,6 @@ class NewsScraper:
         return folder_path
 
     def fetch_page(self, url):
-        """获取页面内容"""
         try:
             response = requests.get(url, headers=headers, timeout=10)
             response.raise_for_status()
@@ -193,7 +205,6 @@ class ChinaDailyScraper(NewsScraper):
             return None
 
     def extract_all_not_visit_urls(self, today):
-        # 初始爬取目标页面
         visited_urls = set()
         full_urls = []
         for base_url in self.origin_url():
@@ -245,10 +256,10 @@ class ChinaDailyScraper(NewsScraper):
             if len(article.images) == 0:
                 print(f"[ERROR] 未找到图片: {url}")
                 continue
-            if self.is_sensitive_word(article.title):
+            if self.is_sensitive_word_cn(article.title):
                 print(f"[ERROR] 标题包含敏感词: {url}")
                 continue
-            if self.is_sensitive_word(article.content_cn):
+            if self.is_sensitive_word_cn(article.content_cn):
                 print(f"[ERROR] 标题包含敏感词: {url}")
                 continue
             if '/gtx/' in url:
@@ -301,9 +312,6 @@ class BbcScraper(NewsScraper):
             'https://www.bbc.com/news'
         ]
 
-    def truncate_after_300_find_period(self, text: str) -> str:
-        return text  # 或返回 text[:end_pos] + "..."（按需选择）
-
     def extract_news_content(self, url) -> NewsArticle:
         """提取新闻页面的标题、图片和正文内容"""
         try:
@@ -338,7 +346,6 @@ class BbcScraper(NewsScraper):
                                 img_url = match.group(1)
                                 width = int(match.group(2))
                                 image_data.append((img_url, width))
-
                         # 找到宽度最大的条目
                         if image_data:
                             max_width_entry = max(image_data, key=lambda x: x[1])
@@ -354,7 +361,6 @@ class BbcScraper(NewsScraper):
                 text = p.get_text(strip=True)
                 if text and len(text) > 10:  # 过滤短文本
                     content += text + " "
-            content = self.truncate_after_300_find_period(content)
             article = NewsArticle(source=self.source, news_type=self.news_type)
             article.title_en = title
             article.content_en = content.strip()
@@ -417,6 +423,12 @@ class BbcScraper(NewsScraper):
             if len(article.content_en) < 10:
                 print(f"[ERROR] 内容过短: {url}")
                 continue
+            if self.is_sensitive_word_en(article.title_en):
+                print(f"[ERROR] 标题包含敏感词: {url}")
+                continue
+            if self.is_sensitive_word_en(article.content_en):
+                print(f"[ERROR] 内容含敏感词: {url}")
+                continue
             article.folder = "{:04d}".format(id)
             results.append(article)
         for id, article in enumerate(results):
@@ -454,15 +466,6 @@ class BbcScraper(NewsScraper):
         print("图片下载完成。")
 
 
-def auto_download_daily():
-    # cs = ChinaDailyScraper(source_url='https://cn.chinadaily.com.cn/', source=CHINADAILY, news_type='国内新闻')
-    # cs.download_images(today=datetime.now().strftime("%Y%m%d"))
-    bbcs = BbcScraper(source_url='https://www.bbc.com/news/', source=BBC, news_type='国际新闻')
-    bbcs.download_images(today=datetime.now().strftime("%Y%m%d"))
-    process_news_results(source=BBC,today=datetime.now().strftime("%Y%m%d"))
-    process_news_results(source=CHINADAILY,today=datetime.now().strftime("%Y%m%d"))
-
-
 def load_and_summarize_news(json_file_path: str) -> List[NewsArticle]:
     """
     加载新闻数据，提取中文摘要，并翻译英文内容为中文。
@@ -494,7 +497,7 @@ def load_and_summarize_news(json_file_path: str) -> List[NewsArticle]:
                 else:
                     article.content_en = article.content_en[:max_length]
             translated_content = \
-            batch_translate(txt_list=[article.content_en], source_language='en', target_language='zh')[0]
+                batch_translate(txt_list=[article.content_en], source_language='en', target_language='zh')[0]
             article.content_cn = translated_content
 
         if article.title_en:
@@ -505,6 +508,7 @@ def load_and_summarize_news(json_file_path: str) -> List[NewsArticle]:
         # 提取中文摘要
         summary = ollama_client.generate_summary(article.content_cn, max_tokens=200)
         article.summary = summary
+
         processed_news.append(article)
 
     return processed_news
@@ -523,7 +527,7 @@ def process_news_results(source: str, today: str = datetime.now().strftime("%Y%m
         processed_news = load_and_summarize_news(json_file_path)
 
         # 保存处理后的新闻数据
-        processed_json_path = os.path.join(folder_path, "processed_news_results.json")
+        processed_json_path = os.path.join(folder_path, PROCESSED_NEWS_JSON_FILE_NAME)
         with open(processed_json_path, 'w', encoding='utf-8') as json_file:
             json.dump([article.to_dict() for article in processed_news], json_file, ensure_ascii=False, indent=4)
 
@@ -532,7 +536,23 @@ def process_news_results(source: str, today: str = datetime.now().strftime("%Y%m
         print(f"未找到新闻结果文件: {json_file_path}")
 
 
-def generate_voice(text: str, output_dir: str = "audio.mp3") -> None:
+def generate_all_news_audio(source: str, today: str = datetime.now().strftime("%Y%m%d")) -> None:
+    folder_path = os.path.join(CN_NEWS_FOLDER_NAME, today, source)
+    json_file_path = os.path.join(folder_path, PROCESSED_NEWS_JSON_FILE_NAME)
+
+    with open(json_file_path, 'r', encoding='utf-8') as json_file:
+        news_data = json.load(json_file)
+
+    for news_item in news_data:
+        article = NewsArticle(**news_item)
+
+        # 新增逻辑：将摘要转换为音频并保存
+        folder_path = os.path.dirname(json_file_path)  # 获取新闻图片所在的文件夹路径
+        audio_output_path = os.path.join(folder_path, article.folder, "%s" % AUDIO_FILE_NAME)
+        generate_audio_macos(article.summary, output_file=audio_output_path)
+
+
+def generate_audio_linux(text: str, output_dir: str = "audio.wav") -> None:
     """
     使用 pyttsx3 将文本转换为语音并保存到指定文件。
 
@@ -540,18 +560,38 @@ def generate_voice(text: str, output_dir: str = "audio.mp3") -> None:
     :param output_dir: 保存语音文件的路径，默认为 "audio.mp3"
     """
     engine = pyttsx3.init()
-
     # 设置语速（默认200，2倍速为400）
-    engine.setProperty('rate', 250)
-
+    engine.setProperty('rate', 230)
     # 合成语音并保存到文件
-    engine.say(text)
-    # engine.save_to_file(text, output_dir)
+    # engine.say(text)
+    engine.save_to_file(text, output_dir)
     engine.runAndWait()  # 确保语音合成完成
     engine.stop()  # 显式关闭引擎以释放资源
     print(f"语音已保存到 {output_dir}")
 
 
+def generate_audio_macos(text, output_file="output.aiff"):
+    print(f"音频文件已保存到 {output_file}")
+    speed = 230
+    os.system(f'say -r {speed} "{text}" -o {output_file}')
+
+
+def auto_download_daily(today=datetime.now().strftime("%Y%m%d")):
+    cs = ChinaDailyScraper(source_url='https://cn.chinadaily.com.cn/', source=CHINADAILY, news_type='国内新闻')
+    cs.download_images(today)
+    bbcScraper = BbcScraper(source_url='https://www.bbc.com/news/', source=BBC, news_type='国际新闻')
+    bbcScraper.download_images(today)
+
+    process_news_results(source=CHINADAILY, today=today)
+    process_news_results(source=BBC, today=today)
+
+    generate_all_news_audio(source=CHINADAILY, today=today)
+    generate_all_news_audio(source=BBC, today=today)
+
+
 if __name__ == "__main__":
     # 处理今天的新闻结果
-    auto_download_daily()
+    # generate_voice("韩国新总统李在镕以近50%的选票胜出，但其蜜月期仅一天即上任，需应对弹劾前总统尹锡烈留下的政治和安全漏洞。首轮挑战是处理唐纳德·特朗普可能破坏的经济、安全和与朝鲜关系。一季度韩国经济收缩，已因特朗普征收25%关税陷入困境。美国驻首尔军事存在可能转向遏制中国，增加韩国的外交和军事压力。李明博希望改善与中国的关系，但面临美国对朝鲜半岛战略布局的不确定性，同时需解决国内民主恢复问题。")
+    # generate_all_news_audio(source=CHINADAILY, today='20250604')
+    generate_all_news_audio(source=BBC, today='20250604')
+    # generate_all_news_audio(source=BBC, today=datetime.now().strftime("%Y%m%d"))

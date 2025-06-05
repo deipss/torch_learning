@@ -1,27 +1,35 @@
 from moviepy import *
 from PIL import ImageDraw
 import datetime
+
+from spyder.plugins.console.widgets.console import MAIN_BG_COLOR
 from zhdate import ZhDate
 import os
 import math
 from PIL import Image
 from pathlib import Path
 
-BACKGROUND_IMAGE_PATH = "images/generated_background.png"
-GLOBAL_WIDTH = 2560
-GLOBAL_HEIGHT = 1440
+from agent.all_reptile import generate_audio_macos
+from all_reptile import generate_audio_linux, NEWS_JSON_FILE_NAME, PROCESSED_NEWS_JSON_FILE_NAME, CN_NEWS_FOLDER_NAME, \
+    AUDIO_FILE_NAME, CHINADAILY, BBC, NewsArticle
+from moviepy.video.fx.Loop import Loop
+
+BACKGROUND_IMAGE_PATH = "videos/generated_background.png"
+INTRODUCTION_AUDIO = "videos/introduction.aiff"
+INTRODUCTION_VIDEO = "videos/introduction.mp4"
+GLOBAL_WIDTH = 1920
+GLOBAL_HEIGHT = 1080
 GAP = int(GLOBAL_WIDTH * 0.02)
 INNER_WIDTH = GLOBAL_WIDTH - GAP
 INNER_HEIGHT = GLOBAL_HEIGHT - GAP
 W_H_RADIO = GLOBAL_WIDTH / GLOBAL_HEIGHT
-FPS = 60
-NEWS_JSON_FILE_NAME = "news_results.json"
-CN_NEWS_FOLDER_NAME = "cn_news"
+FPS = 40
+MAIN_BG_COLOR = "#FF9900"
 print(
     f"GLOBAL_WIDTH:{GLOBAL_WIDTH},  GLOBAL_HEIGHT:{GLOBAL_HEIGHT}, W_H_RADIO:{W_H_RADIO},  FPS:{FPS},  BACKGROUND_IMAGE_PATH:{BACKGROUND_IMAGE_PATH},GAP:{GAP},INNER_WIDTH:{INNER_WIDTH},INNER_HEIGHT:{INNER_HEIGHT}")
 
 
-def generate_background_image(width, height, color='#FF9900'):
+def generate_background_image(width, height, color=MAIN_BG_COLOR):
     # 创建一个新的图像
     image = Image.new("RGB", (width, height), color)  # 橘色背景
     draw = ImageDraw.Draw(image)
@@ -39,6 +47,7 @@ def generate_background_image(width, height, color='#FF9900'):
     image.save(BACKGROUND_IMAGE_PATH)
     return image
 
+
 def create_region_bg(width, height, color='#FFFFFF', duration=1):
     img = Image.new("RGB", (width, height), color)
     draw = ImageDraw.Draw(img)
@@ -52,7 +61,7 @@ def create_region_bg(width, height, color='#FFFFFF', duration=1):
     return ImageClip(temp_path).with_duration(duration)
 
 
-def create_region_bg(width, height, color='#FFFFFF', duration=1,radius=20):
+def create_region_bg(width, height, color='#FFFFFF', duration=1, radius=20):
     img = Image.new("RGB", (width, height), color)
     draw = ImageDraw.Draw(img)
     draw.rounded_rectangle(
@@ -121,7 +130,26 @@ def calculate_font_size_and_line_length(text, box_width, box_height, font_ratio=
     return 40, len(text)
 
 
-def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, output_path):
+def truncate_after_400_find_period(text: str) -> str:
+    if len(text) <= 400:
+        return text
+
+    end_pos = 400  # 第300个字符的位置（索引从0开始，取前300个字符）
+
+    # 从end_pos位置开始向后查找第一个句号
+    last_period = text.find('。', end_pos)
+
+    if last_period != -1:
+        # 截取至句号位置（包含句号）
+        return text[:last_period + 1]
+    else:
+        # 300字符后无句号，返回全文（或截断并添加省略号）
+        return text  # 或返回 text[:end_pos] + "..."（按需选择）
+
+
+def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, summary, output_path):
+    title = '新闻来源：' + title
+    txt_cn = truncate_after_400_find_period(txt_cn)
     # 加载背景和音频
     bg_clip = ColorClip(size=(INNER_WIDTH, INNER_HEIGHT), color=(255, 255, 255))  # 白色背景
     audio_clip = AudioFileClip(audio_path)
@@ -161,11 +189,11 @@ def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, output
         method='label'
     ).with_duration(duration).with_position((left_width, 'top'))
     # 左下文字处理
-    font_size, chars_per_line = calculate_font_size_and_line_length(title, bottom_left_width * 95 / 100,
+    font_size, chars_per_line = calculate_font_size_and_line_length(summary, bottom_left_width * 95 / 100,
                                                                     bottom_height * 95 / 100)
-    title = '\n'.join([title[i:i + chars_per_line] for i in range(0, len(title), chars_per_line)])
+    summary = '\n'.join([summary[i:i + chars_per_line] for i in range(0, len(summary), chars_per_line)])
     bottom_left_txt = TextClip(
-        text=title,
+        text=summary,
         interline=font_size // 2,
         font_size=font_size,
         color='black',
@@ -174,12 +202,21 @@ def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, output
         method='caption'
     ).with_duration(duration).with_position(('left', top_height))
 
-    # 右下图片处理 todo
     bottom_right_img = ImageClip('images/male_announcer.png')
     if bottom_right_img.w > bottom_right_width or bottom_right_img.h > bottom_height:
         scale = min(bottom_right_width / bottom_right_img.w, bottom_height / bottom_right_img.h)
         bottom_right_img = bottom_right_img.resized(scale)
     bottom_right_img = bottom_right_img.with_position((bottom_left_width, top_height)).with_duration(duration)
+
+    title_font_size = 40
+    top_title = TextClip(
+        interline=title_font_size // 2,
+        text=title,
+        font_size=title_font_size,
+        color='black',
+        font='./font/simhei.ttf',
+        method='label'
+    ).with_duration(duration).with_position(('left', 'top'))
 
     # 创建各区域背景框
     top_left_bg = create_region_bg(left_width, top_height, '#FFFFFF', duration=duration)
@@ -197,13 +234,106 @@ def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, output
         top_left_img,
         top_right_txt,
         bottom_left_txt,
-        bottom_right_img
+        bottom_right_img,
+        top_title
     ], size=(bg_width, bg_height))
     final_video.preview()
 
     # final_video.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=FPS)
 
 
+def calculate_segment_times(duration, num_segments):
+    """
+    将总时长分成若干段，并计算每段的开始和结束时间。
+
+    参数:
+    duration (float): 总时长（秒）
+    num_segments (int): 分段数量
+
+    返回:
+    list: 每段的开始和结束时间列表，格式为 [(start_time, end_time), ...]
+    """
+    segment_duration = duration / num_segments
+    segment_times = []
+    for i in range(num_segments):
+        start_time = i * segment_duration
+        end_time = (i + 1) * segment_duration
+        segment_times.append((start_time, end_time))
+    return segment_times
+
+
+def generate_quad_layout_video_v2(audio_path, image_list, title, summary, output_path):
+    title = '新闻来源：' + title
+    # 加载背景和音频
+    bg_clip = ColorClip(size=(INNER_WIDTH, INNER_HEIGHT), color=(255, 255, 255))  # 白色背景
+    audio_clip = AudioFileClip(audio_path)
+    duration = audio_clip.duration
+    bg_clip = bg_clip.with_duration(duration).with_audio(audio_clip)
+    bg_width, bg_height = bg_clip.size
+
+    # 计算各区域尺寸
+    title_height = 40
+    HEIGHT_RATIO = 0.75
+    top_height = int((bg_height - title_height) * HEIGHT_RATIO)
+    bottom_height = bg_height - top_height - title_height
+
+    bottom_right_width = int(bg_width * 0.2)
+    bottom_left_width = bg_width - bottom_right_width
+
+    # 右下图片处理 地球仪
+    bottom_right_img = VideoFileClip('videos/earth.mp4')
+    if bottom_right_img.w > bottom_right_width or bottom_right_img.h > bottom_height:
+        scale = min(bottom_right_width / bottom_right_img.w, bottom_height / bottom_right_img.h)
+        bottom_right_img = bottom_right_img.resized(scale)
+    bottom_right_img = bottom_right_img.with_position(('right', 'bottom')).with_duration(duration)
+
+    # 左上图片处理
+    segment_times = calculate_segment_times(duration, len(image_list))
+    image_clip_list = []
+    for image_path_top,(s,e) in zip(image_list,segment_times):
+        top_left_img = ImageClip(image_path_top)
+        scale = min(bg_width / top_left_img.w, top_height / top_left_img.h)
+        top_left_img = top_left_img.resized(scale)
+        offset_w, offest_h = (bg_width - top_left_img.w) // 2, (top_height - top_left_img.h) // 2
+        top_left_img = top_left_img.with_position((offset_w, offest_h + title_height)).with_end(e).with_start(s)
+        image_clip_list.append(top_left_img)
+
+    # 左下文字处理
+    font_size, chars_per_line = calculate_font_size_and_line_length(summary, bottom_left_width * 95 / 100,
+                                                                    bottom_height * 95 / 100)
+    summary = '\n'.join([summary[i:i + chars_per_line] for i in range(0, len(summary), chars_per_line)])
+    bottom_left_txt = TextClip(
+        text=summary,
+        interline=font_size // 2,
+        font_size=font_size,
+        color='black',
+        font='./font/simhei.ttf',
+        text_align='center',
+        size=(bottom_left_width, bottom_height),
+        method='caption'
+    ).with_duration(duration).with_position(('left', top_height + title_height))
+
+    # 标题
+    title_font_size = 40
+    top_title = TextClip(
+        interline=title_font_size // 2,
+        text=title,
+        font_size=title_font_size,
+        color='black',
+        font='./font/simhei.ttf',
+        method='label'
+    ).with_duration(duration).with_position(('left', 'top'))
+
+    # 创建各区域背景框
+
+    # 合成最终视频
+    image_clip_list.insert(0,bg_clip)
+    image_clip_list.append(bottom_left_txt)
+    image_clip_list.append(bottom_right_img)
+    image_clip_list.append(top_title)
+    final_video = CompositeVideoClip(clips= image_clip_list, size=(bg_width, bg_height))
+    final_video.preview()
+    # final_video.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=FPS)
 
 
 def get_full_date():
@@ -223,7 +353,7 @@ def get_full_date():
     return "今天是{}, \n农历{}, \n{}".format(solar_date, lunar_date, weekday)
 
 
-def generate_video_intro(bg_music_path, output_path="videos/intro.mp4"):
+def generate_video_intro(output_path='videos/introduction.mp4'):
     """生成带日期文字和背景音乐的片头视频
 
     Args:
@@ -235,14 +365,16 @@ def generate_video_intro(bg_music_path, output_path="videos/intro.mp4"):
     bg_clip = ImageClip(BACKGROUND_IMAGE_PATH)
 
     # 加载背景音乐
-    audio_clip = AudioFileClip(bg_music_path)
+    date_text = get_full_date()
+    generate_audio_macos(date_text, INTRODUCTION_AUDIO)
+    audio_clip = AudioFileClip(INTRODUCTION_AUDIO)
     duration = audio_clip.duration
 
     # 设置背景视频时长
     bg_clip = bg_clip.with_duration(duration).with_audio(audio_clip)
 
     # 创建日期文字
-    date_text = get_full_date()
+
     date_parts = date_text.split('\n')
     max_length = max(len(part) for part in date_parts) if date_parts else len(date_text)
 
@@ -261,7 +393,7 @@ def generate_video_intro(bg_music_path, output_path="videos/intro.mp4"):
         output_path,
         codec="libx264",
         audio_codec="aac",
-        fps=24
+        fps=FPS
     )
 
 
@@ -293,16 +425,19 @@ def combine_videos_with_transitions(video_paths):
 
 
 def temp_video_text_align():
-    generate_quad_layout_video(
-        output_path="videos/quad_layout_video_4.mp4",
-        audio_path="audios/1.mp3",
-        image_path_top="cn_news/20250510/0000/681ea0256b8e07c422ceb78c_m.jpeg",
-        txt_cn=
-        """
-        美国总统特朗普4日宣布对所有进入美国、在外国制作的电影征收100%关税，这一决定持续引发业界强烈反对。 美国和加拿大电影电视行业从业者的工会组织——国际戏剧舞台从业者联盟近日发布声明表示，鉴于加拿大与美国的文化和经济伙伴关系，美国政府需要采取措施，恢复公平竞争环境，维护美加两国的电影和电视行业利益。 国际戏剧舞台从业者联盟主席 马修·勒布：我们希望创造公平的竞争环境，并正在寻求惠及所有成员的解决方案，尤其是电视剧、小成本电影和独立电影。我们期待美国政府就拟议的关税计划提供更多信息，但任何的贸易决策都不能损害我们加拿大成员和整个行业的利益。 国际戏剧舞台从业者联盟是一个有着超百年历史的美国和加拿大联合工会组织。联盟成立于1893年，1898年以来一直代表美国和加拿大的影视业幕后从业者，在美加两地有超17万名业内人员。勒布表示，成千上万的家庭、小企业和社区承受着行业萎缩带来的经济压力，关税将对该联盟造成严重影响。此外，鉴于加拿大与美国独特的文化和经济伙伴关系，联盟认为应特别考虑加拿大的电影和电视制作。
-        """
-        ,
-        title="""美国总统特朗普4日宣布对所有进入美国、在外国制作的电影征收100%关税，"""
+    list = [
+        'news/20250604/chinadaily/0002/683fd0b16b8efd9fa6284ec3_m.jpg',
+        'news/20250604/chinadaily/0002/683fd0b16b8efd9fa6284ec5_m.png',
+        'news/20250604/chinadaily/0002/683fd0b26b8efd9fa6284ec7_m.jpg',
+        'news/20250604/chinadaily/0002/683fd0b26b8efd9fa6284ec9_m.jpg',
+        'news/20250604/chinadaily/0002/683fd0b26b8efd9fa6284ecb_m.jpg']
+
+    generate_quad_layout_video_v2(
+        output_path="news/20250604/bbc/0000/video.mp4",
+        audio_path="news/20250604/bbc/0000/summary_audio.aiff",
+        image_list=list,
+        summary="""韩国新总统李在镕以近50%的选票胜出，但其蜜月期仅一天即上任，需应对弹劾前总统尹锡烈留下的政治和安全漏洞。首轮挑战是处理唐纳德·特朗普可能破坏的经济、安全和与朝鲜关系。一季度韩国经济收缩，已因特朗普征收25%关税陷入困境。美国驻首尔军事存在可能转向遏制中国，增加韩国的外交和军事压力。李明博希望改善与中国的关系，但面临美国对朝鲜半岛战略布局的不确定性，同时需解决国内民主恢复问题。""",
+        title="""[英国广播公司]韩国新总统需要避免特朗普式的危机"""
     )
 
 
@@ -408,5 +543,8 @@ def combine_videos():
 # 示例使用
 if __name__ == "__main__":
     temp_video_text_align()
+    # generate_background_image(GLOBAL_WIDTH, GLOBAL_HEIGHT)
+    # generate_video_intro(INTRODUCTION_VIDEO)
+
     # combine_videos_with_transitions(
     #     ['cn_news/20250512/intro.mp4', 'cn_news/20250512/0000/video.mp4', 'cn_news/20250512/0001/video.mp4'])
