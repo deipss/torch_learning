@@ -1,8 +1,7 @@
 from moviepy import *
 from PIL import ImageDraw
-import datetime
-
-from spyder.plugins.console.widgets.console import MAIN_BG_COLOR
+from datetime import datetime
+import json
 from zhdate import ZhDate
 import os
 import math
@@ -12,11 +11,10 @@ from pathlib import Path
 from agent.all_reptile import generate_audio_macos
 from all_reptile import generate_audio_linux, NEWS_JSON_FILE_NAME, PROCESSED_NEWS_JSON_FILE_NAME, CN_NEWS_FOLDER_NAME, \
     AUDIO_FILE_NAME, CHINADAILY, BBC, NewsArticle
-from moviepy.video.fx.Loop import Loop
+from ollama_client import OllamaClient
 
 BACKGROUND_IMAGE_PATH = "videos/generated_background.png"
 INTRODUCTION_AUDIO = "videos/introduction.aiff"
-INTRODUCTION_VIDEO = "videos/introduction.mp4"
 GLOBAL_WIDTH = 1920
 GLOBAL_HEIGHT = 1080
 GAP = int(GLOBAL_WIDTH * 0.02)
@@ -25,8 +23,33 @@ INNER_HEIGHT = GLOBAL_HEIGHT - GAP
 W_H_RADIO = GLOBAL_WIDTH / GLOBAL_HEIGHT
 FPS = 40
 MAIN_BG_COLOR = "#FF9900"
+VIDEO_FILE_NAME = "video.mp4"
 print(
     f"GLOBAL_WIDTH:{GLOBAL_WIDTH},  GLOBAL_HEIGHT:{GLOBAL_HEIGHT}, W_H_RADIO:{W_H_RADIO},  FPS:{FPS},  BACKGROUND_IMAGE_PATH:{BACKGROUND_IMAGE_PATH},GAP:{GAP},INNER_WIDTH:{INNER_WIDTH},INNER_HEIGHT:{INNER_HEIGHT}")
+
+
+def build_today_path(today=datetime.now().strftime("%Y%m%d")):
+    return os.path.join(CN_NEWS_FOLDER_NAME, today)
+
+
+def build_today_news_path(today=datetime.now().strftime("%Y%m%d")):
+    return os.path.join(CN_NEWS_FOLDER_NAME, today, NEWS_JSON_FILE_NAME)
+
+
+def build_today_intro_path(today=datetime.now().strftime("%Y%m%d")):
+    return os.path.join(CN_NEWS_FOLDER_NAME, today, "intro.mp4")
+
+
+def build_today_video_path( today=datetime.now().strftime("%Y%m%d")):
+    return os.path.join(CN_NEWS_FOLDER_NAME, today, "video.mp4")
+
+
+def build_today_bg_music_path(index: str, today=datetime.now().strftime("%Y%m%d")):
+    return os.path.join(CN_NEWS_FOLDER_NAME, today, index, "bg_music.mp4")
+
+
+def build_today_index_path(index: str, today=datetime.now().strftime("%Y%m%d")):
+    return os.path.join(CN_NEWS_FOLDER_NAME, today, index)
 
 
 def generate_background_image(width, height, color=MAIN_BG_COLOR):
@@ -147,7 +170,7 @@ def truncate_after_400_find_period(text: str) -> str:
         return text  # 或返回 text[:end_pos] + "..."（按需选择）
 
 
-def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, summary, output_path):
+def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, summary, output_path, is_preview=True):
     title = '新闻来源：' + title
     txt_cn = truncate_after_400_find_period(txt_cn)
     # 加载背景和音频
@@ -237,9 +260,10 @@ def generate_quad_layout_video(audio_path, image_path_top, txt_cn, title, summar
         bottom_right_img,
         top_title
     ], size=(bg_width, bg_height))
-    final_video.preview()
-
-    # final_video.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=FPS)
+    if is_preview:
+        final_video.preview()
+    else:
+        final_video.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=FPS)
 
 
 def calculate_segment_times(duration, num_segments):
@@ -262,8 +286,8 @@ def calculate_segment_times(duration, num_segments):
     return segment_times
 
 
-def generate_quad_layout_video_v2(audio_path, image_list, title, summary, output_path):
-    title = '新闻来源：' + title
+def generate_quad_layout_video_v2(audio_path, image_list, title, summary, output_path, index, is_preview=True):
+    title = '新闻来源：' + title + "    " + index
     # 加载背景和音频
     bg_clip = ColorClip(size=(INNER_WIDTH, INNER_HEIGHT), color=(255, 255, 255))  # 白色背景
     audio_clip = AudioFileClip(audio_path)
@@ -290,12 +314,13 @@ def generate_quad_layout_video_v2(audio_path, image_list, title, summary, output
     # 左上图片处理
     segment_times = calculate_segment_times(duration, len(image_list))
     image_clip_list = []
-    for image_path_top,(s,e) in zip(image_list,segment_times):
+    for image_path_top, (s, e) in zip(image_list, segment_times):
         top_left_img = ImageClip(image_path_top)
         scale = min(bg_width / top_left_img.w, top_height / top_left_img.h)
         top_left_img = top_left_img.resized(scale)
         offset_w, offest_h = (bg_width - top_left_img.w) // 2, (top_height - top_left_img.h) // 2
-        top_left_img = top_left_img.with_position((offset_w, offest_h + title_height)).with_end(e).with_start(s)
+        top_left_img = top_left_img.with_position((offset_w, offest_h + title_height)).with_start(s).with_duration(
+            e - s)
         image_clip_list.append(top_left_img)
 
     # 左下文字处理
@@ -327,18 +352,19 @@ def generate_quad_layout_video_v2(audio_path, image_list, title, summary, output
     # 创建各区域背景框
 
     # 合成最终视频
-    image_clip_list.insert(0,bg_clip)
-    image_clip_list.append(bottom_left_txt)
-    image_clip_list.append(bottom_right_img)
-    image_clip_list.append(top_title)
-    final_video = CompositeVideoClip(clips= image_clip_list, size=(bg_width, bg_height))
-    final_video.preview()
-    # final_video.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=FPS)
+    image_clip_list.insert(0, bg_clip)
+    image_clip_list.insert(1, bottom_left_txt)
+    image_clip_list.insert(2, bottom_right_img)
+    image_clip_list.insert(3, top_title)
+    final_video = CompositeVideoClip(clips=image_clip_list, size=(bg_width, bg_height))
+    if is_preview:
+        final_video.preview()
+    else:
+        final_video.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=FPS)
 
 
-def get_full_date():
+def get_full_date(today=datetime.now()):
     """获取完整的日期信息：公历日期、农历日期和星期"""
-    today = datetime.datetime.now()
 
     # 获取公历日期
     solar_date = today.strftime("%Y年%m月%d日")
@@ -353,19 +379,21 @@ def get_full_date():
     return "今天是{}, \n农历{}, \n{}".format(solar_date, lunar_date, weekday)
 
 
-def generate_video_intro(output_path='videos/introduction.mp4'):
+def generate_video_intro(output_path='videos/introduction.mp4', today=datetime.now().strftime("%%m%d")):
     """生成带日期文字和背景音乐的片头视频
 
     Args:
         bg_music_path: 背景音乐文件路径
         output_path: 输出视频路径
     """
-
-    # 加载背景图片
+    if os.path.exists(output_path):
+        return
+        # 加载背景图片
     bg_clip = ImageClip(BACKGROUND_IMAGE_PATH)
 
     # 加载背景音乐
-    date_text = get_full_date()
+    date_obj = datetime.strptime(today, "%Y%m%d")
+    date_text = get_full_date(date_obj)
     generate_audio_macos(date_text, INTRODUCTION_AUDIO)
     audio_clip = AudioFileClip(INTRODUCTION_AUDIO)
     duration = audio_clip.duration
@@ -397,8 +425,7 @@ def generate_video_intro(output_path='videos/introduction.mp4'):
     )
 
 
-def combine_videos_with_transitions(video_paths):
-    output_path = build_today_combine_video_path()
+def combine_videos_with_transitions(video_paths, output_path):
     bg_clip = ImageClip(BACKGROUND_IMAGE_PATH)
 
     # 加载视频和音频
@@ -406,6 +433,8 @@ def combine_videos_with_transitions(video_paths):
     for i, video_path in enumerate(video_paths):
         # 加载视频
         video = VideoFileClip(video_path)
+        if(video.duration < 2):
+            continue
         video = video.with_position(('center', 'center'), relative=True)
         # 将视频放置在背景上
         video_with_bg = CompositeVideoClip([
@@ -437,36 +466,9 @@ def temp_video_text_align():
         audio_path="news/20250604/bbc/0000/summary_audio.aiff",
         image_list=list,
         summary="""韩国新总统李在镕以近50%的选票胜出，但其蜜月期仅一天即上任，需应对弹劾前总统尹锡烈留下的政治和安全漏洞。首轮挑战是处理唐纳德·特朗普可能破坏的经济、安全和与朝鲜关系。一季度韩国经济收缩，已因特朗普征收25%关税陷入困境。美国驻首尔军事存在可能转向遏制中国，增加韩国的外交和军事压力。李明博希望改善与中国的关系，但面临美国对朝鲜半岛战略布局的不确定性，同时需解决国内民主恢复问题。""",
-        title="""[英国广播公司]韩国新总统需要避免特朗普式的危机"""
+        title="""[英国广播公司]韩国新总统需要避免特朗普式的危机""",
+        index="0000"
     )
-
-
-def build_today_path():
-    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"))
-
-
-def build_today_news_path():
-    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), NEWS_JSON_FILE_NAME)
-
-
-def build_today_intro_path():
-    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), "intro.mp4")
-
-
-def build_today_combine_video_path():
-    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), "video.mp4")
-
-
-def build_today_video_path(index: str):
-    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), index, "video.mp4")
-
-
-def build_today_bg_music_path(index: str):
-    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), index, "bg_music.mp4")
-
-
-def build_today_index_path(index: str):
-    return os.path.join(CN_NEWS_FOLDER_NAME, datetime.datetime.now().strftime("%Y%m%d"), index)
 
 
 def find_highest_resolution_image(directory: str) -> tuple[str, int, int] | None:
@@ -513,38 +515,76 @@ def find_highest_resolution_image(directory: str) -> tuple[str, int, int] | None
 
 
 def combine_videos():
-    import json
+    today = '20250605'
     generate_background_image(GLOBAL_WIDTH, GLOBAL_HEIGHT)
     video_paths = []
-    intro_path = build_today_intro_path()
+    intro_path = build_today_intro_path(today)
+    generate_video_intro(intro_path, today)
     video_paths.append(intro_path)
-    # todo generate audio for introduction
-    # todo generate audio for every news
-    generate_video_intro("audios/1.mp3", intro_path)
-    with open(build_today_news_path(), "r", encoding="utf-8") as f:
-        news_list = json.load(f)
-        for i, news in enumerate(news_list):
-            index_path = build_today_index_path(news['folder'])
-            video_path = build_today_video_path(news['folder'])
-            img_path, w, h = find_highest_resolution_image(index_path)
-            generate_quad_layout_video(
-                output_path=video_path,
-                audio_path="audios/1.mp3",
-                image_path_top=img_path,
-                txt_cn=news["content"],
-                title=news["title"]
-            )
-            video_paths.append(video_path)
-            if i > 2:
-                break
-    combine_videos_with_transitions(video_paths)
+    bbc_paths = generate_all_news_video(source=BBC, today=today)
+    cn_paths = generate_all_news_video(source=CHINADAILY, today=today)
+    [video_paths.append(i) for i in bbc_paths]
+    [video_paths.append(i) for i in cn_paths]
+    combine_videos_with_transitions(video_paths, build_today_video_path(today))
+
+
+def generate_all_news_video(source: str, today: str = datetime.now().strftime("%Y%m%d")) -> list[str]:
+    folder_path = os.path.join(CN_NEWS_FOLDER_NAME, today, source)
+    json_file_path = os.path.join(folder_path, PROCESSED_NEWS_JSON_FILE_NAME)
+
+    with open(json_file_path, 'r', encoding='utf-8') as json_file:
+        news_data = json.load(json_file)
+    video_output_paths = []
+    for news_item in news_data:
+        article = NewsArticle(**news_item)
+
+        # 新增逻辑：将摘要转换为音频并保存
+        folder_path = os.path.dirname(json_file_path)  # 获取新闻图片所在的文件夹路径
+        video_output_path = os.path.join(folder_path, article.folder, "%s" % VIDEO_FILE_NAME)
+        if os.path.exists(video_output_path):
+            print(f"{article.folder}视频已存在，跳过生成,path={video_output_path}")
+            video_output_paths.append(video_output_path)
+            continue
+        audio_output_path = os.path.join(folder_path, article.folder, "%s" % AUDIO_FILE_NAME)
+        img_list = []
+        for image in article.images:
+            img_list.append(os.path.join(folder_path, article.folder, image))
+        generate_quad_layout_video_v2(
+            output_path=video_output_path,
+            audio_path=audio_output_path,
+            image_list=img_list,
+            summary=article.summary,
+            title=article.title,
+            index=article.folder,
+            is_preview=False
+        )
+        video_output_paths.append(video_output_path)
+    return video_output_paths
+
+
+def temp_test():
+    generate_all_news_video(source=BBC, today='20250604')
+    generate_all_news_video(source=CHINADAILY, today='20250604')
+    generate_background_image(GLOBAL_WIDTH, GLOBAL_HEIGHT)
+    generate_video_intro()
+    combine_videos_with_transitions(
+        ['cn_news/20250512/intro.mp4', 'cn_news/20250512/0000/video.mp4', 'cn_news/20250512/0001/video.mp4'], 'a.mp4')
+
+
+def temp_test_ollama():
+    client = OllamaClient()
+    folder_path = os.path.join(CN_NEWS_FOLDER_NAME, '20250605', BBC)
+    json_file_path = os.path.join(folder_path, PROCESSED_NEWS_JSON_FILE_NAME)
+
+    with open(json_file_path, 'r', encoding='utf-8') as json_file:
+        news_data = json.load(json_file)
+    txt = ";".join([news_item['title']for news_item in news_data])
+    data = client.generate_top_topic(txt)
+    print(data)
+
 
 
 # 示例使用
 if __name__ == "__main__":
-    temp_video_text_align()
-    # generate_background_image(GLOBAL_WIDTH, GLOBAL_HEIGHT)
-    # generate_video_intro(INTRODUCTION_VIDEO)
-
-    # combine_videos_with_transitions(
-    #     ['cn_news/20250512/intro.mp4', 'cn_news/20250512/0000/video.mp4', 'cn_news/20250512/0001/video.mp4'])
+    # combine_videos()
+    temp_test_ollama()

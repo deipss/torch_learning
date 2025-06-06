@@ -463,7 +463,7 @@ class BbcScraper(NewsScraper):
                             image_file.write(response.content)
                     except requests.RequestException as e:
                         print(f"[ERROR] 下载图片失败: {image_url} - {e}")
-        print("图片下载完成。")
+        print(f"{self.source}图片下载完成。")
 
 
 def load_and_summarize_news(json_file_path: str) -> List[NewsArticle]:
@@ -507,8 +507,13 @@ def load_and_summarize_news(json_file_path: str) -> List[NewsArticle]:
 
         # 提取中文摘要
         summary = ollama_client.generate_summary(article.content_cn, max_tokens=200)
+        if len(summary) > 200:
+            end_pos = 180  # 第300个字符的位置（索引从0开始，取前300个字符）
+            # 从end_pos位置开始向后查找第一个句号
+            last_period = summary.find('。', end_pos)
+            summary = summary[:last_period + 1]
         article.summary = summary
-
+        print(f"{article.url} - {article.title}补充完成")
         processed_news.append(article)
 
     return processed_news
@@ -520,6 +525,7 @@ def process_news_results(source: str, today: str = datetime.now().strftime("%Y%m
 
     :param today: 日期字符串，格式为 YYYYMMDD
     """
+    print(f"开始处理 {source} 的新闻结果文件...")
     folder_path = os.path.join(CN_NEWS_FOLDER_NAME, today, source)
     json_file_path = os.path.join(folder_path, NEWS_JSON_FILE_NAME)
 
@@ -534,6 +540,7 @@ def process_news_results(source: str, today: str = datetime.now().strftime("%Y%m
         print(f"处理完成，已保存到 {processed_json_path}")
     else:
         print(f"未找到新闻结果文件: {json_file_path}")
+    print(f"处理 {source} 的新闻结果文件完成")
 
 
 def generate_all_news_audio(source: str, today: str = datetime.now().strftime("%Y%m%d")) -> None:
@@ -590,8 +597,4 @@ def auto_download_daily(today=datetime.now().strftime("%Y%m%d")):
 
 
 if __name__ == "__main__":
-    # 处理今天的新闻结果
-    # generate_voice("韩国新总统李在镕以近50%的选票胜出，但其蜜月期仅一天即上任，需应对弹劾前总统尹锡烈留下的政治和安全漏洞。首轮挑战是处理唐纳德·特朗普可能破坏的经济、安全和与朝鲜关系。一季度韩国经济收缩，已因特朗普征收25%关税陷入困境。美国驻首尔军事存在可能转向遏制中国，增加韩国的外交和军事压力。李明博希望改善与中国的关系，但面临美国对朝鲜半岛战略布局的不确定性，同时需解决国内民主恢复问题。")
-    # generate_all_news_audio(source=CHINADAILY, today='20250604')
-    generate_all_news_audio(source=BBC, today='20250604')
-    # generate_all_news_audio(source=BBC, today=datetime.now().strftime("%Y%m%d"))
+    auto_download_daily()
